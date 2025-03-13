@@ -4,23 +4,62 @@
  * for various browser features.
  */
 
-/**
- * Check if the browser supports the Intersection Observer API
- */
+// Core detection functions
+export const detectBrowser = (): {
+  name: string;
+  isChrome: boolean;
+  isSafari: boolean;
+  isFirefox: boolean;
+  isEdge: boolean;
+  isIE: boolean;
+  isOpera: boolean;
+} => {
+  const userAgent = navigator.userAgent;
+  
+  return {
+    name: getBrowserName(userAgent),
+    isChrome: /chrome|chromium|crios/i.test(userAgent) && !/edg/i.test(userAgent),
+    isSafari: /safari/i.test(userAgent) && !/chrome|chromium|crios/i.test(userAgent),
+    isFirefox: /firefox|fxios/i.test(userAgent),
+    isEdge: /edg/i.test(userAgent),
+    isIE: /trident|msie/i.test(userAgent),
+    isOpera: /opr\//i.test(userAgent)
+  };
+};
+
+export const detectEmailClient = (): {
+  isEmailClient: boolean;
+  name: string | null;
+} => {
+  const userAgent = navigator.userAgent;
+  let emailClientName = null;
+  
+  if (userAgent.indexOf('Outlook') !== -1) {
+    emailClientName = 'Outlook';
+  } else if (userAgent.indexOf('Gmail') !== -1) {
+    emailClientName = 'Gmail';
+  } else if (userAgent.indexOf('Yahoo') !== -1) {
+    emailClientName = 'Yahoo';
+  } else if (document.documentElement.className.indexOf('mail') !== -1) {
+    emailClientName = 'Generic Mail Client';
+  }
+  
+  return {
+    isEmailClient: emailClientName !== null,
+    name: emailClientName
+  };
+};
+
+// Feature detection functions
 export const supportsIntersectionObserver = (): boolean => {
   return 'IntersectionObserver' in window;
 };
 
-/**
- * Check if the browser supports smooth scrolling
- */
 export const supportsSmoothScroll = (): boolean => {
   return 'scrollBehavior' in document.documentElement.style;
 };
 
-/**
- * Fallback for smooth scrolling for browsers that don't support it natively
- */
+// Browser utilities
 export const smoothScrollTo = (element: HTMLElement): void => {
   if (supportsSmoothScroll()) {
     element.scrollIntoView({ behavior: 'smooth' });
@@ -48,38 +87,44 @@ export const smoothScrollTo = (element: HTMLElement): void => {
   }
 };
 
-/**
- * Generate CSS that works across browsers including older versions
- */
-export const getCrossBrowserCSS = (property: string, value: string): Record<string, string> => {
-  const prefixes = ['', '-webkit-', '-moz-', '-ms-', '-o-'];
-  const result: Record<string, string> = {};
+// Helper functions
+function getBrowserName(userAgent: string): string {
+  if (/edg/i.test(userAgent)) {
+    return 'Edge';
+  } else if (/chrome|chromium|crios/i.test(userAgent)) {
+    return 'Chrome';
+  } else if (/firefox|fxios/i.test(userAgent)) {
+    return 'Firefox';
+  } else if (/safari/i.test(userAgent) && !/chrome|chromium|crios/i.test(userAgent)) {
+    return 'Safari';
+  } else if (/trident|msie/i.test(userAgent)) {
+    return 'Internet Explorer';
+  } else if (/opr\//i.test(userAgent)) {
+    return 'Opera';
+  } else {
+    return 'Unknown';
+  }
+}
+
+// Add browser-specific classes to document root
+export const addBrowserClasses = (): void => {
+  const { isChrome, isSafari, isFirefox, isEdge, isIE } = detectBrowser();
   
-  prefixes.forEach(prefix => {
-    result[`${prefix}${property}`] = value;
-  });
-  
-  return result;
+  if (isChrome) document.documentElement.classList.add('browser-chrome');
+  if (isSafari) document.documentElement.classList.add('browser-safari');
+  if (isFirefox) document.documentElement.classList.add('browser-firefox');
+  if (isEdge) document.documentElement.classList.add('browser-edge');
+  if (isIE) document.documentElement.classList.add('browser-ie');
 };
 
-/**
- * Feature detection for email client rendering
- */
-export const isEmailClient = (): boolean => {
-  // Basic detection - this is a simplification
-  return (
-    window.navigator.userAgent.indexOf('Outlook') !== -1 ||
-    window.navigator.userAgent.indexOf('Gmail') !== -1 ||
-    window.navigator.userAgent.indexOf('Yahoo') !== -1 ||
-    document.documentElement.className.indexOf('mail') !== -1
-  );
-};
-
-/**
- * Apply email client specific styles if needed
- */
+// Apply email client specific styles
 export const applyEmailClientStyles = (): void => {
-  if (isEmailClient()) {
+  const { isEmailClient, name } = detectEmailClient();
+  
+  if (isEmailClient) {
+    document.documentElement.classList.add('email-client');
+    if (name) document.documentElement.classList.add(`email-${name.toLowerCase()}`);
+    
     const emailStyleElement = document.createElement('style');
     emailStyleElement.innerHTML = `
       /* Email client specific overrides */
@@ -96,15 +141,23 @@ export const applyEmailClientStyles = (): void => {
       img {
         -ms-interpolation-mode: bicubic;
       }
+      
+      /* Fix for Outlook */
+      .email-outlook .mso-fix {
+        mso-line-height-rule: exactly;
+      }
     `;
     document.head.appendChild(emailStyleElement);
   }
 };
 
-// Initialize compatibility helpers
+// Initialize all browser compatibility features
 export const initCompatibilityHelpers = (): void => {
-  // Apply email client specific styles
+  addBrowserClasses();
   applyEmailClientStyles();
   
-  // Add any other initialization logic as needed
+  // Console log for demonstration purposes
+  console.log('Browser compatibility helpers initialized');
+  console.log('Browser:', detectBrowser().name);
+  console.log('Email client:', detectEmailClient().isEmailClient ? detectEmailClient().name : 'Not an email client');
 };
