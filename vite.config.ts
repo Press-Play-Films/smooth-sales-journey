@@ -30,6 +30,9 @@ export default defineConfig(({ mode }) => ({
           vendor: ['react', 'react-dom', 'react-router-dom'],
           ui: ['@/components/ui'],
           charts: ['recharts'],
+          // Separate TensorFlow into its own chunks to allow code-splitting
+          tensorflow: ['@tensorflow/tfjs'],
+          faceDetection: ['@tensorflow-models/face-detection'],
         },
         assetFileNames: 'assets/[name]-[hash][extname]',
         chunkFileNames: 'assets/[name]-[hash].js',
@@ -38,12 +41,14 @@ export default defineConfig(({ mode }) => ({
     },
     terserOptions: {
       compress: {
-        drop_console: true,
+        drop_console: mode === 'production', // Only drop console in production
         drop_debugger: true,
       },
     },
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
+    // Exclude TensorFlow from initial bundle - will be loaded on demand
+    exclude: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
   },
 }));

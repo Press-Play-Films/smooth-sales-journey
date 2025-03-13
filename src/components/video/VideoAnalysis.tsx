@@ -1,6 +1,7 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { analyzeVideoFrame, determineClientStatus } from '@/services/video-analysis';
+import { loadTensorFlow } from '@/utils/lazyTensorflow';
 
 interface VideoAnalysisProps {
   videoElement: HTMLVideoElement | null;
@@ -15,30 +16,56 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
   currentStatus,
   onStatusChange
 }) => {
+  const [isAnalysisEnabled, setIsAnalysisEnabled] = useState(false);
+  const analysisInterval = 2000; // Check every 2 seconds
+  
+  // Load TensorFlow when component mounts
   useEffect(() => {
-    // Start analyzing video frames
+    let isMounted = true;
+    
+    const initializeAnalysis = async () => {
+      try {
+        await loadTensorFlow();
+        if (isMounted) {
+          setIsAnalysisEnabled(true);
+        }
+      } catch (err) {
+        console.error('Failed to initialize video analysis:', err);
+      }
+    };
+    
+    initializeAnalysis();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+  
+  // Start analyzing video frames once TensorFlow is loaded
+  useEffect(() => {
+    // Only start analysis if both the video element exists and TensorFlow is loaded
+    if (!videoElement || !isAnalysisEnabled) return;
+    
     let analyzeInterval: number;
     
-    if (videoElement) {
-      analyzeInterval = window.setInterval(async () => {
-        try {
-          const analysisResult = await analyzeVideoFrame(videoElement);
-          const newStatus = determineClientStatus(analysisResult);
-          
-          // Only update if status has changed
-          if (newStatus !== currentStatus) {
-            onStatusChange(clientId, newStatus);
-          }
-        } catch (err) {
-          console.error('Error analyzing video frame:', err);
+    analyzeInterval = window.setInterval(async () => {
+      try {
+        const analysisResult = await analyzeVideoFrame(videoElement);
+        const newStatus = determineClientStatus(analysisResult);
+        
+        // Only update if status has changed
+        if (newStatus !== currentStatus) {
+          onStatusChange(clientId, newStatus);
         }
-      }, 2000); // Check every 2 seconds
-    }
+      } catch (err) {
+        console.error('Error analyzing video frame:', err);
+      }
+    }, analysisInterval);
     
     return () => {
       clearInterval(analyzeInterval);
     };
-  }, [videoElement, clientId, currentStatus, onStatusChange]);
+  }, [videoElement, clientId, currentStatus, onStatusChange, isAnalysisEnabled]);
   
   // This component doesn't render anything visible
   return null;

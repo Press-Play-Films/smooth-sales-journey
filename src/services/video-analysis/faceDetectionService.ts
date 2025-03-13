@@ -1,21 +1,35 @@
 
 /**
  * Service for detecting faces in video frames
+ * Optimized with lazy loading to reduce initial resource usage
  */
-import * as tf from '@tensorflow/tfjs';
-import * as faceDetection from '@tensorflow-models/face-detection';
+import { loadTensorFlow, isTensorFlowLoaded } from '@/utils/lazyTensorflow';
+
+// Variables to hold the dynamically imported modules
+let tf: any = null;
+let faceDetection: any = null;
 
 // Face detection model instance
-let faceDetector: faceDetection.FaceDetector | null = null;
+let faceDetector: any = null;
 
 /**
  * Initialize the face detection model
  * Optimized for small video feeds like Zoom thumbnails
  */
-export const initializeFaceDetection = async (): Promise<faceDetection.FaceDetector | null> => {
+export const initializeFaceDetection = async (): Promise<any | null> => {
   if (!faceDetector) {
     try {
-      await tf.ready();
+      // Only load TensorFlow if not already loaded
+      if (!isTensorFlowLoaded()) {
+        await loadTensorFlow();
+      }
+      
+      // Dynamically import the face detection module
+      if (!faceDetection) {
+        tf = await import('@tensorflow/tfjs');
+        faceDetection = await import('@tensorflow-models/face-detection');
+      }
+      
       // Using SSD MobileNet model - optimized for small faces and faster performance
       const model = faceDetection.SupportedModels.MediaPipeFaceDetector;
       const detectorConfig = {
@@ -40,7 +54,7 @@ export const initializeFaceDetection = async (): Promise<faceDetection.FaceDetec
  */
 export const detectFaces = async (
   videoElement: HTMLVideoElement
-): Promise<faceDetection.Face[]> => {
+): Promise<any[]> => {
   // Ensure face detector is initialized
   const detector = await initializeFaceDetection();
   if (!detector) {
@@ -61,12 +75,12 @@ export const detectFaces = async (
 /**
  * Check if eyes are visible based on face landmarks
  */
-export const checkEyesVisible = (face: faceDetection.Face): boolean => {
+export const checkEyesVisible = (face: any): boolean => {
   // If keypoints are available, use them to check eye visibility
   if (face.keypoints && face.keypoints.length >= 6) {
     // MediaPipe face detector provides these keypoints
-    const leftEye = face.keypoints.find(point => point.name === 'leftEye');
-    const rightEye = face.keypoints.find(point => point.name === 'rightEye');
+    const leftEye = face.keypoints.find((point: any) => point.name === 'leftEye');
+    const rightEye = face.keypoints.find((point: any) => point.name === 'rightEye');
     
     // If both eyes are detected with reasonable confidence
     if (leftEye && rightEye) {
