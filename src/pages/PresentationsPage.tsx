@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { Button } from "@/components/ui/button";
-import { demoActivePresentations, demoUpcomingPresentations } from '@/utils/demoData';
+import { demoActivePresentations, demoUpcomingPresentations } from '@/utils/demoData/presentations';
 import { searchPresentations } from '@/utils/searchUtils';
 import NewPresentationForm from '@/components/presentation/NewPresentationForm';
 import PresentationFilters from '@/components/presentation/PresentationFilters';
