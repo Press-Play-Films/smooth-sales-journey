@@ -10,11 +10,7 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { ChevronDown, DollarSign, MoreVertical } from "lucide-react";
 import ClientCard from '../ClientCard';
-import SaleRecordForm from './SaleRecordForm';
 import { ActivePresentation } from '@/types/dashboard';
 import { formatTime } from '@/utils/formatters';
 
@@ -25,10 +21,8 @@ interface ActivePresentationCardProps {
 const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ presentation }) => {
   const { toast } = useToast();
   const [clients, setClients] = useState(presentation.clients);
-  const [activeSaleClientId, setActiveSaleClientId] = useState<string | null>(null);
-  const [showSaleDialog, setShowSaleDialog] = useState(false);
 
-  // Handle client status updates
+  // Handle client status updates from video analysis
   const handleClientStatusChange = (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => {
     setClients(prevClients => 
       prevClients.map(client => 
@@ -37,53 +31,15 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
     );
   };
 
-  // Initialize sale recording for a specific client
-  const handleRecordSale = (clientId: string) => {
-    setActiveSaleClientId(clientId);
-    setShowSaleDialog(true);
-  };
-
-  // Handle successful sale recording
-  const handleSaleSuccess = () => {
-    setShowSaleDialog(false);
-    setActiveSaleClientId(null);
-    
-    toast({
-      title: "Sale Recorded",
-      description: "The sale has been successfully recorded in the system.",
-    });
-  };
-
-  // Handle cancellation of sale recording
-  const handleSaleCancel = () => {
-    setShowSaleDialog(false);
-    setActiveSaleClientId(null);
-  };
-
-  // Check if it's the main Brio Vacations presentation
-  const isBrioVacations = presentation.title.includes('Brio Vacations');
-
-  // Find the active client for sale recording
-  const activeClient = clients.find(client => client.id === activeSaleClientId);
-
   return (
     <Card key={presentation.id} className="overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-brio-navy to-brio-navy/80 text-white">
         <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            {isBrioVacations && (
-              <img 
-                src="/lovable-uploads/378ec97a-04b4-45e4-93e8-5bc4340decae.png" 
-                alt="Brio Vacations Logo" 
-                className="h-8 mr-3" 
-              />
-            )}
-            <div>
-              <CardTitle>{presentation.title}</CardTitle>
-              <CardDescription className="text-white/80">
-                Presenter: {presentation.presenter} • Started: {formatTime(presentation.startTime)}
-              </CardDescription>
-            </div>
+          <div>
+            <CardTitle>{presentation.title}</CardTitle>
+            <CardDescription className="text-white/80">
+              Presenter: {presentation.presenter} • Started: {formatTime(presentation.startTime)}
+            </CardDescription>
           </div>
           <Badge className="bg-brio-teal text-brio-navy hover:bg-brio-teal/90">
             Live
@@ -94,33 +50,11 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {clients.map(client => (
-            <div key={client.id} className="relative">
-              <ClientCard 
-                client={client}
-                onStatusChange={handleClientStatusChange}
-              />
-              <DropdownMenu>
-                <DropdownMenuTrigger className="absolute top-2 right-2 h-8 w-8 rounded-full flex items-center justify-center bg-white/90 hover:bg-white shadow-sm">
-                  <MoreVertical className="h-4 w-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>Client Actions</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => handleRecordSale(client.id)}>
-                    <DollarSign className="mr-2 h-4 w-4" />
-                    <span>Record Sale</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => {
-                    toast({
-                      title: "Client Profile",
-                      description: "Opening client profile",
-                    });
-                  }}>
-                    <span>View Profile</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <ClientCard 
+              key={client.id} 
+              client={client}
+              onStatusChange={handleClientStatusChange}
+            />
           ))}
         </div>
       </CardContent>
@@ -154,21 +88,6 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
           End Presentation
         </button>
       </CardFooter>
-
-      {/* Sale Recording Dialog */}
-      <Dialog open={showSaleDialog} onOpenChange={setShowSaleDialog}>
-        <DialogContent className="sm:max-w-[600px]">
-          {activeClient && (
-            <SaleRecordForm 
-              presentationId={presentation.id}
-              clientId={activeClient.id}
-              clientNames={activeClient.names}
-              onSuccess={handleSaleSuccess}
-              onCancel={handleSaleCancel}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </Card>
   );
 };

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import StatsCard from './dashboard/StatsCard';
@@ -5,7 +6,6 @@ import ActivePresentationCard from './dashboard/ActivePresentationCard';
 import UpcomingPresentationList from './dashboard/UpcomingPresentationList';
 import RecentTransfersList from './dashboard/RecentTransfersList';
 import EngagementMetrics from './EngagementMetrics';
-import NewPresentationForm from './presentation/NewPresentationForm';
 import { ActivePresentation, Client } from '@/types/dashboard';
 import { 
   demoActivePresentations, 
@@ -15,60 +15,33 @@ import {
 
 const Dashboard: React.FC = () => {
   const { toast } = useToast();
-  const [showNewPresentationForm, setShowNewPresentationForm] = useState(false);
   
   // State for active presentations with auto-updating client statuses
   const [activePresentations, setActivePresentations] = useState<ActivePresentation[]>(demoActivePresentations);
   
-  // Simulate real-time status updates (in a more controlled way for demo purposes)
+  // Simulate real-time status updates
   useEffect(() => {
-    // Only update status every 45 seconds to avoid flickering and for a more polished demo
     const statusUpdateInterval = setInterval(() => {
       setActivePresentations(prevPresentations => {
         return prevPresentations.map(presentation => {
-          // Update one client at a time in a predictable pattern
-          const updatedClients = [...presentation.clients];
-          
-          // Get current timestamp to determine which client to update
-          const now = new Date();
-          const seconds = now.getSeconds();
-          const clientIndex = seconds % updatedClients.length;
-          
-          // Predictable status pattern based on time
-          const minute = now.getMinutes();
-          let newStatus: 'engaged' | 'distracted' | 'away';
-          
-          if (minute % 3 === 0) {
-            newStatus = 'engaged';
-          } else if (minute % 3 === 1) {
-            newStatus = 'distracted';
-          } else {
-            newStatus = 'away';
-          }
-          
-          // Only update if status is different
-          if (updatedClients[clientIndex].status !== newStatus) {
-            updatedClients[clientIndex] = {
-              ...updatedClients[clientIndex],
-              status: newStatus
-            };
-            
-            // Show toast for important status changes (away only)
-            if (newStatus === 'away') {
-              toast({
-                title: "Client Status Change",
-                description: `${updatedClients[clientIndex].names} is now away from their screen.`,
-              });
+          // Update random client statuses to simulate real activity
+          const updatedClients = presentation.clients.map(client => {
+            // 20% chance to change status
+            if (Math.random() < 0.2) {
+              const statuses: ('engaged' | 'distracted' | 'away')[] = ['engaged', 'distracted', 'away'];
+              const newStatusIndex = Math.floor(Math.random() * statuses.length);
+              return { ...client, status: statuses[newStatusIndex] };
             }
-          }
+            return client;
+          });
           
           return { ...presentation, clients: updatedClients };
         });
       });
-    }, 45000); // Update every 45 seconds for a smoother demo
+    }, 10000); // Update every 10 seconds
     
     return () => clearInterval(statusUpdateInterval);
-  }, [toast]);
+  }, []);
 
   // Get all clients from all active presentations
   const getAllClients = (): Client[] => {
@@ -82,14 +55,6 @@ const Dashboard: React.FC = () => {
     const totalClients = clients.length;
     return `${engaged} of ${totalClients} clients currently engaged`;
   };
-
-  const openNewPresentationForm = () => {
-    setShowNewPresentationForm(true);
-  };
-  
-  const closeNewPresentationForm = () => {
-    setShowNewPresentationForm(false);
-  };
   
   return (
     <div className="space-y-8">
@@ -98,7 +63,12 @@ const Dashboard: React.FC = () => {
           <h2 className="text-3xl font-bold text-brio-navy">Dashboard</h2>
           <div>
             <button 
-              onClick={openNewPresentationForm}
+              onClick={() => {
+                toast({
+                  title: "New Presentation",
+                  description: "This feature will be available soon!",
+                });
+              }}
               className="bg-brio-navy hover:bg-brio-navy/90 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -170,10 +140,6 @@ const Dashboard: React.FC = () => {
           <RecentTransfersList transfers={demoRecentTransfers} />
         </section>
       </div>
-      
-      {showNewPresentationForm && (
-        <NewPresentationForm onClose={closeNewPresentationForm} />
-      )}
     </div>
   );
 };
