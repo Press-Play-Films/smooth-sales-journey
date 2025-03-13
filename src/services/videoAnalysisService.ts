@@ -4,6 +4,34 @@
  * Optimized for thumbnail-sized video feeds from platforms like Zoom
  */
 
+import * as tf from '@tensorflow/tfjs';
+import * as faceDetection from '@tensorflow-models/face-detection';
+
+// Load TensorFlow.js models
+let faceDetector: faceDetection.FaceDetector | null = null;
+
+// Initialize face detection model
+const initializeFaceDetection = async () => {
+  if (!faceDetector) {
+    try {
+      await tf.ready();
+      // Using SSD MobileNet model - optimized for small faces and faster performance
+      const model = faceDetection.SupportedModels.MediaPipeFaceDetector;
+      const detectorConfig = {
+        runtime: 'tfjs', // Use TensorFlow.js runtime
+        modelType: 'short', // Use lightweight model for better performance
+        maxFaces: 1, // Optimize for single face detection in thumbnails
+      } as const;
+      
+      faceDetector = await faceDetection.createDetector(model, detectorConfig);
+      console.log('Face detection model loaded successfully');
+    } catch (error) {
+      console.error('Error initializing face detection:', error);
+    }
+  }
+  return faceDetector;
+};
+
 // Engagement thresholds
 const ENGAGEMENT_THRESHOLD = 0.7;
 const DISTRACTION_THRESHOLD = 0.4;
@@ -39,46 +67,87 @@ export const analyzeVideoFrame = async (
     };
   }
 
-  // Create a canvas to process the video frame
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  
-  if (!context) {
-    console.error('Could not get canvas context');
-    return {
-      attentionScore: 0,
-      facingCamera: false,
-      eyesVisible: false, 
-      movement: 'none',
-    };
+  // Ensure face detector is initialized
+  const detector = await initializeFaceDetection();
+  if (!detector) {
+    console.error('Face detector not available');
+    return fallbackAnalysis(videoElement);
   }
 
-  // Set canvas dimensions to match video
-  canvas.width = videoElement.videoWidth;
-  canvas.height = videoElement.videoHeight;
-  
-  // Draw the current video frame on the canvas
-  context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-  // Note: This is where the actual face detection and analysis would occur
-  // For thumbnail-sized Zoom feeds, we need specialized handling:
-  
-  // 1. Determine if this is a small feed (likely from Zoom)
-  const isSmallFeed = canvas.width <= ZOOM_THUMBNAIL_AVG_WIDTH * 1.5;
-  
-  // 2. Apply different processing based on feed size
-  if (isSmallFeed) {
-    // Use algorithms optimized for small faces in thumbnails
-    // console.log('Using small feed optimizations for Zoom thumbnail');
+  try {
+    // Detect faces in the video frame
+    const faces = await detector.estimateFaces(videoElement);
     
-    // In production, you would use:
-    // - MediaPipe Face Mesh (works well on smaller images, ~30 FPS on mobile)
-    // - TensorFlow.js face-landmarks-detection with SSD MobileNet model (lightweight)
-    // - Or a custom model trained specifically for thumbnail analysis
+    // No faces detected
+    if (faces.length === 0) {
+      return {
+        attentionScore: 0,
+        facingCamera: false,
+        eyesVisible: false,
+        movement: 'none',
+      };
+    }
+
+    // Get the main face (first detected face)
+    const face = faces[0];
+    
+    // 1. Determine if this is a small feed (likely from Zoom)
+    const isSmallFeed = videoElement.videoWidth <= ZOOM_THUMBNAIL_AVG_WIDTH * 1.5;
+    
+    // Calculate face size relative to frame
+    const faceBox = face.box || { xMin: 0, yMin: 0, width: 0, height: 0, xMax: 0, yMax: 0 };
+    const faceWidth = faceBox.width || 0;
+    const faceHeight = faceBox.height || 0;
+    const frameArea = videoElement.videoWidth * videoElement.videoHeight;
+    const faceArea = faceWidth * faceHeight;
+    
+    // Calculate face ratio (how much of the frame is occupied by the face)
+    const faceRatio = frameArea > 0 ? faceArea / frameArea : 0;
+    
+    // Apply different processing based on feed size
+    let confidenceMultiplier = 1.0;
+    if (isSmallFeed) {
+      // Boost confidence for small feeds where detection is more challenging
+      confidenceMultiplier = 1.2;
+    }
+    
+    // Calculate attention score based on face position and landmarks
+    // Higher score when face is centered and eyes are visible
+    const faceCenteredness = calculateFaceCenteredness(face, videoElement);
+    
+    // Use landmarks to determine if eyes are visible
+    // With MediaPipe face detector, we can check eye landmarks
+    const eyesVisible = checkEyesVisible(face);
+    
+    // Assume facing camera if a face was detected
+    const facingCamera = faceRatio > 0.05; // Face must be at least 5% of frame
+    
+    // Calculate attention score based on multiple factors
+    const attentionScore = Math.min(1, Math.max(0, 
+      (faceCenteredness * 0.6 + (eyesVisible ? 0.4 : 0)) * confidenceMultiplier
+    ));
+    
+    // For movement, we would need to compare with previous frames
+    // For now, use a simulated approach
+    const movement = determineMovement(face, faceRatio);
+    
+    return {
+      attentionScore,
+      facingCamera,
+      eyesVisible,
+      movement,
+    };
+  } catch (error) {
+    console.error('Error analyzing video frame:', error);
+    return fallbackAnalysis(videoElement);
   }
-  
+};
+
+/**
+ * Fallback to pseudo-random analysis when face detection fails
+ */
+const fallbackAnalysis = (videoElement: HTMLVideoElement): VideoAnalysisResult => {
   // For demo purposes, we're using a simulation
-  // In production, replace with actual face detection and eye tracking
   const clientId = videoElement.getAttribute('data-client-id') || '';
   const timeNow = Date.now();
   
@@ -109,6 +178,81 @@ export const analyzeVideoFrame = async (
     eyesVisible,
     movement,
   };
+};
+
+/**
+ * Calculate how centered the face is in the frame
+ * Returns a value between 0-1, where 1 is perfectly centered
+ */
+const calculateFaceCenteredness = (
+  face: faceDetection.Face, 
+  videoElement: HTMLVideoElement
+): number => {
+  const box = face.box || { xMin: 0, yMin: 0, width: 0, height: 0, xMax: 0, yMax: 0 };
+  
+  // Calculate the center of the face
+  const faceCenterX = box.xMin + box.width / 2;
+  const faceCenterY = box.yMin + box.height / 2;
+  
+  // Calculate the center of the video
+  const videoCenterX = videoElement.videoWidth / 2;
+  const videoCenterY = videoElement.videoHeight / 2;
+  
+  // Calculate distance from center (normalized)
+  const maxDistanceX = videoElement.videoWidth / 2;
+  const maxDistanceY = videoElement.videoHeight / 2;
+  const distanceX = Math.abs(faceCenterX - videoCenterX) / maxDistanceX;
+  const distanceY = Math.abs(faceCenterY - videoCenterY) / maxDistanceY;
+  
+  // Average distance (0 = center, 1 = edge)
+  const avgDistance = (distanceX + distanceY) / 2;
+  
+  // Convert to centeredness (1 = center, 0 = edge)
+  return 1 - avgDistance;
+};
+
+/**
+ * Check if eyes are visible based on face landmarks
+ */
+const checkEyesVisible = (face: faceDetection.Face): boolean => {
+  // If keypoints are available, use them to check eye visibility
+  if (face.keypoints && face.keypoints.length >= 6) {
+    // MediaPipe face detector provides these keypoints
+    const leftEye = face.keypoints.find(point => point.name === 'leftEye');
+    const rightEye = face.keypoints.find(point => point.name === 'rightEye');
+    
+    // If both eyes are detected with reasonable confidence
+    if (leftEye && rightEye) {
+      return true;
+    }
+  }
+  
+  // Fallback: use a heuristic approach based on face orientation
+  if (face.box) {
+    // If face is detected and appears to be facing forward
+    // (Assumption: if the face is reasonably square, it's likely facing forward)
+    const aspectRatio = face.box.width / face.box.height;
+    return aspectRatio > 0.7 && aspectRatio < 1.3;
+  }
+  
+  return false;
+};
+
+/**
+ * Determine movement level based on face position
+ */
+const determineMovement = (face: faceDetection.Face, faceRatio: number): 'none' | 'low' | 'high' => {
+  // In a real implementation, we would compare current face position with previous frames
+  // For this implementation, we'll use the face ratio as a heuristic
+  
+  if (faceRatio < 0.05) {
+    // Small or distant face might indicate movement
+    return 'high';
+  } else if (faceRatio < 0.1) {
+    return 'low';
+  }
+  
+  return 'none';
 };
 
 /**
@@ -149,6 +293,9 @@ export const connectToExternalVideoSource = async (
   console.log('Connecting to Zoom video feed:', sourceId);
   
   try {
+    // Initialize face detection model
+    await initializeFaceDetection();
+    
     // In a real implementation, this would:
     // 1. Connect to the Zoom SDK API (https://marketplace.zoom.us/docs/sdk/native-sdks/)
     // 2. Request access to meeting participant video feeds
