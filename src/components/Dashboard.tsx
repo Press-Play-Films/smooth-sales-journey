@@ -24,10 +24,10 @@ const Dashboard: React.FC = () => {
       startTime: new Date(),
       status: 'active',
       clients: [
-        { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged' },
-        { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted' },
-        { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged' },
-        { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'engaged' }
+        { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged' as 'engaged' },
+        { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted' as 'distracted' },
+        { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged' as 'engaged' },
+        { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'engaged' as 'engaged' }
       ]
     }
   ];
