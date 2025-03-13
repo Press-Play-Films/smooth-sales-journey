@@ -1,27 +1,43 @@
 
 import React, { useRef, useEffect, useState } from 'react';
-import { analyzeVideoFrame, determineClientStatus } from '@/services/videoAnalysisService';
+import { 
+  analyzeVideoFrame, 
+  determineClientStatus, 
+  connectToExternalVideoSource 
+} from '@/services/videoAnalysisService';
 import { Client } from '@/types/dashboard';
 
 interface VideoStreamProps {
   client: Client;
   onStatusChange: (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => void;
+  sourceId?: string; // ID of the external video source (e.g., Zoom participant ID)
 }
 
-const VideoStream: React.FC<VideoStreamProps> = ({ client, onStatusChange }) => {
+const VideoStream: React.FC<VideoStreamProps> = ({ 
+  client, 
+  onStatusChange,
+  sourceId 
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // In a real application, this would be an actual video stream
-  // For demo purposes, we'll use a simulated video feed
+  // Set up video stream from external source (e.g., Zoom)
   useEffect(() => {
-    // Simulate connecting to a video stream
-    const simulateVideoStream = async () => {
+    const setupVideoStream = async () => {
       if (videoRef.current) {
         try {
-          // In a real implementation, we would connect to an actual stream
-          // For demo purposes, we'll set the video to a solid color
+          // Try to connect to an external video source if sourceId is provided
+          if (sourceId) {
+            const connected = await connectToExternalVideoSource(videoRef.current, sourceId);
+            if (connected) {
+              setIsStreaming(true);
+              setError(null);
+              return;
+            }
+          }
+          
+          // Fallback to simulated video if external source connection fails or no sourceId
           const canvas = document.createElement('canvas');
           canvas.width = 640;
           canvas.height = 480;
@@ -58,7 +74,6 @@ const VideoStream: React.FC<VideoStreamProps> = ({ client, onStatusChange }) => 
               videoRef.current.setAttribute('autoplay', '');
               videoRef.current.muted = true;
               
-              // Try playing with user interaction requirement bypassed
               const playPromise = videoRef.current.play();
               
               if (playPromise !== undefined) {
@@ -81,7 +96,7 @@ const VideoStream: React.FC<VideoStreamProps> = ({ client, onStatusChange }) => 
       }
     };
     
-    simulateVideoStream();
+    setupVideoStream();
     
     // Start analyzing video frames
     let analyzeInterval: number;
@@ -110,7 +125,7 @@ const VideoStream: React.FC<VideoStreamProps> = ({ client, onStatusChange }) => 
         tracks.forEach(track => track.stop());
       }
     };
-  }, [client.id, client.names, client.status, isStreaming, onStatusChange]);
+  }, [client.id, client.names, client.status, isStreaming, onStatusChange, sourceId]);
   
   // Handle manual play for browsers that block autoplay
   const handleVideoClick = () => {

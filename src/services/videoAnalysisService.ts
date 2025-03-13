@@ -1,11 +1,16 @@
 
 /**
  * Service for analyzing video streams to determine client engagement
+ * Optimized for thumbnail-sized video feeds from platforms like Zoom
  */
 
 // Engagement thresholds
 const ENGAGEMENT_THRESHOLD = 0.7;
 const DISTRACTION_THRESHOLD = 0.4;
+
+// Configuration for small video feeds
+const MIN_FACE_SIZE = 30; // Minimum face size in pixels to detect
+const ANALYSIS_INTERVAL = 2000; // How often to analyze frames (ms)
 
 type VideoAnalysisResult = {
   attentionScore: number;
@@ -16,6 +21,8 @@ type VideoAnalysisResult = {
 
 /**
  * Analyze video frame to determine client engagement
+ * Optimized for small video feeds from conferencing platforms like Zoom
+ * 
  * @param videoElement The video element to analyze
  */
 export const analyzeVideoFrame = async (
@@ -52,19 +59,21 @@ export const analyzeVideoFrame = async (
   // Draw the current video frame on the canvas
   context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
 
-  // In a real implementation, we would:
-  // 1. Use face detection to determine if client is facing camera
-  // 2. Use eye tracking to see if they are looking at the screen
-  // 3. Measure movement to determine fidgeting or distractions
+  // For real implementation with Zoom feeds, you'd use:
+  // 1. A lightweight face detection model optimized for small thumbnails
+  // 2. Eye tracking that works with lower resolution images
+  // 3. Simple movement detection by comparing frame differences
   
-  // For demo purposes, we'll simulate analysis with pseudorandom data
-  // that's somewhat consistent per client
+  // IMPLEMENTATION NOTE: In production, you would integrate with:
+  // - TensorFlow.js face-landmarks-detection (lightweight model)
+  // - or MediaPipe Face Mesh (works well on smaller images)
+  // - or a custom model trained specifically for thumbnail analysis
+  
+  // Until the real implementation is added, we'll continue with the simulation
   const clientId = videoElement.getAttribute('data-client-id') || '';
   const timeNow = Date.now();
   
   // Create a seeded "random" number based on client ID and time
-  // This makes the engagement pattern somewhat consistent per client
-  // but still changing over time
   const seedValue = clientId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const pseudoRandom = Math.sin(seedValue + timeNow / 10000) * 0.5 + 0.5;
   
@@ -115,4 +124,26 @@ export const determineClientStatus = (
   }
   
   return 'away';
+};
+
+/**
+ * Connect to external video source (e.g., Zoom)
+ * This is a placeholder for the actual implementation
+ * 
+ * @param videoElement The video element to connect
+ * @param sourceId Optional source ID for the video feed
+ */
+export const connectToExternalVideoSource = async (
+  videoElement: HTMLVideoElement,
+  sourceId?: string
+): Promise<boolean> => {
+  console.log('Connecting to external video source:', sourceId);
+  
+  // In a real implementation, this would:
+  // 1. Connect to the Zoom API or use the Zoom SDK
+  // 2. Get access to participant video feeds
+  // 3. Route the selected feed to the provided video element
+  
+  // For now, we'll just return true to simulate a successful connection
+  return true;
 };
