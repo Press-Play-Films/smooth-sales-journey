@@ -33,3 +33,15 @@ export {
   teamMemberAssignments
 } from './performance';
 
+// Export sales data
+export {
+  demoSales,
+  getSalesByDate,
+  getSalesByWave,
+  getSalesByRoom,
+  getSalesByPackage,
+  getSalesBySalesExecutive,
+  getSalesByTOManager,
+  calculateTotalSales,
+  getSalesCountByPackage
+} from './sales';

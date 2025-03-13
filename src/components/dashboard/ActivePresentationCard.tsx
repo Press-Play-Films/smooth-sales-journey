@@ -10,7 +10,11 @@ import {
   CardTitle
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ChevronDown, DollarSign, MoreVertical } from "lucide-react";
 import ClientCard from '../ClientCard';
+import SaleRecordForm from './SaleRecordForm';
 import { ActivePresentation } from '@/types/dashboard';
 import { formatTime } from '@/utils/formatters';
 
@@ -21,6 +25,8 @@ interface ActivePresentationCardProps {
 const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ presentation }) => {
   const { toast } = useToast();
   const [clients, setClients] = useState(presentation.clients);
+  const [activeSaleClientId, setActiveSaleClientId] = useState<string | null>(null);
+  const [showSaleDialog, setShowSaleDialog] = useState(false);
 
   // Handle client status updates from video analysis
   const handleClientStatusChange = (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => {
@@ -31,8 +37,29 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
     );
   };
 
+  // Initialize sale recording for a specific client
+  const handleRecordSale = (clientId: string) => {
+    setActiveSaleClientId(clientId);
+    setShowSaleDialog(true);
+  };
+
+  // Handle successful sale recording
+  const handleSaleSuccess = () => {
+    setShowSaleDialog(false);
+    setActiveSaleClientId(null);
+  };
+
+  // Handle cancellation of sale recording
+  const handleSaleCancel = () => {
+    setShowSaleDialog(false);
+    setActiveSaleClientId(null);
+  };
+
   // Check if it's the main Brio Vacations presentation
   const isBrioVacations = presentation.title === 'Brio Vacations';
+
+  // Find the active client for sale recording
+  const activeClient = clients.find(client => client.id === activeSaleClientId);
 
   return (
     <Card key={presentation.id} className="overflow-hidden">
@@ -62,11 +89,33 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {clients.map(client => (
-            <ClientCard 
-              key={client.id} 
-              client={client}
-              onStatusChange={handleClientStatusChange}
-            />
+            <div key={client.id} className="relative">
+              <ClientCard 
+                client={client}
+                onStatusChange={handleClientStatusChange}
+              />
+              <DropdownMenu>
+                <DropdownMenuTrigger className="absolute top-2 right-2 h-8 w-8 rounded-full flex items-center justify-center bg-white/90 hover:bg-white shadow-sm">
+                  <MoreVertical className="h-4 w-4" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Client Actions</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleRecordSale(client.id)}>
+                    <DollarSign className="mr-2 h-4 w-4" />
+                    <span>Record Sale</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => {
+                    toast({
+                      title: "Client Profile",
+                      description: "Opening client profile",
+                    });
+                  }}>
+                    <span>View Profile</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           ))}
         </div>
       </CardContent>
@@ -100,6 +149,21 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
           End Presentation
         </button>
       </CardFooter>
+
+      {/* Sale Recording Dialog */}
+      <Dialog open={showSaleDialog} onOpenChange={setShowSaleDialog}>
+        <DialogContent className="sm:max-w-[600px]">
+          {activeClient && (
+            <SaleRecordForm 
+              presentationId={presentation.id}
+              clientId={activeClient.id}
+              clientNames={activeClient.names}
+              onSuccess={handleSaleSuccess}
+              onCancel={handleSaleCancel}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

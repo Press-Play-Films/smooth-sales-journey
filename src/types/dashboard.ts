@@ -1,4 +1,3 @@
-
 export interface Client {
   id: string;
   names: string;
@@ -92,6 +91,22 @@ export interface ClientJourney {
   roomNumbers: string[];
 }
 
+export interface Sale {
+  id: string;
+  presentationId: string;
+  clientId: string;
+  clientNames: string;
+  packageType: string;
+  paymentMethod: string;
+  salesExecutive: string;
+  toManager: string;
+  amount: number;
+  transactionNotes?: string;
+  timestamp: Date;
+  waveTime: string;
+  roomNumber: string;
+}
+
 export interface TeamMemberAssignment {
   id: string;
   name: string;
@@ -101,4 +116,3 @@ export interface TeamMemberAssignment {
     roomNumbers: string[];
   }[];
 }
-
