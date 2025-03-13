@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -13,6 +13,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const { toast } = useToast();
   
+  // Simple role management (in a real app, this would come from authentication)
+  const [userRole, setUserRole] = useState<'employee' | 'executive'>('employee');
+  
+  // Toggle between employee and executive views
+  const toggleUserRole = () => {
+    const newRole = userRole === 'employee' ? 'executive' : 'employee';
+    setUserRole(newRole);
+    toast({
+      title: `Switched to ${newRole} view`,
+      description: `You are now viewing the application as ${newRole}`,
+    });
+  };
+  
   // Active link helper
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -21,7 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <SidebarProvider>
       <div className="flex flex-col min-h-screen w-full">
-        <Header />
+        <Header userRole={userRole} toggleUserRole={toggleUserRole} />
         
         <div className="flex flex-1 w-full">
           {/* Sidebar Navigation */}
@@ -104,6 +117,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </svg>
                 <span>Analytics</span>
               </Link>
+              
+              {userRole === 'executive' && (
+                <Link 
+                  to="/executive" 
+                  className={`flex items-center space-x-2 p-3 rounded-lg transition-all ${
+                    isActive('/executive') 
+                      ? 'bg-white/20 text-brio-teal' 
+                      : 'hover:bg-white/10'
+                  }`}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                  <span>Executive Dashboard</span>
+                </Link>
+              )}
             </nav>
             
             <div className="border-t border-white/10 pt-4">

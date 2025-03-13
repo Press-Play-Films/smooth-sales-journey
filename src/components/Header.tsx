@@ -2,8 +2,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  userRole: 'employee' | 'executive';
+  toggleUserRole: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ userRole, toggleUserRole }) => {
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -24,6 +31,18 @@ const Header: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-4">
+          {/* User Role Toggle */}
+          <div className="hidden md:flex items-center space-x-2 mr-4 bg-gray-100 p-2 rounded-lg">
+            <Switch 
+              id="role-mode" 
+              checked={userRole === 'executive'}
+              onCheckedChange={toggleUserRole}
+            />
+            <Label htmlFor="role-mode" className="text-sm font-medium">
+              {userRole === 'executive' ? 'Executive View' : 'Employee View'}
+            </Label>
+          </div>
+          
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             <button 
@@ -99,6 +118,21 @@ const Header: React.FC = () => {
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-b border-gray-200 animate-slide-down">
           <div className="px-2 pt-2 pb-3 space-y-1">
+            {/* Role toggle in mobile menu */}
+            <div className="flex items-center justify-between px-3 py-2">
+              <span className="text-sm font-medium">View Mode:</span>
+              <div className="flex items-center space-x-2">
+                <Switch 
+                  id="mobile-role-mode" 
+                  checked={userRole === 'executive'}
+                  onCheckedChange={toggleUserRole}
+                />
+                <Label htmlFor="mobile-role-mode" className="text-sm">
+                  {userRole === 'executive' ? 'Executive' : 'Employee'}
+                </Label>
+              </div>
+            </div>
+            
             <Link 
               to="/"
               className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brio-navy hover:bg-gray-100"
@@ -134,6 +168,16 @@ const Header: React.FC = () => {
             >
               Analytics
             </Link>
+            
+            {userRole === 'executive' && (
+              <Link 
+                to="/executive"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brio-navy hover:bg-gray-100"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Executive Dashboard
+              </Link>
+            )}
           </div>
           <div className="pt-4 pb-3 border-t border-gray-200">
             <div className="flex items-center px-5">
