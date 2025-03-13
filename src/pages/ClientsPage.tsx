@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { useToast } from "@/hooks/use-toast";
@@ -7,61 +6,13 @@ import { Button } from "@/components/ui/button";
 import ClientSearch from '@/components/client/ClientSearch';
 import ClientCard from '@/components/ClientCard';
 import { Client } from '@/types/dashboard';
+import { demoClients } from '@/utils/demoData';
 
 const ClientsPage: React.FC = () => {
   const { toast } = useToast();
   
-  // Sample client data (in a real app, this would come from an API or context)
-  const [clients, setClients] = useState<Client[]>([
-    { 
-      id: 'client-001', 
-      names: 'George & Lyn Whitehead', 
-      location: 'North Carolina', 
-      status: 'engaged',
-      presentationTime: '12:30 PM',
-      image: '/placeholder.svg'
-    },
-    { 
-      id: 'client-002', 
-      names: 'Malinda & Larry Jones', 
-      location: 'Florida', 
-      status: 'distracted',
-      presentationTime: '12:30 PM',
-      image: '/placeholder.svg'
-    },
-    { 
-      id: 'client-003', 
-      names: 'Philip & Traci Naegele', 
-      location: 'Georgia', 
-      status: 'engaged',
-      presentationTime: '3:30 PM',
-      image: '/placeholder.svg'
-    },
-    { 
-      id: 'client-004', 
-      names: 'Scott & Renee White', 
-      location: 'Texas', 
-      status: 'away',
-      presentationTime: '6:30 PM',
-      image: '/placeholder.svg'
-    },
-    { 
-      id: 'client-005', 
-      names: 'Michael & Karen Thompson', 
-      location: 'California', 
-      status: 'engaged',
-      presentationTime: '6:30 PM',
-      image: '/placeholder.svg'
-    },
-    { 
-      id: 'client-006', 
-      names: 'David & Sarah Miller', 
-      location: 'New York', 
-      status: 'distracted',
-      presentationTime: '8:00 PM',
-      image: '/placeholder.svg'
-    },
-  ]);
+  // Use the demo client data from the refactored import
+  const [clients, setClients] = useState<Client[]>(demoClients.slice(0, 6));
   
   const [filteredClients, setFilteredClients] = useState<Client[]>(clients);
   

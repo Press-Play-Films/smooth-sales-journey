@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import DashboardHeader from '@/components/executive/DashboardHeader';
 import OverviewContent from '@/components/executive/OverviewContent';
 import SalesContent from '@/components/executive/SalesContent';
 import TeamContent from '@/components/executive/TeamContent';
+import { demoDepartmentStats } from '@/utils/demoData';
 
 const ExecutiveDashboard: React.FC = () => {
   const [selectedReport, setSelectedReport] = useState<'overview' | 'sales' | 'team'>('overview');
