@@ -3,7 +3,6 @@ import React from 'react';
 import Layout from '@/components/Layout';
 import Dashboard from '@/components/Dashboard';
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from 'react-router-dom';
 
 const Index: React.FC = () => {
   return (
@@ -19,8 +18,8 @@ const Index: React.FC = () => {
             <div>
               <h3 className="font-medium text-blue-800">Welcome to Brio Sales Management</h3>
               <p className="text-sm text-blue-600 mt-1">
-                This is the employee dashboard for managing your daily tasks. For executive-level data and reports, 
-                switch to <span className="font-semibold">Executive View</span> using the toggle in the header.
+                Track your presentations, manage clients, and monitor your performance metrics from this 
+                centralized dashboard. Check the sidebar for all available features.
               </p>
             </div>
           </div>
