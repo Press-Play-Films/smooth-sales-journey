@@ -7,19 +7,13 @@ import { Button } from "@/components/ui/button";
 import ClientSearch from '@/components/client/ClientSearch';
 import ClientCard from '@/components/ClientCard';
 import { Client } from '@/types/dashboard';
+import { demoClients } from '@/utils/demoData';
 
 const ClientsPage: React.FC = () => {
   const { toast } = useToast();
   
-  // Sample client data (in a real app, this would come from an API or context)
-  const [clients, setClients] = useState<Client[]>([
-    { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged' },
-    { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted' },
-    { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged' },
-    { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'away' },
-    { id: 'client-005', names: 'Michael & Karen Thompson', location: 'California', status: 'engaged' },
-    { id: 'client-006', names: 'David & Sarah Miller', location: 'New York', status: 'distracted' },
-  ]);
+  // Use the demo client data from the refactored import
+  const [clients, setClients] = useState<Client[]>(demoClients.slice(0, 6));
   
   const [filteredClients, setFilteredClients] = useState<Client[]>(clients);
   
@@ -29,6 +23,13 @@ const ClientsPage: React.FC = () => {
       client.id === clientId ? {...client, status: newStatus} : client
     );
     setClients(updatedClients);
+    
+    // Also update filtered clients
+    setFilteredClients(prevFiltered => 
+      prevFiltered.map(client => 
+        client.id === clientId ? {...client, status: newStatus} : client
+      )
+    );
     
     toast({
       title: "Status Updated",

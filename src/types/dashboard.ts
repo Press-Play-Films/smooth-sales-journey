@@ -3,10 +3,14 @@ export interface Client {
   id: string;
   names: string;
   location?: string;
+  city?: string;
+  state?: string;
   status: 'engaged' | 'distracted' | 'away';
   department?: 'sales' | 'finance' | 'exit-survey';
   roomNumber?: string;
   assignedAgent?: string;
+  image?: string;
+  presentationTime?: string;
 }
 
 export interface ActivePresentation {
@@ -17,6 +21,7 @@ export interface ActivePresentation {
   status: string;
   clients: Client[];
   roomNumber: string;
+  waveTime?: string;
 }
 
 export interface UpcomingPresentation {
@@ -27,6 +32,7 @@ export interface UpcomingPresentation {
   status: string;
   clients: number;
   roomNumber: string;
+  waveTime?: string;
 }
 
 export interface Transfer {
@@ -86,4 +92,30 @@ export interface ClientJourney {
   }[];
   currentStage: string;
   roomNumbers: string[];
+}
+
+export interface Sale {
+  id: string;
+  presentationId: string;
+  clientId: string;
+  clientNames: string;
+  packageType: string;
+  paymentMethod: string;
+  salesExecutive: string;
+  toManager: string;
+  amount: number;
+  transactionNotes?: string;
+  timestamp: Date;
+  waveTime: string;
+  roomNumber: string;
+}
+
+export interface TeamMemberAssignment {
+  id: string;
+  name: string;
+  role: string;
+  waveAssignments: {
+    time: string;
+    roomNumbers: string[];
+  }[];
 }
