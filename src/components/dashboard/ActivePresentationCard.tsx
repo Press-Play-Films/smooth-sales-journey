@@ -31,15 +31,27 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
     );
   };
 
+  // Check if it's the main Brio Vacations presentation
+  const isBrioVacations = presentation.title === 'Brio Vacations';
+
   return (
     <Card key={presentation.id} className="overflow-hidden">
       <CardHeader className="bg-gradient-to-r from-brio-navy to-brio-navy/80 text-white">
         <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>{presentation.title}</CardTitle>
-            <CardDescription className="text-white/80">
-              Presenter: {presentation.presenter} • Started: {formatTime(presentation.startTime)}
-            </CardDescription>
+          <div className="flex items-center">
+            {isBrioVacations && (
+              <img 
+                src="/lovable-uploads/378ec97a-04b4-45e4-93e8-5bc4340decae.png" 
+                alt="Brio Vacations Logo" 
+                className="h-8 mr-3" 
+              />
+            )}
+            <div>
+              <CardTitle>{presentation.title}</CardTitle>
+              <CardDescription className="text-white/80">
+                Presenter: {presentation.presenter} • Started: {formatTime(presentation.startTime)}
+              </CardDescription>
+            </div>
           </div>
           <Badge className="bg-brio-teal text-brio-navy hover:bg-brio-teal/90">
             Live

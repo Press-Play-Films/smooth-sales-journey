@@ -10,7 +10,7 @@ const now = new Date();
 export const demoActivePresentations: ActivePresentation[] = [
   {
     id: 'pres-001',
-    title: 'Brio Vacations Premium Package',
+    title: 'Brio Vacations',
     presenter: 'Craig Boure',
     startTime: new Date(now.getTime() - 45 * 60000), // Started 45 minutes ago
     status: 'active',
