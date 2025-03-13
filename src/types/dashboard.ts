@@ -3,6 +3,8 @@ export interface Client {
   id: string;
   names: string;
   location?: string;
+  city?: string;
+  state?: string;
   status: 'engaged' | 'distracted' | 'away';
   department?: 'sales' | 'finance' | 'exit-survey';
   roomNumber?: string;

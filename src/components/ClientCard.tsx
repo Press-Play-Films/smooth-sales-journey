@@ -19,6 +19,8 @@ interface ClientCardProps {
     id: string;
     names: string;
     location?: string;
+    city?: string;
+    state?: string;
     status: 'engaged' | 'distracted' | 'away';
     image?: string;
     presentationTime?: string;
@@ -47,7 +49,12 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onStatusChange }) => {
             <ClientStatusBadge status={client.status} />
           </div>
           
-          <ClientInfo names={client.names} location={client.location} />
+          <ClientInfo 
+            names={client.names} 
+            location={client.location}
+            city={client.city}
+            state={client.state}
+          />
           
           {/* Add video stream component */}
           <div className="mt-3 mb-3 h-24 bg-gray-100 rounded-md overflow-hidden">
