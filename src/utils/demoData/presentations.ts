@@ -20,7 +20,7 @@ export const demoActivePresentations: ActivePresentation[] = [
   },
   {
     id: 'pres-002',
-    title: 'Brio Caribbean Experience',
+    title: 'Brio Vacation Experience',
     presenter: 'Sarah Miller',
     startTime: new Date(now.getTime() - 20 * 60000), // Started 20 minutes ago
     status: 'active',
