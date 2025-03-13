@@ -13,6 +13,7 @@ import {
   PopoverTrigger
 } from "@/components/ui/popover";
 import ClientNotes from './ClientNotes';
+import VideoStream from './VideoStream';
 
 interface ClientCardProps {
   client: {
@@ -21,9 +22,10 @@ interface ClientCardProps {
     location?: string;
     status: 'engaged' | 'distracted' | 'away';
   };
+  onStatusChange?: (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => void;
 }
 
-const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
+const ClientCard: React.FC<ClientCardProps> = ({ client, onStatusChange }) => {
   const { toast } = useToast();
   
   // Generate initials from names
@@ -70,6 +72,13 @@ const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
   
   const statusStyle = getStatusStyles(client.status);
   
+  // Handle status change from video stream
+  const handleStatusChange = (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => {
+    if (onStatusChange) {
+      onStatusChange(clientId, newStatus);
+    }
+  };
+  
   return (
     <Card className="overflow-hidden hover-lift border border-gray-200 h-full flex flex-col">
       <CardContent className="p-4 flex-1">
@@ -88,6 +97,14 @@ const ClientCard: React.FC<ClientCardProps> = ({ client }) => {
             {client.location && (
               <p className="text-sm text-gray-500">{client.location}</p>
             )}
+          </div>
+          
+          {/* Add video stream component */}
+          <div className="mt-3 mb-3 h-24 bg-gray-100 rounded-md overflow-hidden">
+            <VideoStream 
+              client={client} 
+              onStatusChange={handleStatusChange}
+            />
           </div>
           
           <div className="flex flex-wrap gap-2 mt-auto">

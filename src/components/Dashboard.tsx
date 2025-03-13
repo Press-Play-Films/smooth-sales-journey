@@ -1,17 +1,18 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import StatsCard from './dashboard/StatsCard';
 import ActivePresentationCard from './dashboard/ActivePresentationCard';
 import UpcomingPresentationList from './dashboard/UpcomingPresentationList';
 import RecentTransfersList from './dashboard/RecentTransfersList';
-import { ActivePresentation, UpcomingPresentation, Transfer } from '@/types/dashboard';
+import EngagementMetrics from './EngagementMetrics';
+import { ActivePresentation, UpcomingPresentation, Transfer, Client } from '@/types/dashboard';
 
 const Dashboard: React.FC = () => {
   const { toast } = useToast();
   
-  // Example data for active presentations
-  const activePresentations: ActivePresentation[] = [
+  // State for active presentations with auto-updating client statuses
+  const [activePresentations, setActivePresentations] = useState<ActivePresentation[]>([
     {
       id: 'pres-001',
       title: 'Brio Vacations Premium Package',
@@ -25,7 +26,7 @@ const Dashboard: React.FC = () => {
         { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'engaged' }
       ]
     }
-  ];
+  ]);
   
   // Example data for upcoming presentations
   const upcomingPresentations: UpcomingPresentation[] = [
@@ -71,6 +72,18 @@ const Dashboard: React.FC = () => {
       timestamp: new Date(Date.now() - 7200000) // 2 hours ago
     }
   ];
+
+  // Get all clients from all active presentations
+  const getAllClients = (): Client[] => {
+    return activePresentations.flatMap(presentation => presentation.clients);
+  };
+  
+  // Calculate engagement stats
+  const calculateEngagementStats = () => {
+    const clients = getAllClients();
+    const engaged = clients.filter(c => c.status === 'engaged').length;
+    return `${engaged} clients currently attending`;
+  };
   
   return (
     <div className="space-y-8">
@@ -99,7 +112,7 @@ const Dashboard: React.FC = () => {
           <StatsCard 
             title="Active Presentations" 
             value={activePresentations.length} 
-            description="4 clients currently attending" 
+            description={calculateEngagementStats()} 
           />
           
           <StatsCard 
@@ -116,24 +129,32 @@ const Dashboard: React.FC = () => {
         </div>
       </section>
       
-      <section className="space-y-6">
-        <h3 className="text-2xl font-semibold text-brio-navy">Active Presentations</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+        <div className="lg:col-span-3">
+          <section className="space-y-6">
+            <h3 className="text-2xl font-semibold text-brio-navy">Active Presentations</h3>
+            
+            {activePresentations.map(presentation => (
+              <ActivePresentationCard 
+                key={presentation.id} 
+                presentation={presentation} 
+              />
+            ))}
+            
+            {activePresentations.length === 0 && (
+              <div className="bg-gray-50 border-dashed rounded-lg p-10">
+                <div className="text-center">
+                  <p className="text-gray-500">No active presentations</p>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
         
-        {activePresentations.map(presentation => (
-          <ActivePresentationCard 
-            key={presentation.id} 
-            presentation={presentation} 
-          />
-        ))}
-        
-        {activePresentations.length === 0 && (
-          <div className="bg-gray-50 border-dashed rounded-lg p-10">
-            <div className="text-center">
-              <p className="text-gray-500">No active presentations</p>
-            </div>
-          </div>
-        )}
-      </section>
+        <div className="lg:col-span-1">
+          <EngagementMetrics clients={getAllClients()} />
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section>

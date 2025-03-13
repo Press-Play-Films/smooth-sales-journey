@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import {
   Card,
@@ -20,6 +20,16 @@ interface ActivePresentationCardProps {
 
 const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ presentation }) => {
   const { toast } = useToast();
+  const [clients, setClients] = useState(presentation.clients);
+
+  // Handle client status updates from video analysis
+  const handleClientStatusChange = (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => {
+    setClients(prevClients => 
+      prevClients.map(client => 
+        client.id === clientId ? { ...client, status: newStatus } : client
+      )
+    );
+  };
 
   return (
     <Card key={presentation.id} className="overflow-hidden">
@@ -39,10 +49,11 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
       
       <CardContent className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {presentation.clients.map(client => (
+          {clients.map(client => (
             <ClientCard 
               key={client.id} 
-              client={client} 
+              client={client}
+              onStatusChange={handleClientStatusChange}
             />
           ))}
         </div>
