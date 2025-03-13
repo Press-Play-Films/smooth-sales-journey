@@ -1,12 +1,40 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ClientSearch from '@/components/client/ClientSearch';
+import ClientCard from '@/components/ClientCard';
+import { Client } from '@/types/dashboard';
 
 const ClientsPage: React.FC = () => {
   const { toast } = useToast();
+  
+  // Sample client data (in a real app, this would come from an API or context)
+  const [clients, setClients] = useState<Client[]>([
+    { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged' },
+    { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted' },
+    { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged' },
+    { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'away' },
+    { id: 'client-005', names: 'Michael & Karen Thompson', location: 'California', status: 'engaged' },
+    { id: 'client-006', names: 'David & Sarah Miller', location: 'New York', status: 'distracted' },
+  ]);
+  
+  const [filteredClients, setFilteredClients] = useState<Client[]>(clients);
+  
+  // Handle client status change
+  const handleStatusChange = (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => {
+    const updatedClients = clients.map(client => 
+      client.id === clientId ? {...client, status: newStatus} : client
+    );
+    setClients(updatedClients);
+    
+    toast({
+      title: "Status Updated",
+      description: `Client status has been updated to ${newStatus}.`,
+    });
+  };
   
   return (
     <Layout>
@@ -26,17 +54,37 @@ const ClientsPage: React.FC = () => {
           </Button>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Client Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-500">
-              Client management features are coming soon. You'll be able to view all clients, add new clients, 
-              and manage client information from this page.
-            </p>
-          </CardContent>
-        </Card>
+        {/* Client search and filters */}
+        <div className="py-4">
+          <ClientSearch 
+            clients={clients} 
+            onFilteredClientsChange={setFilteredClients}
+          />
+        </div>
+        
+        {/* Client grid */}
+        {filteredClients.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredClients.map((client) => (
+              <ClientCard 
+                key={client.id} 
+                client={client} 
+                onStatusChange={handleStatusChange}
+              />
+            ))}
+          </div>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>No Clients Found</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-500">
+                No clients match your search criteria. Try adjusting your filters or search term.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </Layout>
   );
