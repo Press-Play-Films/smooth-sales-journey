@@ -5,16 +5,16 @@ import { subDays, addHours, addMinutes, addDays } from 'date-fns';
 
 // Generate consistent demo client data
 export const demoClients: Client[] = [
-  { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged', department: 'sales' },
-  { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted', department: 'sales' },
-  { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged', department: 'finance' },
-  { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'engaged', department: 'finance' },
-  { id: 'client-005', names: 'Brian & Stephanie Miller', location: 'California', status: 'engaged', department: 'sales' },
-  { id: 'client-006', names: 'David & Karen Thompson', location: 'New York', status: 'away', department: 'exit-survey' },
-  { id: 'client-007', names: 'Robert & Lisa Anderson', location: 'Arizona', status: 'distracted', department: 'sales' },
-  { id: 'client-008', names: 'Michael & Jennifer Wilson', location: 'Colorado', status: 'engaged', department: 'finance' },
-  { id: 'client-009', names: 'James & Patricia Martinez', location: 'Nevada', status: 'engaged', department: 'sales' },
-  { id: 'client-010', names: 'John & Barbara Williams', location: 'Washington', status: 'distracted', department: 'exit-survey' },
+  { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged', department: 'sales', roomNumber: '6391', assignedAgent: 'Craig Boure' },
+  { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted', department: 'sales', roomNumber: '6391', assignedAgent: 'Craig Boure' },
+  { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged', department: 'finance', roomNumber: '6393', assignedAgent: 'Jennifer Williams' },
+  { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'engaged', department: 'finance', roomNumber: '6393', assignedAgent: 'Jennifer Williams' },
+  { id: 'client-005', names: 'Brian & Stephanie Miller', location: 'California', status: 'engaged', department: 'sales', roomNumber: '6392', assignedAgent: 'Sarah Miller' },
+  { id: 'client-006', names: 'David & Karen Thompson', location: 'New York', status: 'away', department: 'exit-survey', roomNumber: '6395', assignedAgent: 'Robert Davis' },
+  { id: 'client-007', names: 'Robert & Lisa Anderson', location: 'Arizona', status: 'distracted', department: 'sales', roomNumber: '6392', assignedAgent: 'Sarah Miller' },
+  { id: 'client-008', names: 'Michael & Jennifer Wilson', location: 'Colorado', status: 'engaged', department: 'finance', roomNumber: '6394', assignedAgent: 'Michael Johnson' },
+  { id: 'client-009', names: 'James & Patricia Martinez', location: 'Nevada', status: 'engaged', department: 'sales', roomNumber: '6394', assignedAgent: 'Michael Johnson' },
+  { id: 'client-010', names: 'John & Barbara Williams', location: 'Washington', status: 'distracted', department: 'exit-survey', roomNumber: '6395', assignedAgent: 'Robert Davis' },
 ];
 
 // Current date reference for relative times
@@ -28,7 +28,8 @@ export const demoActivePresentations: ActivePresentation[] = [
     presenter: 'Craig Boure',
     startTime: new Date(now.getTime() - 45 * 60000), // Started 45 minutes ago
     status: 'active',
-    clients: demoClients.slice(0, 4) // First 4 clients
+    clients: demoClients.slice(0, 4), // First 4 clients
+    roomNumber: '6391'
   },
   {
     id: 'pres-002',
@@ -36,7 +37,8 @@ export const demoActivePresentations: ActivePresentation[] = [
     presenter: 'Sarah Miller',
     startTime: new Date(now.getTime() - 20 * 60000), // Started 20 minutes ago
     status: 'active',
-    clients: demoClients.slice(4, 7) // Next 3 clients
+    clients: demoClients.slice(4, 7), // Next 3 clients
+    roomNumber: '6392'
   }
 ];
 
@@ -48,7 +50,8 @@ export const demoUpcomingPresentations: UpcomingPresentation[] = [
     presenter: 'Craig Boure',
     startTime: addHours(now, 2), // In 2 hours
     status: 'scheduled',
-    clients: 6
+    clients: 6,
+    roomNumber: '6391'
   },
   {
     id: 'pres-004',
@@ -56,7 +59,8 @@ export const demoUpcomingPresentations: UpcomingPresentation[] = [
     presenter: 'Sarah Miller',
     startTime: addHours(now, 4), // In 4 hours
     status: 'scheduled',
-    clients: 4
+    clients: 4,
+    roomNumber: '6392'
   },
   {
     id: 'pres-005',
@@ -64,7 +68,8 @@ export const demoUpcomingPresentations: UpcomingPresentation[] = [
     presenter: 'Michael Johnson',
     startTime: addHours(now, 6), // In 6 hours
     status: 'scheduled',
-    clients: 5
+    clients: 5,
+    roomNumber: '6394'
   }
 ];
 
@@ -73,37 +78,62 @@ export const demoRecentTransfers: Transfer[] = [
   {
     id: 'transfer-001',
     clientNames: 'John & Jane Smith',
+    clientId: 'client-011',
     fromDepartment: 'Presentation',
     toDepartment: 'Sales',
-    timestamp: subDays(now, 0.0625) // 1.5 hours ago
+    fromAgent: 'Craig Boure',
+    toAgent: 'Sarah Miller',
+    roomNumber: '6391',
+    timestamp: subDays(now, 0.0625), // 1.5 hours ago
+    notes: 'Interested in premium package'
   },
   {
     id: 'transfer-002',
     clientNames: 'Robert & Mary Johnson',
+    clientId: 'client-012',
     fromDepartment: 'Sales',
     toDepartment: 'Finance',
-    timestamp: subDays(now, 0.125) // 3 hours ago
+    fromAgent: 'Sarah Miller',
+    toAgent: 'Jennifer Williams',
+    roomNumber: '6392',
+    timestamp: subDays(now, 0.125), // 3 hours ago
+    notes: 'Ready to purchase'
   },
   {
     id: 'transfer-003',
     clientNames: 'David & Lisa Brown',
+    clientId: 'client-013',
     fromDepartment: 'Finance',
     toDepartment: 'Exit Survey',
-    timestamp: subDays(now, 0.25) // 6 hours ago
+    fromAgent: 'Jennifer Williams',
+    toAgent: 'Robert Davis',
+    roomNumber: '6393',
+    timestamp: subDays(now, 0.25), // 6 hours ago
+    notes: 'Completed purchase'
   },
   {
     id: 'transfer-004',
     clientNames: 'Michael & Susan Green',
+    clientId: 'client-014',
     fromDepartment: 'Presentation',
     toDepartment: 'Sales',
-    timestamp: subDays(now, 0.5) // 12 hours ago
+    fromAgent: 'Michael Johnson',
+    toAgent: 'Craig Boure',
+    roomNumber: '6394',
+    timestamp: subDays(now, 0.5), // 12 hours ago
+    notes: 'Highly interested'
   },
   {
     id: 'transfer-005',
     clientNames: 'Richard & Betty Clark',
+    clientId: 'client-015',
     fromDepartment: 'Sales',
     toDepartment: 'Exit Survey',
-    timestamp: subDays(now, 0.75) // 18 hours ago
+    fromAgent: 'Sarah Miller',
+    toAgent: 'Robert Davis',
+    roomNumber: '6395',
+    timestamp: subDays(now, 0.75), // 18 hours ago
+    notes: 'Declined offer'
   }
 ];
 
