@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -11,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ClientNotes from './ClientNotes';
 import ClientTransfer from './ClientTransfer';
+import ClientEngagementMetrics from './ClientEngagementMetrics';
 
 interface ClientProfileProps {
   clientId: string;
@@ -38,7 +38,12 @@ const ClientProfile: React.FC<ClientProfileProps> = ({ clientId }) => {
       { category: 'Travel Companions', value: 'Adult children, grandchildren' },
       { category: 'Budget Range', value: '$5,000 - $8,000 per trip' },
       { category: 'Dream Destinations', value: 'Mediterranean cruise, Japanese tour' }
-    ]
+    ],
+    engagementData: {
+      engaged: 75,
+      distracted: 20,
+      away: 5
+    }
   };
   
   // Status styling
@@ -195,6 +200,25 @@ const ClientProfile: React.FC<ClientProfileProps> = ({ clientId }) => {
           </div>
         </CardContent>
       </Card>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div className="md:col-span-2">
+          <ClientEngagementMetrics clientData={client.engagementData} />
+        </div>
+        <div className="md:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Current Status</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className={`text-center p-4 rounded-lg ${statusStyle.bg} ${statusStyle.text}`}>
+                <p className="text-xl font-semibold">{statusStyle.label}</p>
+                <p className="text-sm mt-1">Last updated: Just now</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
       
       <Tabs defaultValue="key-info" className="w-full">
         <TabsList className="grid grid-cols-3 w-full">
