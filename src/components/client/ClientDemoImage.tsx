@@ -17,43 +17,22 @@ const ClientDemoImage: React.FC<ClientDemoImageProps> = ({
 }) => {
   const { toast } = useToast();
   
-  // Generate a consistent background color based on client ID
+  // Get user initials for the avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .filter(n => n && n !== '&')
+      .map(part => part.trim().charAt(0))
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  };
+  
+  // Generate a background color based on client ID
   const generateBackgroundColor = (id: string) => {
     const idSum = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const hue = idSum % 360;
-    return `hsl(${hue}, 70%, 60%)`;
-  };
-  
-  // Generate a different but complementary color for the gradient
-  const generateSecondaryColor = (id: string) => {
-    const idSum = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const hue = (idSum + 180) % 360;
-    return `hsl(${hue}, 70%, 60%)`;
-  };
-  
-  // Get user initials for the placeholder
-  const getInitials = (name: string) => {
-    return name
-      .split('&')
-      .map(part => part.trim().charAt(0))
-      .join('');
-  };
-  
-  // Select a placeholder image based on client ID
-  const getPlaceholderImage = (id: string) => {
-    // Use modulo to select from available placeholders
-    const imageIndex = parseInt(id.replace(/\D/g, '')) % 6;
-    
-    const placeholders = [
-      "public/lovable-uploads/af49a26c-e519-496d-b4ce-767db3b943c0.png",
-      "/placeholder.svg",
-      "/placeholder.svg",
-      "/placeholder.svg",
-      "/placeholder.svg",
-      "/placeholder.svg"
-    ];
-    
-    return placeholders[imageIndex] || placeholders[0];
+    return `hsl(${hue}, 70%, 75%)`;
   };
   
   // Handle click to change status (for demo purposes)
@@ -63,11 +42,6 @@ const ClientDemoImage: React.FC<ClientDemoImageProps> = ({
       const currentIndex = statuses.indexOf(status);
       const nextIndex = (currentIndex + 1) % statuses.length;
       onStatusChange(statuses[nextIndex]);
-      
-      toast({
-        title: "Status Updated",
-        description: `Client status changed to ${statuses[nextIndex]}.`,
-      });
     }
   };
   
@@ -75,20 +49,18 @@ const ClientDemoImage: React.FC<ClientDemoImageProps> = ({
     <div 
       className="relative w-full h-full rounded-md overflow-hidden cursor-pointer"
       onClick={handleClick}
-      style={{
-        background: `linear-gradient(to bottom right, ${generateBackgroundColor(clientId)}, ${generateSecondaryColor(clientId)})`
-      }}
     >
-      {/* Display a placeholder image */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <img 
-          src={getPlaceholderImage(clientId)}
-          alt={`${clientNames} preview`}
-          className="w-full h-full object-cover"
-        />
+      {/* Avatar circle with initials */}
+      <div 
+        className="absolute inset-0 flex items-center justify-center"
+        style={{ backgroundColor: generateBackgroundColor(clientId) }}
+      >
+        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold">
+          {getInitials(clientNames)}
+        </div>
       </div>
       
-      {/* Overlay with client status indicator */}
+      {/* Status overlay */}
       <div className={`absolute inset-0 flex items-center justify-center ${
         status === 'away' ? 'bg-black/50' : 
         status === 'distracted' ? 'bg-black/30' : 

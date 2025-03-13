@@ -56,8 +56,8 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onStatusChange }) => {
             state={client.state}
           />
           
-          {/* Replace video stream with static client image */}
-          <div className="mt-3 mb-3 h-24 rounded-md overflow-hidden">
+          {/* Demo client image area */}
+          <div className="mt-3 mb-3 h-24 rounded-md overflow-hidden bg-gray-100">
             <ClientDemoImage 
               clientId={client.id}
               clientNames={client.names} 

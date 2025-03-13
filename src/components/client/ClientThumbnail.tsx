@@ -15,20 +15,26 @@ const ClientThumbnail: React.FC<ClientThumbnailProps> = ({
   presentationTime
 }) => {
   // Generate initials from names
-  const generateInitials = (names: string) => {
-    return names
-      .split('&')
-      .map(name => name.trim().charAt(0))
-      .join('');
+  const generateInitials = (name: string) => {
+    return name
+      .split(' ')
+      .filter(n => n && n !== '&')
+      .map(part => part.trim().charAt(0))
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
   };
 
   return (
     <div className="space-y-2">
       <Avatar className="w-16 h-16 rounded-md border">
-        <AvatarImage src={image} alt={names} />
-        <AvatarFallback className="bg-gradient-to-br from-brio-navy to-brio-teal text-white text-xl">
-          {generateInitials(names)}
-        </AvatarFallback>
+        {image ? (
+          <AvatarImage src={image} alt={names} className="object-cover" />
+        ) : (
+          <AvatarFallback className="bg-gradient-to-br from-brio-navy to-brio-teal text-white text-xl">
+            {generateInitials(names)}
+          </AvatarFallback>
+        )}
       </Avatar>
       
       {presentationTime && (
