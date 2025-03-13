@@ -28,7 +28,7 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
   const [activeSaleClientId, setActiveSaleClientId] = useState<string | null>(null);
   const [showSaleDialog, setShowSaleDialog] = useState(false);
 
-  // Handle client status updates from video analysis
+  // Handle client status updates
   const handleClientStatusChange = (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => {
     setClients(prevClients => 
       prevClients.map(client => 
@@ -47,6 +47,11 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
   const handleSaleSuccess = () => {
     setShowSaleDialog(false);
     setActiveSaleClientId(null);
+    
+    toast({
+      title: "Sale Recorded",
+      description: "The sale has been successfully recorded in the system.",
+    });
   };
 
   // Handle cancellation of sale recording
@@ -56,7 +61,7 @@ const ActivePresentationCard: React.FC<ActivePresentationCardProps> = ({ present
   };
 
   // Check if it's the main Brio Vacations presentation
-  const isBrioVacations = presentation.title === 'Brio Vacations';
+  const isBrioVacations = presentation.title.includes('Brio Vacations');
 
   // Find the active client for sale recording
   const activeClient = clients.find(client => client.id === activeSaleClientId);

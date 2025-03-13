@@ -19,29 +19,55 @@ const Dashboard: React.FC = () => {
   // State for active presentations with auto-updating client statuses
   const [activePresentations, setActivePresentations] = useState<ActivePresentation[]>(demoActivePresentations);
   
-  // Simulate real-time status updates
+  // Simulate real-time status updates (in a more controlled way for demo purposes)
   useEffect(() => {
+    // Only update status every 45 seconds to avoid flickering and for a more polished demo
     const statusUpdateInterval = setInterval(() => {
       setActivePresentations(prevPresentations => {
         return prevPresentations.map(presentation => {
-          // Update random client statuses to simulate real activity
-          const updatedClients = presentation.clients.map(client => {
-            // 20% chance to change status
-            if (Math.random() < 0.2) {
-              const statuses: ('engaged' | 'distracted' | 'away')[] = ['engaged', 'distracted', 'away'];
-              const newStatusIndex = Math.floor(Math.random() * statuses.length);
-              return { ...client, status: statuses[newStatusIndex] };
+          // Update one client at a time in a predictable pattern
+          const updatedClients = [...presentation.clients];
+          
+          // Get current timestamp to determine which client to update
+          const now = new Date();
+          const seconds = now.getSeconds();
+          const clientIndex = seconds % updatedClients.length;
+          
+          // Predictable status pattern based on time
+          const minute = now.getMinutes();
+          let newStatus: 'engaged' | 'distracted' | 'away';
+          
+          if (minute % 3 === 0) {
+            newStatus = 'engaged';
+          } else if (minute % 3 === 1) {
+            newStatus = 'distracted';
+          } else {
+            newStatus = 'away';
+          }
+          
+          // Only update if status is different
+          if (updatedClients[clientIndex].status !== newStatus) {
+            updatedClients[clientIndex] = {
+              ...updatedClients[clientIndex],
+              status: newStatus
+            };
+            
+            // Show toast for important status changes (away only)
+            if (newStatus === 'away') {
+              toast({
+                title: "Client Status Change",
+                description: `${updatedClients[clientIndex].names} is now away from their screen.`,
+              });
             }
-            return client;
-          });
+          }
           
           return { ...presentation, clients: updatedClients };
         });
       });
-    }, 10000); // Update every 10 seconds
+    }, 45000); // Update every 45 seconds for a smoother demo
     
     return () => clearInterval(statusUpdateInterval);
-  }, []);
+  }, [toast]);
 
   // Get all clients from all active presentations
   const getAllClients = (): Client[] => {

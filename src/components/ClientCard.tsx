@@ -5,7 +5,6 @@ import {
   CardContent,
   CardFooter
 } from "@/components/ui/card";
-import VideoStream from './VideoStream';
 import ClientAvatar from './client/ClientAvatar';
 import ClientStatusBadge from './client/ClientStatusBadge';
 import ClientInfo from './client/ClientInfo';
@@ -13,6 +12,7 @@ import ClientActions from './client/ClientActions';
 import ClientOptions from './client/ClientOptions';
 import ProfileViewButton from './client/ProfileViewButton';
 import ClientThumbnail from './client/ClientThumbnail';
+import ClientDemoImage from './client/ClientDemoImage';
 
 interface ClientCardProps {
   client: {
@@ -29,7 +29,7 @@ interface ClientCardProps {
 }
 
 const ClientCard: React.FC<ClientCardProps> = ({ client, onStatusChange }) => {
-  // Handle status change from video stream
+  // Handle status change from client image
   const handleStatusChange = (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => {
     if (onStatusChange) {
       onStatusChange(clientId, newStatus);
@@ -56,11 +56,13 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onStatusChange }) => {
             state={client.state}
           />
           
-          {/* Add video stream component */}
-          <div className="mt-3 mb-3 h-24 bg-gray-100 rounded-md overflow-hidden">
-            <VideoStream 
-              client={client} 
-              onStatusChange={handleStatusChange}
+          {/* Replace video stream with static client image */}
+          <div className="mt-3 mb-3 h-24 rounded-md overflow-hidden">
+            <ClientDemoImage 
+              clientId={client.id}
+              clientNames={client.names} 
+              status={client.status}
+              onStatusChange={(newStatus) => handleStatusChange(client.id, newStatus)}
             />
           </div>
           

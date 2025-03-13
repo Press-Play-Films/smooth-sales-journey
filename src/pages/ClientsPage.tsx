@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +23,13 @@ const ClientsPage: React.FC = () => {
       client.id === clientId ? {...client, status: newStatus} : client
     );
     setClients(updatedClients);
+    
+    // Also update filtered clients
+    setFilteredClients(prevFiltered => 
+      prevFiltered.map(client => 
+        client.id === clientId ? {...client, status: newStatus} : client
+      )
+    );
     
     toast({
       title: "Status Updated",
