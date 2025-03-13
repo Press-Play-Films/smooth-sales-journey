@@ -3,6 +3,9 @@ import React from 'react';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
+import { CalendarIcon } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 interface DashboardHeaderProps {
   selectedReport: 'overview' | 'sales' | 'team';
@@ -13,6 +16,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   selectedReport, 
   setSelectedReport 
 }) => {
+  const [date, setDate] = React.useState<Date | undefined>(new Date());
+
   const handleExportData = () => {
     // In a real app, this would generate and download CSV data
     const currentDate = format(new Date(), 'yyyy-MM-dd');
@@ -20,20 +25,47 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   return (
-    <div className="flex justify-between items-center mb-6">
-      <h2 className="text-3xl font-bold text-brio-navy">Executive Dashboard</h2>
-      <div className="flex space-x-4">
+    <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center mb-6">
+      <div>
+        <h2 className="text-3xl font-bold text-brio-navy">Executive Dashboard</h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Brio Vacations • Asheville, NC Headquarters
+        </p>
+      </div>
+      
+      <div className="flex flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4">
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto justify-start text-left font-normal"
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date ? format(date, 'PPP') : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="end">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={setDate}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+        
         <Tabs 
           value={selectedReport} 
           onValueChange={(v: any) => setSelectedReport(v)}
           className="border rounded-lg overflow-hidden"
         >
-          <TabsList className="grid grid-cols-3 w-[300px]">
+          <TabsList className="grid grid-cols-3 w-full sm:w-[300px]">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="sales">Sales</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
           </TabsList>
         </Tabs>
+        
         <Button 
           onClick={handleExportData}
           className="bg-brio-navy hover:bg-brio-navy/90"

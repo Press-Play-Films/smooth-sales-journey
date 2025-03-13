@@ -10,6 +10,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ClientTransferProps {
   clientId: string;
@@ -20,16 +22,28 @@ const ClientTransfer: React.FC<ClientTransferProps> = ({ clientId, clientNames }
   const { toast } = useToast();
   const [selectedDepartment, setSelectedDepartment] = useState<string>('');
   const [selectedAgent, setSelectedAgent] = useState<string>('');
+  const [roomNumber, setRoomNumber] = useState<string>('');
   const [transferNotes, setTransferNotes] = useState<string>('');
   
   // Mock departments and agents (in a real app, these would come from an API)
   const departments = [
+    { id: 'marketing', name: 'Marketing Department' },
+    { id: 'presentation', name: 'Presentation Department' },
     { id: 'sales', name: 'Sales Department' },
     { id: 'finance', name: 'Finance Department' },
     { id: 'exit-survey', name: 'Exit Survey Department' }
   ];
   
   const agentsByDepartment: Record<string, Array<{ id: string; name: string }>> = {
+    'marketing': [
+      { id: 'agent-008', name: 'Thomas Wilson' },
+      { id: 'agent-009', name: 'Emily Clark' },
+      { id: 'agent-010', name: 'Christopher Lewis' }
+    ],
+    'presentation': [
+      { id: 'agent-011', name: 'Craig Boure' },
+      { id: 'agent-012', name: 'Sarah Miller' }
+    ],
     'sales': [
       { id: 'agent-001', name: 'John Smith' },
       { id: 'agent-002', name: 'Sarah Johnson' },
@@ -44,6 +58,11 @@ const ClientTransfer: React.FC<ClientTransferProps> = ({ clientId, clientNames }
       { id: 'agent-007', name: 'Robert Davis' }
     ]
   };
+  
+  // Mock virtual room numbers
+  const availableRooms = [
+    '6391', '6392', '6393', '6394', '6395'
+  ];
   
   const handleTransfer = () => {
     if (!selectedDepartment) {
@@ -64,6 +83,15 @@ const ClientTransfer: React.FC<ClientTransferProps> = ({ clientId, clientNames }
       return;
     }
     
+    if (!roomNumber) {
+      toast({
+        title: "Room Number Required",
+        description: "Please assign a virtual room number for this client.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // In a real app, you would call an API to handle the transfer
     // For now, we'll simulate updating the client's department
     // This would normally involve a backend API call
@@ -74,18 +102,22 @@ const ClientTransfer: React.FC<ClientTransferProps> = ({ clientId, clientNames }
       clientNames,
       toDepartment: selectedDepartment,
       toAgent: selectedAgent,
+      roomNumber,
       notes: transferNotes,
-      timestamp: new Date()
+      timestamp: new Date(),
+      fromDepartment: 'current-department', // This would be dynamically fetched in a real app
+      fromAgent: 'current-agent', // This would be dynamically fetched in a real app
     });
     
     toast({
       title: "Client Transferred",
-      description: `${clientNames} has been transferred to ${selectedDepartment === 'sales' ? 'Sales' : selectedDepartment === 'finance' ? 'Finance' : 'Exit Survey'} Department.`,
+      description: `${clientNames} has been transferred to ${selectedDepartment === 'sales' ? 'Sales' : selectedDepartment === 'finance' ? 'Finance' : selectedDepartment === 'presentation' ? 'Presentation' : selectedDepartment === 'marketing' ? 'Marketing' : 'Exit Survey'} Department in Room #${roomNumber}.`,
     });
     
     // Reset form
     setSelectedDepartment('');
     setSelectedAgent('');
+    setRoomNumber('');
     setTransferNotes('');
   };
   
@@ -141,6 +173,25 @@ const ClientTransfer: React.FC<ClientTransferProps> = ({ clientId, clientNames }
         )}
         
         <div className="space-y-2">
+          <Label htmlFor="roomNumber">Virtual Room Number</Label>
+          <Select value={roomNumber} onValueChange={setRoomNumber}>
+            <SelectTrigger id="roomNumber">
+              <SelectValue placeholder="Assign a room number" />
+            </SelectTrigger>
+            <SelectContent>
+              {availableRooms.map(room => (
+                <SelectItem key={room} value={room}>
+                  Room #{room}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-gray-500">
+            Each client must be assigned to a virtual room for their session
+          </p>
+        </div>
+        
+        <div className="space-y-2">
           <label htmlFor="notes" className="text-sm font-medium">
             Transfer Notes
           </label>
@@ -164,6 +215,7 @@ const ClientTransfer: React.FC<ClientTransferProps> = ({ clientId, clientNames }
             onClick={() => {
               setSelectedDepartment('');
               setSelectedAgent('');
+              setRoomNumber('');
               setTransferNotes('');
             }}
             variant="outline"
@@ -178,6 +230,7 @@ const ClientTransfer: React.FC<ClientTransferProps> = ({ clientId, clientNames }
         <p className="text-sm text-gray-500">
           Client transfers are tracked throughout the sales process to ensure a smooth transition between departments.
           All client notes and key information will be available to the receiving agent.
+          Every employee involved in the client journey is recorded for training and analysis purposes.
         </p>
       </div>
     </div>

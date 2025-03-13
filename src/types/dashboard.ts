@@ -1,9 +1,12 @@
+
 export interface Client {
   id: string;
   names: string;
   location?: string;
   status: 'engaged' | 'distracted' | 'away';
   department?: 'sales' | 'finance' | 'exit-survey';
+  roomNumber?: string;
+  assignedAgent?: string;
 }
 
 export interface ActivePresentation {
@@ -13,6 +16,7 @@ export interface ActivePresentation {
   startTime: Date;
   status: string;
   clients: Client[];
+  roomNumber: string;
 }
 
 export interface UpcomingPresentation {
@@ -22,14 +26,20 @@ export interface UpcomingPresentation {
   startTime: Date;
   status: string;
   clients: number;
+  roomNumber: string;
 }
 
 export interface Transfer {
   id: string;
   clientNames: string;
+  clientId: string;
   fromDepartment: string;
   toDepartment: string;
+  fromAgent: string;
+  toAgent: string;
+  roomNumber: string;
   timestamp: Date;
+  notes?: string;
 }
 
 export interface DepartmentStatistics {
@@ -43,4 +53,37 @@ export interface TimeframeData {
   label: string;
   sales: number;
   transfers: number;
+}
+
+export interface EmployeePerformance {
+  id: string;
+  name: string;
+  department: string;
+  clientsHandled: number;
+  conversions: number;
+  conversionRate: number;
+  avgEngagement: number;
+  avgSessionTime: number;
+}
+
+export interface RoomPerformance {
+  roomNumber: string;
+  tours: number;
+  conversionRate: number;
+  avgClientCount: number;
+  department: string;
+}
+
+export interface ClientJourney {
+  clientId: string;
+  clientNames: string;
+  stages: {
+    department: string;
+    agent: string;
+    timestamp: Date;
+    duration: number;
+    status: 'completed' | 'current' | 'pending';
+  }[];
+  currentStage: string;
+  roomNumbers: string[];
 }
