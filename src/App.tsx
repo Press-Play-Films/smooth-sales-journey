@@ -13,6 +13,7 @@ const PresentationsPage = lazy(() => import("./pages/PresentationsPage"));
 const AnalyticsPage = lazy(() => import("./pages/AnalyticsPage"));
 const ClientView = lazy(() => import("./pages/ClientView"));
 const TeamView = lazy(() => import("./pages/TeamView"));
+const ExecutiveDashboard = lazy(() => import("./pages/ExecutiveDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/presentations" element={<PresentationsPage />} />
             <Route path="/team" element={<TeamView />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/executive" element={<ExecutiveDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

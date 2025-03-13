@@ -65,6 +65,18 @@ const ClientTransfer: React.FC<ClientTransferProps> = ({ clientId, clientNames }
     }
     
     // In a real app, you would call an API to handle the transfer
+    // For now, we'll simulate updating the client's department
+    // This would normally involve a backend API call
+    
+    // Log the transfer to console (would be saved to database in real app)
+    console.log('Client Transfer:', {
+      clientId,
+      clientNames,
+      toDepartment: selectedDepartment,
+      toAgent: selectedAgent,
+      notes: transferNotes,
+      timestamp: new Date()
+    });
     
     toast({
       title: "Client Transferred",

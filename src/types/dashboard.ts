@@ -1,9 +1,9 @@
-
 export interface Client {
   id: string;
   names: string;
   location?: string;
   status: 'engaged' | 'distracted' | 'away';
+  department?: 'sales' | 'finance' | 'exit-survey';
 }
 
 export interface ActivePresentation {
@@ -30,4 +30,17 @@ export interface Transfer {
   fromDepartment: string;
   toDepartment: string;
   timestamp: Date;
+}
+
+export interface DepartmentStatistics {
+  department: string;
+  clientCount: number;
+  engagementRate: number;
+  conversionRate: number;
+}
+
+export interface TimeframeData {
+  label: string;
+  sales: number;
+  transfers: number;
 }
