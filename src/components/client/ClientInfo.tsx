@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 
 interface ClientInfoProps {
   names: string;
@@ -17,4 +17,4 @@ const ClientInfo: React.FC<ClientInfoProps> = ({ names, location }) => {
   );
 };
 
-export default ClientInfo;
+export default memo(ClientInfo);

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 
 interface ClientAvatarProps {
   names: string;
@@ -21,4 +21,4 @@ const ClientAvatar: React.FC<ClientAvatarProps> = ({ names }) => {
   );
 };
 
-export default ClientAvatar;
+export default memo(ClientAvatar);
