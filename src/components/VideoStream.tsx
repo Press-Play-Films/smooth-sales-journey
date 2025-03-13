@@ -1,10 +1,9 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { 
   analyzeVideoFrame, 
   determineClientStatus, 
   connectToExternalVideoSource 
-} from '@/services/videoAnalysisService';
+} from '@/services/video-analysis';
 import { Client } from '@/types/dashboard';
 
 interface VideoStreamProps {
