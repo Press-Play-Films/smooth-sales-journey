@@ -17,47 +17,66 @@ const VideoStream: React.FC<VideoStreamProps> = ({ client, onStatusChange }) => 
   // For demo purposes, we'll use a simulated video feed
   useEffect(() => {
     // Simulate connecting to a video stream
-    const simulateVideoStream = () => {
+    const simulateVideoStream = async () => {
       if (videoRef.current) {
-        // In a real implementation, we would connect to an actual stream
-        // For demo purposes, we'll set the video to a solid color
-        const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 480;
-        
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // Create a gradient background based on client ID for visualization
-          const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        try {
+          // In a real implementation, we would connect to an actual stream
+          // For demo purposes, we'll set the video to a solid color
+          const canvas = document.createElement('canvas');
+          canvas.width = 640;
+          canvas.height = 480;
           
-          // Generate colors based on client ID to make each client's video visually distinct
-          const clientIdSum = client.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-          const hue1 = clientIdSum % 360;
-          const hue2 = (clientIdSum + 180) % 360;
-          
-          gradient.addColorStop(0, `hsl(${hue1}, 70%, 60%)`);
-          gradient.addColorStop(1, `hsl(${hue2}, 70%, 60%)`);
-          
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
-          // Add client name to the video
-          ctx.fillStyle = 'white';
-          ctx.font = '24px Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(client.names, canvas.width / 2, canvas.height / 2);
-          
-          // Convert canvas to video stream
-          const stream = canvas.captureStream(15); // 15 fps
-          
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-            videoRef.current.setAttribute('data-client-id', client.id);
-            videoRef.current.play().catch(err => {
-              setError(`Error playing video: ${err.message}`);
-            });
-            setIsStreaming(true);
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            // Create a gradient background based on client ID for visualization
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            
+            // Generate colors based on client ID to make each client's video visually distinct
+            const clientIdSum = client.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const hue1 = clientIdSum % 360;
+            const hue2 = (clientIdSum + 180) % 360;
+            
+            gradient.addColorStop(0, `hsl(${hue1}, 70%, 60%)`);
+            gradient.addColorStop(1, `hsl(${hue2}, 70%, 60%)`);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add client name to the video
+            ctx.fillStyle = 'white';
+            ctx.font = '24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(client.names, canvas.width / 2, canvas.height / 2);
+            
+            // Convert canvas to video stream
+            const stream = canvas.captureStream(15); // 15 fps
+            
+            if (videoRef.current) {
+              videoRef.current.srcObject = stream;
+              videoRef.current.setAttribute('data-client-id', client.id);
+              videoRef.current.setAttribute('playsinline', '');
+              videoRef.current.setAttribute('autoplay', '');
+              videoRef.current.muted = true;
+              
+              // Try playing with user interaction requirement bypassed
+              const playPromise = videoRef.current.play();
+              
+              if (playPromise !== undefined) {
+                playPromise
+                  .then(() => {
+                    setIsStreaming(true);
+                    setError(null);
+                  })
+                  .catch(err => {
+                    console.warn('Autoplay was prevented:', err);
+                    setError('Click to enable video');
+                  });
+              }
+            }
           }
+        } catch (err) {
+          console.error('Error setting up video stream:', err);
+          setError('Error setting up video stream');
         }
       }
     };
@@ -91,15 +110,31 @@ const VideoStream: React.FC<VideoStreamProps> = ({ client, onStatusChange }) => 
         tracks.forEach(track => track.stop());
       }
     };
-  }, [client.id, client.status, isStreaming, onStatusChange]);
+  }, [client.id, client.names, client.status, isStreaming, onStatusChange]);
+  
+  // Handle manual play for browsers that block autoplay
+  const handleVideoClick = () => {
+    if (videoRef.current && !isStreaming) {
+      videoRef.current.play()
+        .then(() => {
+          setIsStreaming(true);
+          setError(null);
+        })
+        .catch(err => {
+          console.error('Error playing video on click:', err);
+          setError(`Unable to play video: ${err.message}`);
+        });
+    }
+  };
   
   return (
-    <div className="relative rounded-md overflow-hidden">
+    <div className="relative rounded-md overflow-hidden w-full h-full">
       <video
         ref={videoRef}
         className="w-full h-full object-cover"
         muted
         playsInline
+        onClick={handleVideoClick}
       />
       
       <div className="absolute bottom-2 right-2">
@@ -110,7 +145,8 @@ const VideoStream: React.FC<VideoStreamProps> = ({ client, onStatusChange }) => 
       </div>
       
       {error && (
-        <div className="absolute inset-0 bg-black/80 flex items-center justify-center text-white text-sm p-2">
+        <div className="absolute inset-0 bg-black/80 flex items-center justify-center text-white text-sm p-2 cursor-pointer"
+             onClick={handleVideoClick}>
           {error}
         </div>
       )}
