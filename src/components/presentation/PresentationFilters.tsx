@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { waveTimes } from '@/utils/demoData';
+import { waveTimes } from '@/utils/demoData/presentations';
 
 interface PresentationFiltersProps {
   searchTerm: string;
@@ -65,7 +65,7 @@ const PresentationFilters: React.FC<PresentationFiltersProps> = ({
                   <SelectValue placeholder="All Wave Times" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Wave Times</SelectItem>
+                  <SelectItem value="all">All Wave Times</SelectItem>
                   {waveTimes.map((time) => (
                     <SelectItem key={time} value={time}>{time}</SelectItem>
                   ))}
@@ -80,7 +80,7 @@ const PresentationFilters: React.FC<PresentationFiltersProps> = ({
                   <SelectValue placeholder="All Rooms" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Rooms</SelectItem>
+                  <SelectItem value="all">All Rooms</SelectItem>
                   {allRooms.map((room) => (
                     <SelectItem key={room} value={room}>Room {room}</SelectItem>
                   ))}
@@ -95,7 +95,7 @@ const PresentationFilters: React.FC<PresentationFiltersProps> = ({
                   <SelectValue placeholder="All Presenters" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Presenters</SelectItem>
+                  <SelectItem value="all">All Presenters</SelectItem>
                   {allPresenters.map((presenter) => (
                     <SelectItem key={presenter} value={presenter}>{presenter}</SelectItem>
                   ))}

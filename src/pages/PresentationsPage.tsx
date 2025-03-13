@@ -13,9 +13,9 @@ const PresentationsPage: React.FC = () => {
   
   // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRoom, setSelectedRoom] = useState('');
-  const [selectedWave, setSelectedWave] = useState('');
-  const [selectedPresenter, setSelectedPresenter] = useState('');
+  const [selectedRoom, setSelectedRoom] = useState('all');
+  const [selectedWave, setSelectedWave] = useState('all');
+  const [selectedPresenter, setSelectedPresenter] = useState('all');
 
   // Get unique list of rooms
   const allRooms = [
@@ -39,18 +39,18 @@ const PresentationsPage: React.FC = () => {
     demoUpcomingPresentations,
     searchTerm,
     {
-      presenter: selectedPresenter,
-      room: selectedRoom,
-      waveTime: selectedWave
+      presenter: selectedPresenter === 'all' ? '' : selectedPresenter,
+      room: selectedRoom === 'all' ? '' : selectedRoom,
+      waveTime: selectedWave === 'all' ? '' : selectedWave
     }
   );
 
   // Clear all filters
   const clearFilters = () => {
     setSearchTerm('');
-    setSelectedRoom('');
-    setSelectedWave('');
-    setSelectedPresenter('');
+    setSelectedRoom('all');
+    setSelectedWave('all');
+    setSelectedPresenter('all');
   };
 
   const openNewPresentationForm = () => {
