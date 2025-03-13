@@ -1,3 +1,4 @@
+
 export interface Client {
   id: string;
   names: string;
@@ -18,6 +19,7 @@ export interface ActivePresentation {
   status: string;
   clients: Client[];
   roomNumber: string;
+  waveTime?: string;
 }
 
 export interface UpcomingPresentation {
@@ -28,6 +30,7 @@ export interface UpcomingPresentation {
   status: string;
   clients: number;
   roomNumber: string;
+  waveTime?: string;
 }
 
 export interface Transfer {
@@ -88,3 +91,14 @@ export interface ClientJourney {
   currentStage: string;
   roomNumbers: string[];
 }
+
+export interface TeamMemberAssignment {
+  id: string;
+  name: string;
+  role: string;
+  waveAssignments: {
+    time: string;
+    roomNumbers: string[];
+  }[];
+}
+

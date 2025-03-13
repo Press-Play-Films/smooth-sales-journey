@@ -27,3 +27,55 @@ export const teamPerformanceData = [
   { name: 'Jennifer Williams', sales: 36, conversion: 70 },
   { name: 'Robert Davis', sales: 28, conversion: 63 },
 ];
+
+// Team member role assignments
+export const teamMemberAssignments = [
+  {
+    id: 'team-001',
+    name: 'Craig Boure',
+    role: 'Presenter',
+    waveAssignments: [
+      { time: '12:30 PM', roomNumbers: ['6391'] },
+      { time: '3:30 PM', roomNumbers: ['6392'] },
+      { time: '6:00 PM', roomNumbers: ['6391'] }
+    ]
+  },
+  {
+    id: 'team-002',
+    name: 'Sarah Miller',
+    role: 'Presenter',
+    waveAssignments: [
+      { time: '12:30 PM', roomNumbers: ['6392'] },
+      { time: '6:00 PM', roomNumbers: ['6392'] }
+    ]
+  },
+  {
+    id: 'team-003',
+    name: 'Michael Johnson',
+    role: 'Sales Executive',
+    waveAssignments: [
+      { time: '3:30 PM', roomNumbers: ['6393'] },
+      { time: '6:00 PM', roomNumbers: ['6394'] }
+    ]
+  },
+  {
+    id: 'team-004',
+    name: 'Jennifer Williams',
+    role: 'Sales Executive',
+    waveAssignments: [
+      { time: '12:30 PM', roomNumbers: ['6393'] },
+      { time: '3:30 PM', roomNumbers: ['6393'] }
+    ]
+  },
+  {
+    id: 'team-005',
+    name: 'Robert Davis',
+    role: 'T.O. Manager',
+    waveAssignments: [
+      { time: '12:30 PM', roomNumbers: ['6391', '6392', '6393'] },
+      { time: '3:30 PM', roomNumbers: ['6392', '6393', '6394'] },
+      { time: '6:00 PM', roomNumbers: ['6391', '6392', '6394', '6395'] }
+    ]
+  }
+]
+

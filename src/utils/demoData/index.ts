@@ -8,7 +8,12 @@ export { demoClients } from './clients';
 // Export presentations data
 export { 
   demoActivePresentations,
-  demoUpcomingPresentations
+  demoUpcomingPresentations,
+  waveTimes,
+  getPresentationsByWave,
+  getPresentationsByRoom,
+  getTeamMembersByWave,
+  getTeamMembersByRoom
 } from './presentations';
 
 // Export transfers data
@@ -24,5 +29,7 @@ export {
 export {
   monthlyPerformanceData,
   packagePopularityData,
-  teamPerformanceData
+  teamPerformanceData,
+  teamMemberAssignments
 } from './performance';
+
