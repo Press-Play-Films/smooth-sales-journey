@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Edit2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 
@@ -20,10 +20,23 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   date = new Date(),
   setDate = () => {}
 }) => {
+  const [showEditMode, setShowEditMode] = useState(false);
+  
   return (
     <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center mb-6">
       <div>
-        <h2 className="text-3xl font-bold text-brio-navy">Executive Dashboard</h2>
+        <div className="flex items-center space-x-2">
+          <h2 className="text-3xl font-bold text-brio-navy">Executive Dashboard</h2>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="text-gray-500 hover:text-brio-navy hover:bg-gray-100"
+            onClick={() => setShowEditMode(!showEditMode)}
+          >
+            <Edit2 className="h-4 w-4" />
+            <span className="ml-1 text-xs">{showEditMode ? 'Exit Edit Mode' : 'Edit Mode'}</span>
+          </Button>
+        </div>
         <p className="text-sm text-gray-500 mt-1">
           Brio Vacations • Asheville, NC Headquarters
         </p>
