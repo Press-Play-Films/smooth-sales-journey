@@ -67,6 +67,8 @@ export const demoSales: Sale[] = [
   }
 ];
 
+// Helper functions for sales data filtering
+
 // Function to get sales by date
 export const getSalesByDate = (date: Date) => {
   const targetDate = new Date(date);
