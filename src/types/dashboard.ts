@@ -1,4 +1,3 @@
-
 export interface Client {
   id: string;
   names: string;
@@ -7,6 +6,8 @@ export interface Client {
   department?: 'sales' | 'finance' | 'exit-survey';
   roomNumber?: string;
   assignedAgent?: string;
+  image?: string;
+  presentationTime?: string;
 }
 
 export interface ActivePresentation {

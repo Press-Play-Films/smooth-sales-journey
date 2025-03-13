@@ -13,12 +13,54 @@ const ClientsPage: React.FC = () => {
   
   // Sample client data (in a real app, this would come from an API or context)
   const [clients, setClients] = useState<Client[]>([
-    { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged' },
-    { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted' },
-    { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged' },
-    { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'away' },
-    { id: 'client-005', names: 'Michael & Karen Thompson', location: 'California', status: 'engaged' },
-    { id: 'client-006', names: 'David & Sarah Miller', location: 'New York', status: 'distracted' },
+    { 
+      id: 'client-001', 
+      names: 'George & Lyn Whitehead', 
+      location: 'North Carolina', 
+      status: 'engaged',
+      presentationTime: '12:30 PM',
+      image: '/placeholder.svg'
+    },
+    { 
+      id: 'client-002', 
+      names: 'Malinda & Larry Jones', 
+      location: 'Florida', 
+      status: 'distracted',
+      presentationTime: '12:30 PM',
+      image: '/placeholder.svg'
+    },
+    { 
+      id: 'client-003', 
+      names: 'Philip & Traci Naegele', 
+      location: 'Georgia', 
+      status: 'engaged',
+      presentationTime: '3:30 PM',
+      image: '/placeholder.svg'
+    },
+    { 
+      id: 'client-004', 
+      names: 'Scott & Renee White', 
+      location: 'Texas', 
+      status: 'away',
+      presentationTime: '6:30 PM',
+      image: '/placeholder.svg'
+    },
+    { 
+      id: 'client-005', 
+      names: 'Michael & Karen Thompson', 
+      location: 'California', 
+      status: 'engaged',
+      presentationTime: '6:30 PM',
+      image: '/placeholder.svg'
+    },
+    { 
+      id: 'client-006', 
+      names: 'David & Sarah Miller', 
+      location: 'New York', 
+      status: 'distracted',
+      presentationTime: '8:00 PM',
+      image: '/placeholder.svg'
+    },
   ]);
   
   const [filteredClients, setFilteredClients] = useState<Client[]>(clients);

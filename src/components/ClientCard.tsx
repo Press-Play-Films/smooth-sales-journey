@@ -12,6 +12,7 @@ import ClientInfo from './client/ClientInfo';
 import ClientActions from './client/ClientActions';
 import ClientOptions from './client/ClientOptions';
 import ProfileViewButton from './client/ProfileViewButton';
+import ClientThumbnail from './client/ClientThumbnail';
 
 interface ClientCardProps {
   client: {
@@ -19,6 +20,8 @@ interface ClientCardProps {
     names: string;
     location?: string;
     status: 'engaged' | 'distracted' | 'away';
+    image?: string;
+    presentationTime?: string;
   };
   onStatusChange?: (clientId: string, newStatus: 'engaged' | 'distracted' | 'away') => void;
 }
@@ -36,7 +39,11 @@ const ClientCard: React.FC<ClientCardProps> = ({ client, onStatusChange }) => {
       <CardContent className="p-4 flex-1">
         <div className="flex flex-col gap-3 h-full">
           <div className="flex justify-between items-start">
-            <ClientAvatar names={client.names} />
+            <ClientThumbnail 
+              names={client.names} 
+              image={client.image}
+              presentationTime={client.presentationTime}
+            />
             <ClientStatusBadge status={client.status} />
           </div>
           
