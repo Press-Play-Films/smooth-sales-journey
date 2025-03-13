@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { format } from 'date-fns';
+import { Eye, Edit } from "lucide-react";
 import EditPresentationForm from './EditPresentationForm';
 
 interface PresentationCardProps {
@@ -53,7 +54,7 @@ const PresentationCard: React.FC<PresentationCardProps> = ({
               <h4 className="text-lg font-semibold">{title}</h4>
               <p className="text-gray-500">
                 Presenter: {presenter} • Room: {roomNumber} • 
-                Wave: {waveTime || 'N/A'} •
+                {waveTime && ` Wave: ${waveTime} • `}
                 {isActive ? 'Started: ' : 'Starts: '}{format(startTime, 'h:mm a')}
               </p>
               <p className="mt-2">
@@ -70,8 +71,12 @@ const PresentationCard: React.FC<PresentationCardProps> = ({
             <Button 
               variant="outline" 
               onClick={handleViewDetails}
+              className="flex items-center gap-1"
             >
-              {isActive ? 'View Details' : 'Edit'}
+              {isActive ? 
+                <><Eye className="h-4 w-4" /> View Details</> : 
+                <><Edit className="h-4 w-4" /> Edit</>
+              }
             </Button>
           </div>
         </CardContent>

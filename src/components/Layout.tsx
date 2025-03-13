@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SidebarProvider } from "@/components/ui/sidebar";
 import Header from './Header';
 import Sidebar from './layout/Sidebar';
@@ -13,10 +13,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   // Simple role management (in a real app, this would come from authentication)
   const [userRole, setUserRole] = useState<'employee' | 'executive'>('employee');
   
+  // Get stored user role from localStorage if available
+  useEffect(() => {
+    const storedRole = localStorage.getItem('userRole');
+    if (storedRole === 'employee' || storedRole === 'executive') {
+      setUserRole(storedRole);
+    }
+  }, []);
+  
   // Toggle between employee and executive views
   const toggleUserRole = () => {
     const newRole = userRole === 'employee' ? 'executive' : 'employee';
     setUserRole(newRole);
+    localStorage.setItem('userRole', newRole);
   };
 
   return (

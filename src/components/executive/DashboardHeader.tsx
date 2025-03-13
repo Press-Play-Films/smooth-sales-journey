@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { CalendarIcon, Edit2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
+import { cn } from '@/lib/utils';
 
 interface DashboardHeaderProps {
   selectedReport: 'overview' | 'sales' | 'team';
@@ -30,7 +31,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
           <Button 
             variant="ghost" 
             size="sm" 
-            className="text-gray-500 hover:text-brio-navy hover:bg-gray-100"
+            className={cn(
+              "text-gray-500 hover:text-brio-navy hover:bg-gray-100",
+              showEditMode && "bg-gray-100 text-brio-navy"
+            )}
             onClick={() => setShowEditMode(!showEditMode)}
           >
             <Edit2 className="h-4 w-4" />
