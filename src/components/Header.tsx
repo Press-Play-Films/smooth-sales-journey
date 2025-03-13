@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import NewPresentationForm from './presentation/NewPresentationForm';
 
 interface HeaderProps {
   userRole: 'employee' | 'executive';
@@ -13,6 +14,16 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ userRole, toggleUserRole }) => {
   const { toast } = useToast();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showNewPresentationForm, setShowNewPresentationForm] = useState(false);
+  
+  const openNewPresentationForm = () => {
+    setShowNewPresentationForm(true);
+    setMobileMenuOpen(false);
+  };
+  
+  const closeNewPresentationForm = () => {
+    setShowNewPresentationForm(false);
+  };
   
   return (
     <header className="sticky top-0 z-50 w-full">
@@ -46,12 +57,7 @@ const Header: React.FC<HeaderProps> = ({ userRole, toggleUserRole }) => {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-1">
             <button 
-              onClick={() => {
-                toast({
-                  title: "New Presentation",
-                  description: "This feature will be available soon!",
-                });
-              }}
+              onClick={openNewPresentationForm}
               className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-brio-navy hover:bg-gray-100 transition-colors"
             >
               New Presentation
@@ -169,6 +175,13 @@ const Header: React.FC<HeaderProps> = ({ userRole, toggleUserRole }) => {
               Analytics
             </Link>
             
+            <button
+              onClick={openNewPresentationForm}
+              className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-brio-navy hover:bg-gray-100"
+            >
+              New Presentation
+            </button>
+            
             {userRole === 'executive' && (
               <Link 
                 to="/executive"
@@ -193,6 +206,11 @@ const Header: React.FC<HeaderProps> = ({ userRole, toggleUserRole }) => {
             </div>
           </div>
         </div>
+      )}
+      
+      {/* New Presentation Form Modal */}
+      {showNewPresentationForm && (
+        <NewPresentationForm onClose={closeNewPresentationForm} />
       )}
     </header>
   );

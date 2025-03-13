@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { useToast } from "@/hooks/use-toast";
@@ -13,12 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import NewPresentationForm from '@/components/presentation/NewPresentationForm';
 import { demoActivePresentations, demoUpcomingPresentations, waveTimes } from '@/utils/demoData';
 import { searchPresentations } from '@/utils/searchUtils';
 import { format } from 'date-fns';
 
 const PresentationsPage: React.FC = () => {
   const { toast } = useToast();
+  const [showNewPresentationForm, setShowNewPresentationForm] = useState(false);
   
   // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,6 +62,14 @@ const PresentationsPage: React.FC = () => {
     setSelectedWave('');
     setSelectedPresenter('');
   };
+
+  const openNewPresentationForm = () => {
+    setShowNewPresentationForm(true);
+  };
+  
+  const closeNewPresentationForm = () => {
+    setShowNewPresentationForm(false);
+  };
   
   return (
     <Layout>
@@ -68,12 +77,7 @@ const PresentationsPage: React.FC = () => {
         <div className="flex justify-between items-center">
           <h2 className="text-3xl font-bold text-brio-navy">Presentations</h2>
           <Button 
-            onClick={() => {
-              toast({
-                title: "New Presentation",
-                description: "This feature will be available soon!",
-              });
-            }}
+            onClick={openNewPresentationForm}
             className="bg-brio-navy hover:bg-brio-navy/90"
           >
             <span className="mr-2">+</span> New Presentation
@@ -257,6 +261,11 @@ const PresentationsPage: React.FC = () => {
             </Card>
           )}
         </div>
+        
+        {/* New Presentation Form Modal */}
+        {showNewPresentationForm && (
+          <NewPresentationForm onClose={closeNewPresentationForm} />
+        )}
       </div>
     </Layout>
   );

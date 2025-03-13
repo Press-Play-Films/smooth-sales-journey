@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import StatsCard from './dashboard/StatsCard';
@@ -6,6 +5,7 @@ import ActivePresentationCard from './dashboard/ActivePresentationCard';
 import UpcomingPresentationList from './dashboard/UpcomingPresentationList';
 import RecentTransfersList from './dashboard/RecentTransfersList';
 import EngagementMetrics from './EngagementMetrics';
+import NewPresentationForm from './presentation/NewPresentationForm';
 import { ActivePresentation, Client } from '@/types/dashboard';
 import { 
   demoActivePresentations, 
@@ -15,6 +15,7 @@ import {
 
 const Dashboard: React.FC = () => {
   const { toast } = useToast();
+  const [showNewPresentationForm, setShowNewPresentationForm] = useState(false);
   
   // State for active presentations with auto-updating client statuses
   const [activePresentations, setActivePresentations] = useState<ActivePresentation[]>(demoActivePresentations);
@@ -81,6 +82,14 @@ const Dashboard: React.FC = () => {
     const totalClients = clients.length;
     return `${engaged} of ${totalClients} clients currently engaged`;
   };
+
+  const openNewPresentationForm = () => {
+    setShowNewPresentationForm(true);
+  };
+  
+  const closeNewPresentationForm = () => {
+    setShowNewPresentationForm(false);
+  };
   
   return (
     <div className="space-y-8">
@@ -89,12 +98,7 @@ const Dashboard: React.FC = () => {
           <h2 className="text-3xl font-bold text-brio-navy">Dashboard</h2>
           <div>
             <button 
-              onClick={() => {
-                toast({
-                  title: "New Presentation",
-                  description: "This feature will be available soon!",
-                });
-              }}
+              onClick={openNewPresentationForm}
               className="bg-brio-navy hover:bg-brio-navy/90 text-white px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -166,6 +170,10 @@ const Dashboard: React.FC = () => {
           <RecentTransfersList transfers={demoRecentTransfers} />
         </section>
       </div>
+      
+      {showNewPresentationForm && (
+        <NewPresentationForm onClose={closeNewPresentationForm} />
+      )}
     </div>
   );
 };
