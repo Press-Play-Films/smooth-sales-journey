@@ -1,22 +1,17 @@
 
 import React from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import ClientCard from './ClientCard';
+import StatsCard from './dashboard/StatsCard';
+import ActivePresentationCard from './dashboard/ActivePresentationCard';
+import UpcomingPresentationList from './dashboard/UpcomingPresentationList';
+import RecentTransfersList from './dashboard/RecentTransfersList';
+import { ActivePresentation, UpcomingPresentation, Transfer } from '@/types/dashboard';
 
 const Dashboard: React.FC = () => {
   const { toast } = useToast();
   
   // Example data for active presentations
-  const activePresentations = [
+  const activePresentations: ActivePresentation[] = [
     {
       id: 'pres-001',
       title: 'Brio Vacations Premium Package',
@@ -24,16 +19,16 @@ const Dashboard: React.FC = () => {
       startTime: new Date(),
       status: 'active',
       clients: [
-        { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged' as 'engaged' },
-        { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted' as 'distracted' },
-        { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged' as 'engaged' },
-        { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'engaged' as 'engaged' }
+        { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged' },
+        { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted' },
+        { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged' },
+        { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'engaged' }
       ]
     }
   ];
   
   // Example data for upcoming presentations
-  const upcomingPresentations = [
+  const upcomingPresentations: UpcomingPresentation[] = [
     {
       id: 'pres-002',
       title: 'Brio Summer Special',
@@ -53,7 +48,7 @@ const Dashboard: React.FC = () => {
   ];
   
   // Example data for recent transfers
-  const recentTransfers = [
+  const recentTransfers: Transfer[] = [
     {
       id: 'transfer-001',
       clientNames: 'John & Jane Smith',
@@ -76,30 +71,6 @@ const Dashboard: React.FC = () => {
       timestamp: new Date(Date.now() - 7200000) // 2 hours ago
     }
   ];
-  
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit', 
-      hour12: true 
-    });
-  };
-  
-  const formatTimeAgo = (date: Date) => {
-    const seconds = Math.floor((new Date().getTime() - date.getTime()) / 1000);
-    
-    let interval = seconds / 3600;
-    if (interval > 1) {
-      return Math.floor(interval) + ' hours ago';
-    }
-    
-    interval = seconds / 60;
-    if (interval > 1) {
-      return Math.floor(interval) + ' minutes ago';
-    }
-    
-    return Math.floor(seconds) + ' seconds ago';
-  };
   
   return (
     <div className="space-y-8">
@@ -125,41 +96,23 @@ const Dashboard: React.FC = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="hover-lift">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium text-gray-700">Active Presentations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-brio-navy">1</div>
-            </CardContent>
-            <CardFooter className="pt-0">
-              <p className="text-sm text-gray-500">4 clients currently attending</p>
-            </CardFooter>
-          </Card>
+          <StatsCard 
+            title="Active Presentations" 
+            value={activePresentations.length} 
+            description="4 clients currently attending" 
+          />
           
-          <Card className="hover-lift">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium text-gray-700">Today's Schedule</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-brio-navy">3</div>
-            </CardContent>
-            <CardFooter className="pt-0">
-              <p className="text-sm text-gray-500">2 more presentations today</p>
-            </CardFooter>
-          </Card>
+          <StatsCard 
+            title="Today's Schedule" 
+            value={upcomingPresentations.length + activePresentations.length} 
+            description="2 more presentations today" 
+          />
           
-          <Card className="hover-lift">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-medium text-gray-700">Conversion Rate</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold text-brio-teal">32%</div>
-            </CardContent>
-            <CardFooter className="pt-0">
-              <p className="text-sm text-gray-500">5% increase from last week</p>
-            </CardFooter>
-          </Card>
+          <StatsCard 
+            title="Conversion Rate" 
+            value="32%" 
+            description="5% increase from last week" 
+          />
         </div>
       </section>
       
@@ -167,72 +120,18 @@ const Dashboard: React.FC = () => {
         <h3 className="text-2xl font-semibold text-brio-navy">Active Presentations</h3>
         
         {activePresentations.map(presentation => (
-          <Card key={presentation.id} className="overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-brio-navy to-brio-navy/80 text-white">
-              <div className="flex justify-between items-center">
-                <div>
-                  <CardTitle>{presentation.title}</CardTitle>
-                  <CardDescription className="text-white/80">
-                    Presenter: {presentation.presenter} • Started: {formatTime(presentation.startTime)}
-                  </CardDescription>
-                </div>
-                <Badge className="bg-brio-teal text-brio-navy hover:bg-brio-teal/90">
-                  Live
-                </Badge>
-              </div>
-            </CardHeader>
-            
-            <CardContent className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {presentation.clients.map(client => (
-                  <ClientCard 
-                    key={client.id} 
-                    client={client} 
-                  />
-                ))}
-              </div>
-            </CardContent>
-            
-            <CardFooter className="bg-gray-50 flex justify-between items-center">
-              <button 
-                onClick={() => {
-                  toast({
-                    title: "Full View",
-                    description: "Opening detailed presentation view",
-                  });
-                }}
-                className="text-brio-navy hover:text-brio-teal text-sm font-medium flex items-center space-x-1 transition-colors"
-              >
-                <span>View Full Presentation</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-              
-              <button 
-                onClick={() => {
-                  toast({
-                    title: "End Presentation",
-                    description: "This will end the presentation for all participants.",
-                    variant: "destructive",
-                  });
-                }}
-                className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
-              >
-                End Presentation
-              </button>
-            </CardFooter>
-          </Card>
+          <ActivePresentationCard 
+            key={presentation.id} 
+            presentation={presentation} 
+          />
         ))}
         
         {activePresentations.length === 0 && (
-          <Card className="bg-gray-50 border-dashed">
-            <CardContent className="py-10">
-              <div className="text-center">
-                <p className="text-gray-500">No active presentations</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="bg-gray-50 border-dashed rounded-lg p-10">
+            <div className="text-center">
+              <p className="text-gray-500">No active presentations</p>
+            </div>
+          </div>
         )}
       </section>
       
@@ -240,81 +139,13 @@ const Dashboard: React.FC = () => {
         <section>
           <h3 className="text-2xl font-semibold text-brio-navy mb-4">Upcoming Presentations</h3>
           
-          <div className="space-y-4">
-            {upcomingPresentations.map(presentation => (
-              <Card key={presentation.id} className="hover-lift">
-                <CardContent className="p-4">
-                  <div className="flex justify-between">
-                    <div>
-                      <h4 className="font-medium text-gray-900">{presentation.title}</h4>
-                      <p className="text-sm text-gray-500">
-                        {presentation.presenter} • {formatTime(presentation.startTime)}
-                      </p>
-                    </div>
-                    <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">
-                      {presentation.clients} clients
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            
-            {upcomingPresentations.length === 0 && (
-              <Card className="bg-gray-50 border-dashed">
-                <CardContent className="py-6">
-                  <div className="text-center">
-                    <p className="text-gray-500">No upcoming presentations</p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          <UpcomingPresentationList presentations={upcomingPresentations} />
         </section>
         
         <section>
           <h3 className="text-2xl font-semibold text-brio-navy mb-4">Recent Transfers</h3>
           
-          <Card>
-            <CardContent className="p-4">
-              <div className="space-y-4">
-                {recentTransfers.map(transfer => (
-                  <div key={transfer.id} className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-0">
-                    <div>
-                      <p className="font-medium text-gray-900">{transfer.clientNames}</p>
-                      <p className="text-sm text-gray-500">
-                        {transfer.fromDepartment} → {transfer.toDepartment}
-                      </p>
-                    </div>
-                    <div className="text-sm text-gray-500">
-                      {formatTimeAgo(transfer.timestamp)}
-                    </div>
-                  </div>
-                ))}
-                
-                {recentTransfers.length === 0 && (
-                  <div className="text-center py-4">
-                    <p className="text-gray-500">No recent transfers</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-            <CardFooter className="bg-gray-50 border-t">
-              <button 
-                onClick={() => {
-                  toast({
-                    title: "Transfer History",
-                    description: "Viewing full transfer history",
-                  });
-                }}
-                className="text-brio-navy hover:text-brio-teal text-sm font-medium flex items-center space-x-1 transition-colors"
-              >
-                <span>View All Transfers</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </CardFooter>
-          </Card>
+          <RecentTransfersList transfers={recentTransfers} />
         </section>
       </div>
     </div>
