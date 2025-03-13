@@ -6,72 +6,42 @@ import ActivePresentationCard from './dashboard/ActivePresentationCard';
 import UpcomingPresentationList from './dashboard/UpcomingPresentationList';
 import RecentTransfersList from './dashboard/RecentTransfersList';
 import EngagementMetrics from './EngagementMetrics';
-import { ActivePresentation, UpcomingPresentation, Transfer, Client } from '@/types/dashboard';
+import { ActivePresentation, Client } from '@/types/dashboard';
+import { 
+  demoActivePresentations, 
+  demoUpcomingPresentations, 
+  demoRecentTransfers 
+} from '@/utils/demoData';
 
 const Dashboard: React.FC = () => {
   const { toast } = useToast();
   
   // State for active presentations with auto-updating client statuses
-  const [activePresentations, setActivePresentations] = useState<ActivePresentation[]>([
-    {
-      id: 'pres-001',
-      title: 'Brio Vacations Premium Package',
-      presenter: 'Craig Boure',
-      startTime: new Date(),
-      status: 'active',
-      clients: [
-        { id: 'client-001', names: 'George & Lyn Whitehead', location: 'North Carolina', status: 'engaged' },
-        { id: 'client-002', names: 'Malinda & Larry Jones', location: 'Florida', status: 'distracted' },
-        { id: 'client-003', names: 'Philip & Traci Naegele', location: 'Georgia', status: 'engaged' },
-        { id: 'client-004', names: 'Scott & Renee White', location: 'Texas', status: 'engaged' }
-      ]
-    }
-  ]);
+  const [activePresentations, setActivePresentations] = useState<ActivePresentation[]>(demoActivePresentations);
   
-  // Example data for upcoming presentations
-  const upcomingPresentations: UpcomingPresentation[] = [
-    {
-      id: 'pres-002',
-      title: 'Brio Summer Special',
-      presenter: 'Craig Boure',
-      startTime: new Date(Date.now() + 3600000), // 1 hour from now
-      status: 'scheduled',
-      clients: 6
-    },
-    {
-      id: 'pres-003',
-      title: 'Brio Holiday Package',
-      presenter: 'Sarah Miller',
-      startTime: new Date(Date.now() + 7200000), // 2 hours from now
-      status: 'scheduled',
-      clients: 4
-    }
-  ];
-  
-  // Example data for recent transfers
-  const recentTransfers: Transfer[] = [
-    {
-      id: 'transfer-001',
-      clientNames: 'John & Jane Smith',
-      fromDepartment: 'Presentation',
-      toDepartment: 'Sales',
-      timestamp: new Date(Date.now() - 1800000) // 30 minutes ago
-    },
-    {
-      id: 'transfer-002',
-      clientNames: 'Robert & Mary Johnson',
-      fromDepartment: 'Sales',
-      toDepartment: 'Finance',
-      timestamp: new Date(Date.now() - 3600000) // 1 hour ago
-    },
-    {
-      id: 'transfer-003',
-      clientNames: 'David & Lisa Brown',
-      fromDepartment: 'Finance',
-      toDepartment: 'Exit Survey',
-      timestamp: new Date(Date.now() - 7200000) // 2 hours ago
-    }
-  ];
+  // Simulate real-time status updates
+  useEffect(() => {
+    const statusUpdateInterval = setInterval(() => {
+      setActivePresentations(prevPresentations => {
+        return prevPresentations.map(presentation => {
+          // Update random client statuses to simulate real activity
+          const updatedClients = presentation.clients.map(client => {
+            // 20% chance to change status
+            if (Math.random() < 0.2) {
+              const statuses: ('engaged' | 'distracted' | 'away')[] = ['engaged', 'distracted', 'away'];
+              const newStatusIndex = Math.floor(Math.random() * statuses.length);
+              return { ...client, status: statuses[newStatusIndex] };
+            }
+            return client;
+          });
+          
+          return { ...presentation, clients: updatedClients };
+        });
+      });
+    }, 10000); // Update every 10 seconds
+    
+    return () => clearInterval(statusUpdateInterval);
+  }, []);
 
   // Get all clients from all active presentations
   const getAllClients = (): Client[] => {
@@ -82,7 +52,8 @@ const Dashboard: React.FC = () => {
   const calculateEngagementStats = () => {
     const clients = getAllClients();
     const engaged = clients.filter(c => c.status === 'engaged').length;
-    return `${engaged} clients currently attending`;
+    const totalClients = clients.length;
+    return `${engaged} of ${totalClients} clients currently engaged`;
   };
   
   return (
@@ -117,8 +88,8 @@ const Dashboard: React.FC = () => {
           
           <StatsCard 
             title="Today's Schedule" 
-            value={upcomingPresentations.length + activePresentations.length} 
-            description="2 more presentations today" 
+            value={demoUpcomingPresentations.length + activePresentations.length} 
+            description={`${demoUpcomingPresentations.length} more presentations today`} 
           />
           
           <StatsCard 
@@ -160,13 +131,13 @@ const Dashboard: React.FC = () => {
         <section>
           <h3 className="text-2xl font-semibold text-brio-navy mb-4">Upcoming Presentations</h3>
           
-          <UpcomingPresentationList presentations={upcomingPresentations} />
+          <UpcomingPresentationList presentations={demoUpcomingPresentations} />
         </section>
         
         <section>
           <h3 className="text-2xl font-semibold text-brio-navy mb-4">Recent Transfers</h3>
           
-          <RecentTransfersList transfers={recentTransfers} />
+          <RecentTransfersList transfers={demoRecentTransfers} />
         </section>
       </div>
     </div>
