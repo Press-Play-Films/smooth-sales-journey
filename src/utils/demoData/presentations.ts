@@ -34,7 +34,7 @@ export const demoActivePresentations: ActivePresentation[] = [
 export const demoUpcomingPresentations: UpcomingPresentation[] = [
   {
     id: 'pres-003',
-    title: 'Brio Summer Special',
+    title: 'Brio Tour 1',
     presenter: 'Craig Boure',
     startTime: addHours(now, 2), // In 2 hours
     status: 'scheduled',
@@ -44,7 +44,7 @@ export const demoUpcomingPresentations: UpcomingPresentation[] = [
   },
   {
     id: 'pres-004',
-    title: 'Brio Holiday Package',
+    title: 'Brio Tour 2',
     presenter: 'Sarah Miller',
     startTime: addHours(now, 4), // In 4 hours
     status: 'scheduled',
@@ -54,7 +54,7 @@ export const demoUpcomingPresentations: UpcomingPresentation[] = [
   },
   {
     id: 'pres-005',
-    title: 'Brio European Adventure',
+    title: 'Brio Tour 3',
     presenter: 'Michael Johnson',
     startTime: addHours(now, 6), // In 6 hours
     status: 'scheduled',
