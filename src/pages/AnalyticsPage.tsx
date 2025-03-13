@@ -2,6 +2,7 @@
 import React from 'react';
 import Layout from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ClientEngagementTrends from '@/components/analytics/ClientEngagementTrends';
 
 const AnalyticsPage: React.FC = () => {
   return (
@@ -11,13 +12,15 @@ const AnalyticsPage: React.FC = () => {
           <h2 className="text-3xl font-bold text-brio-navy">Analytics</h2>
         </div>
         
+        <ClientEngagementTrends />
+        
         <Card>
           <CardHeader>
-            <CardTitle>Sales Analytics</CardTitle>
+            <CardTitle>Additional Analytics</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-gray-500">
-              Analytics features are coming soon. You'll be able to view detailed statistics,
+              More analytics features are coming soon. You'll be able to view detailed statistics,
               generate reports, and track performance metrics from this page.
             </p>
           </CardContent>
