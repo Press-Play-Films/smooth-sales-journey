@@ -103,3 +103,93 @@ export const getTeamMembersByRoom = (roomNumber: string, teamMembers: any[]) => 
   );
 };
 
+// New: Get presentation metrics with thresholds
+export interface MetricThreshold {
+  metric: string;
+  warning: number;
+  critical: number;
+  direction: 'above' | 'below';
+}
+
+export const defaultMetricThresholds: MetricThreshold[] = [
+  { metric: 'engagementRate', warning: 65, critical: 50, direction: 'below' },
+  { metric: 'conversionRate', warning: 25, critical: 15, direction: 'below' },
+  { metric: 'clientCount', warning: 25, critical: 15, direction: 'below' },
+  { metric: 'away', warning: 20, critical: 40, direction: 'above' }
+];
+
+// Historic data for metrics (for time-based filtering)
+export const generateHistoricData = (
+  timeframe: 'day' | 'week' | 'month' | 'quarter' | 'year'
+) => {
+  let data = [];
+  const baseEngagement = 75;
+  const baseConversion = 35;
+  
+  // Generate data based on timeframe
+  switch(timeframe) {
+    case 'day':
+      for (let hour = 9; hour <= 21; hour++) {
+        data.push({
+          label: `${hour % 12 || 12}${hour < 12 ? 'AM' : 'PM'}`,
+          engagementRate: Math.min(100, baseEngagement + Math.round(Math.sin(hour / 3) * 10 + Math.random() * 5)),
+          conversionRate: Math.min(100, baseConversion + Math.round(Math.cos(hour / 4) * 7 + Math.random() * 4)),
+          clientCount: Math.round(20 + Math.sin(hour / 2) * 8 + Math.random() * 5),
+          away: Math.round(10 + Math.cos(hour / 2) * 5 + Math.random() * 3)
+        });
+      }
+      break;
+      
+    case 'week':
+      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      days.forEach((day, i) => {
+        data.push({
+          label: day,
+          engagementRate: Math.min(100, baseEngagement + Math.round(Math.sin(i / 2) * 8 + Math.random() * 4)),
+          conversionRate: Math.min(100, baseConversion + Math.round(Math.cos(i / 3) * 6 + Math.random() * 4)),
+          clientCount: Math.round(120 + Math.sin(i) * 30 + Math.random() * 10),
+          away: Math.round(15 + Math.cos(i) * 7 + Math.random() * 5)
+        });
+      });
+      break;
+      
+    case 'month':
+      for (let i = 1; i <= 4; i++) {
+        data.push({
+          label: `Week ${i}`,
+          engagementRate: Math.min(100, baseEngagement + Math.round(Math.sin(i) * 7 + Math.random() * 4)),
+          conversionRate: Math.min(100, baseConversion + Math.round(Math.cos(i) * 5 + Math.random() * 3)),
+          clientCount: Math.round(500 + Math.sin(i) * 100 + Math.random() * 50),
+          away: Math.round(18 + Math.cos(i) * 6 + Math.random() * 4)
+        });
+      }
+      break;
+      
+    case 'quarter':
+      for (let i = 1; i <= 3; i++) {
+        data.push({
+          label: `Month ${i}`,
+          engagementRate: Math.min(100, baseEngagement + Math.round(Math.sin(i / 1.5) * 6 + Math.random() * 4)),
+          conversionRate: Math.min(100, baseConversion + Math.round(Math.cos(i / 2) * 5 + Math.random() * 3)),
+          clientCount: Math.round(1500 + Math.sin(i) * 300 + Math.random() * 100),
+          away: Math.round(17 + Math.cos(i) * 5 + Math.random() * 4)
+        });
+      }
+      break;
+      
+    case 'year':
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      months.forEach((month, i) => {
+        data.push({
+          label: month,
+          engagementRate: Math.min(100, baseEngagement + Math.round(Math.sin(i / 3) * 8 + Math.random() * 5)),
+          conversionRate: Math.min(100, baseConversion + Math.round(Math.cos(i / 4) * 7 + Math.random() * 4)),
+          clientCount: Math.round(5000 + Math.sin(i / 2) * 1000 + Math.random() * 300),
+          away: Math.round(16 + Math.cos(i / 2) * 8 + Math.random() * 5)
+        });
+      });
+      break;
+  }
+  
+  return data;
+};

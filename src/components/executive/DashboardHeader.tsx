@@ -10,20 +10,16 @@ import { Calendar } from "@/components/ui/calendar";
 interface DashboardHeaderProps {
   selectedReport: 'overview' | 'sales' | 'team';
   setSelectedReport: (value: 'overview' | 'sales' | 'team') => void;
+  date?: Date | undefined;
+  setDate?: (date: Date | undefined) => void;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ 
   selectedReport, 
-  setSelectedReport 
+  setSelectedReport,
+  date = new Date(),
+  setDate = () => {}
 }) => {
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
-
-  const handleExportData = () => {
-    // In a real app, this would generate and download CSV data
-    const currentDate = format(new Date(), 'yyyy-MM-dd');
-    alert(`Brio Sales Report ${currentDate}.xlsx would be downloaded in a production environment.`);
-  };
-
   return (
     <div className="flex flex-col space-y-4 md:flex-row md:justify-between md:items-center mb-6">
       <div>
@@ -65,13 +61,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({
             <TabsTrigger value="team">Team</TabsTrigger>
           </TabsList>
         </Tabs>
-        
-        <Button 
-          onClick={handleExportData}
-          className="bg-brio-navy hover:bg-brio-navy/90"
-        >
-          Export to Excel
-        </Button>
       </div>
     </div>
   );

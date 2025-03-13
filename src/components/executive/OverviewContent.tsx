@@ -1,35 +1,31 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, Area, AreaChart, PieChart, Pie, Cell, Scatter, ScatterChart, ZAxis
 } from 'recharts';
 import StatsCard from '@/components/dashboard/StatsCard';
-import { generateDemoTimeframeData } from '@/utils/demoData';
 import DepartmentCards from './DepartmentCards';
 import { DepartmentStatistics } from '@/types/dashboard';
-import { ArrowBigRight } from 'lucide-react';
 
 interface OverviewContentProps {
   totalClients: number;
   avgEngagementRate: number;
   avgConversionRate: number;
   departments: DepartmentStatistics[];
+  timeframe: 'day' | 'week' | 'month' | 'quarter' | 'year';
+  historicData: any[];
 }
 
 const OverviewContent: React.FC<OverviewContentProps> = ({ 
   totalClients, 
   avgEngagementRate, 
   avgConversionRate,
-  departments
+  departments,
+  timeframe,
+  historicData
 }) => {
-  const [timeframe, setTimeframe] = useState<'day' | 'week' | 'month' | 'year'>('week');
-  
-  // Generate data for the selected timeframe
-  const timeframeData = generateDemoTimeframeData(timeframe);
-
   // Demo data for client flow visualization
   const flowData = [
     { name: 'Marketing', value: 100, color: '#8b5cf6' },
@@ -154,23 +150,13 @@ const OverviewContent: React.FC<OverviewContentProps> = ({
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Performance Trends</CardTitle>
-            <div>
-              <Tabs value={timeframe} onValueChange={(v: any) => setTimeframe(v)} className="w-[400px]">
-                <TabsList className="grid grid-cols-4 w-full">
-                  <TabsTrigger value="day">Day</TabsTrigger>
-                  <TabsTrigger value="week">Week</TabsTrigger>
-                  <TabsTrigger value="month">Month</TabsTrigger>
-                  <TabsTrigger value="year">Year</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
+            <CardTitle>Performance Trends - {timeframe.charAt(0).toUpperCase() + timeframe.slice(1)}</CardTitle>
           </div>
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={400}>
             <BarChart
-              data={timeframeData}
+              data={historicData}
               margin={{
                 top: 20,
                 right: 30,
@@ -183,8 +169,9 @@ const OverviewContent: React.FC<OverviewContentProps> = ({
               <YAxis />
               <Tooltip />
               <Legend />
-              <Bar dataKey="sales" name="Sales" fill="#0f766e" />
-              <Bar dataKey="transfers" name="Transfers" fill="#6366f1" />
+              <Bar dataKey="engagementRate" name="Engagement %" fill="#0f766e" />
+              <Bar dataKey="conversionRate" name="Conversion %" fill="#6366f1" />
+              <Bar dataKey="clientCount" name="Client Count" fill="#f59e0b" />
             </BarChart>
           </ResponsiveContainer>
         </CardContent>
