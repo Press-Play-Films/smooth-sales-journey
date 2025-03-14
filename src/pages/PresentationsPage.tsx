@@ -4,7 +4,8 @@ import Layout from '@/components/Layout';
 import PresentationList from '@/components/presentation/PresentationList';
 import PresentationFilters from '@/components/presentation/PresentationFilters';
 import CRMStatusIndicator from '@/components/salesforce/CRMStatusIndicator';
-import { usePresentations } from '@/utils/demoData'; // Assuming this hook exists
+import { usePresentations } from '@/utils/demoData';
+import { ActivePresentation, UpcomingPresentation } from '@/types/dashboard';
 
 const PresentationsPage: React.FC = () => {
   // State for filters
@@ -13,8 +14,19 @@ const PresentationsPage: React.FC = () => {
   const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   
-  // Mock presentation data
-  const { presentations, status } = usePresentations();
+  // Get presentation data
+  const { presentations } = usePresentations();
+  
+  // Convert the presentations to the expected format
+  const formattedPresentations: (ActivePresentation | UpcomingPresentation)[] = presentations.map(p => ({
+    id: p.id,
+    title: p.title,
+    presenter: p.client.split(' ')[0], // Extract first name as presenter
+    startTime: p.date,
+    status: 'scheduled' as const,
+    clients: 2, // Assuming 2 clients per presentation for UpcomingPresentation
+    roomNumber: p.room
+  }));
   
   return (
     <Layout>
@@ -45,8 +57,8 @@ const PresentationsPage: React.FC = () => {
           
           <PresentationList 
             title="All Presentations"
-            presentations={presentations}
-            status={status}
+            presentations={formattedPresentations}
+            status="scheduled"
           />
         </div>
       </div>

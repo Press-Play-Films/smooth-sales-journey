@@ -2,6 +2,7 @@
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CardFooter } from "@/components/ui/card";
 import { isAuthenticated, initiateLogin, logout } from "@/services/salesforce/salesforceApi";
 import { useToast } from "@/hooks/use-toast";
 

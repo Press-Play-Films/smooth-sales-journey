@@ -1,3 +1,4 @@
+
 // Export all demo data from respective files
 export * from './clients';
 export * from './presentations';
@@ -30,7 +31,6 @@ export function usePresentations() {
         room: 'Executive Room',
         status: 'completed'
       }
-    ],
-    status: 'success' as const
+    ]
   };
 }

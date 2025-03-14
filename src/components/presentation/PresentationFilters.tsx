@@ -16,15 +16,12 @@ import { waveTimes } from '@/utils/demoData/presentations';
 interface PresentationFiltersProps {
   searchTerm: string;
   setSearchTerm: (value: string) => void;
-  selectedRoom: string;
-  setSelectedRoom: (value: string) => void;
-  selectedWave: string;
-  setSelectedWave: (value: string) => void;
-  selectedPresenter: string;
-  setSelectedPresenter: (value: string) => void;
-  allRooms: string[];
-  allPresenters: string[];
-  clearFilters: () => void;
+  selectedRoom: string | null;
+  setSelectedRoom: (value: string | null) => void;
+  dateRange: [Date | null, Date | null];
+  setDateRange: (value: [Date | null, Date | null]) => void;
+  statusFilter: string | null;
+  setStatusFilter: (value: string | null) => void;
 }
 
 const PresentationFilters: React.FC<PresentationFiltersProps> = ({
@@ -32,13 +29,10 @@ const PresentationFilters: React.FC<PresentationFiltersProps> = ({
   setSearchTerm,
   selectedRoom,
   setSelectedRoom,
-  selectedWave,
-  setSelectedWave,
-  selectedPresenter,
-  setSelectedPresenter,
-  allRooms,
-  allPresenters,
-  clearFilters
+  dateRange,
+  setDateRange,
+  statusFilter,
+  setStatusFilter
 }) => {
   return (
     <Card>
@@ -57,55 +51,55 @@ const PresentationFilters: React.FC<PresentationFiltersProps> = ({
             />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label htmlFor="wave">Wave Time</Label>
-              <Select value={selectedWave} onValueChange={setSelectedWave}>
-                <SelectTrigger id="wave">
-                  <SelectValue placeholder="All Wave Times" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Wave Times</SelectItem>
-                  {waveTimes.map((time) => (
-                    <SelectItem key={time} value={time}>{time}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <Label htmlFor="room">Room Number</Label>
-              <Select value={selectedRoom} onValueChange={setSelectedRoom}>
+              <Select 
+                value={selectedRoom || "all"} 
+                onValueChange={(value) => setSelectedRoom(value === "all" ? null : value)}
+              >
                 <SelectTrigger id="room">
                   <SelectValue placeholder="All Rooms" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Rooms</SelectItem>
-                  {allRooms.map((room) => (
-                    <SelectItem key={room} value={room}>Room {room}</SelectItem>
-                  ))}
+                  <SelectItem value="101">Room 101</SelectItem>
+                  <SelectItem value="102">Room 102</SelectItem>
+                  <SelectItem value="103">Room 103</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div>
-              <Label htmlFor="presenter">Presenter</Label>
-              <Select value={selectedPresenter} onValueChange={setSelectedPresenter}>
-                <SelectTrigger id="presenter">
-                  <SelectValue placeholder="All Presenters" />
+              <Label htmlFor="status">Status</Label>
+              <Select 
+                value={statusFilter || "all"} 
+                onValueChange={(value) => setStatusFilter(value === "all" ? null : value)}
+              >
+                <SelectTrigger id="status">
+                  <SelectValue placeholder="All Statuses" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Presenters</SelectItem>
-                  {allPresenters.map((presenter) => (
-                    <SelectItem key={presenter} value={presenter}>{presenter}</SelectItem>
-                  ))}
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="scheduled">Scheduled</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
           
           <div className="flex justify-end">
-            <Button variant="outline" onClick={clearFilters} className="mr-2">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setSearchTerm('');
+                setSelectedRoom(null);
+                setStatusFilter(null);
+                setDateRange([null, null]);
+              }} 
+              className="mr-2"
+            >
               Clear Filters
             </Button>
             <Button className="bg-brio-navy hover:bg-brio-navy/90">
