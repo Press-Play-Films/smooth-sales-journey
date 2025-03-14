@@ -1,66 +1,112 @@
 
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
-import PresentationList from '@/components/presentation/PresentationList';
+import { Button } from "@/components/ui/button";
+import { demoActivePresentations, demoUpcomingPresentations } from '@/utils/demoData/presentations';
+import { searchPresentations } from '@/utils/searchUtils';
+import NewPresentationForm from '@/components/presentation/NewPresentationForm';
 import PresentationFilters from '@/components/presentation/PresentationFilters';
-import CRMStatusIndicator from '@/components/salesforce/CRMStatusIndicator';
-import { usePresentations } from '@/utils/demoData';
-import { ActivePresentation, UpcomingPresentation } from '@/types/dashboard';
+import PresentationList from '@/components/presentation/PresentationList';
 
 const PresentationsPage: React.FC = () => {
-  // State for filters
+  const [showNewPresentationForm, setShowNewPresentationForm] = useState(false);
+  
+  // Search and filter state
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
-  const [dateRange, setDateRange] = useState<[Date | null, Date | null]>([null, null]);
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState('all');
+  const [selectedWave, setSelectedWave] = useState('all');
+  const [selectedPresenter, setSelectedPresenter] = useState('all');
+
+  // Get unique list of rooms
+  const allRooms = [
+    ...new Set([
+      ...demoActivePresentations.map(p => p.roomNumber),
+      ...demoUpcomingPresentations.map(p => p.roomNumber)
+    ])
+  ].sort();
+
+  // Get unique list of presenters
+  const allPresenters = [
+    ...new Set([
+      ...demoActivePresentations.map(p => p.presenter),
+      ...demoUpcomingPresentations.map(p => p.presenter)
+    ])
+  ].sort();
+
+  // Filter presentations based on search and filters
+  const filteredPresentations = searchPresentations(
+    demoActivePresentations,
+    demoUpcomingPresentations,
+    searchTerm,
+    {
+      presenter: selectedPresenter === 'all' ? '' : selectedPresenter,
+      room: selectedRoom === 'all' ? '' : selectedRoom,
+      waveTime: selectedWave === 'all' ? '' : selectedWave
+    }
+  );
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedRoom('all');
+    setSelectedWave('all');
+    setSelectedPresenter('all');
+  };
+
+  const openNewPresentationForm = () => {
+    setShowNewPresentationForm(true);
+  };
   
-  // Get presentation data
-  const { presentations } = usePresentations();
-  
-  // Convert the presentations to the expected format
-  const formattedPresentations: (ActivePresentation | UpcomingPresentation)[] = presentations.map(p => ({
-    id: p.id,
-    title: p.title,
-    presenter: p.client.split(' ')[0], // Extract first name as presenter
-    startTime: p.date,
-    status: 'scheduled' as const,
-    clients: 2, // Assuming 2 clients per presentation for UpcomingPresentation
-    roomNumber: p.room
-  }));
+  const closeNewPresentationForm = () => {
+    setShowNewPresentationForm(false);
+  };
   
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h1 className="text-2xl font-bold tracking-tight">Presentations</h1>
-          <CRMStatusIndicator variant="compact" className="self-start sm:self-auto" />
+        <div className="flex justify-between items-center">
+          <h2 className="text-3xl font-bold text-brio-navy">Presentations</h2>
+          <Button 
+            onClick={openNewPresentationForm}
+            className="bg-brio-navy hover:bg-brio-navy/90"
+          >
+            <span className="mr-2">+</span> New Presentation
+          </Button>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-[250px_1fr] gap-6">
-          <div>
-            <PresentationFilters 
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              selectedRoom={selectedRoom}
-              setSelectedRoom={setSelectedRoom}
-              dateRange={dateRange}
-              setDateRange={setDateRange}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-            />
-            
-            {/* CRM Status Card */}
-            <div className="mt-4 hidden md:block">
-              <CRMStatusIndicator variant="full" />
-            </div>
-          </div>
-          
-          <PresentationList 
-            title="All Presentations"
-            presentations={formattedPresentations}
-            status="scheduled"
-          />
-        </div>
+        {/* Search and filters */}
+        <PresentationFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          selectedRoom={selectedRoom}
+          setSelectedRoom={setSelectedRoom}
+          selectedWave={selectedWave}
+          setSelectedWave={setSelectedWave}
+          selectedPresenter={selectedPresenter}
+          setSelectedPresenter={setSelectedPresenter}
+          allRooms={allRooms}
+          allPresenters={allPresenters}
+          clearFilters={clearFilters}
+        />
+        
+        {/* Active Presentations */}
+        <PresentationList
+          title="Active Presentations"
+          presentations={filteredPresentations.active}
+          status="active"
+        />
+        
+        {/* Upcoming Presentations */}
+        <PresentationList
+          title="Upcoming Presentations"
+          presentations={filteredPresentations.upcoming}
+          status="scheduled"
+        />
+        
+        {/* New Presentation Form Modal */}
+        {showNewPresentationForm && (
+          <NewPresentationForm onClose={closeNewPresentationForm} />
+        )}
       </div>
     </Layout>
   );

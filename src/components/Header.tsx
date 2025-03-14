@@ -5,7 +5,6 @@ import RoleToggle from './header/RoleToggle';
 import DesktopNavigation from './header/DesktopNavigation';
 import MobileMenu from './header/MobileMenu';
 import NewPresentationForm from './presentation/NewPresentationForm';
-import CRMStatusIndicator from './salesforce/CRMStatusIndicator';
 
 interface HeaderProps {
   userRole: 'employee' | 'executive';
@@ -42,11 +41,6 @@ const Header: React.FC<HeaderProps> = ({ userRole, toggleUserRole }) => {
         </div>
         
         <div className="flex items-center space-x-4">
-          {/* CRM Status Indicator */}
-          <div className="hidden md:block">
-            <CRMStatusIndicator variant="compact" />
-          </div>
-          
           {/* User Role Toggle */}
           <RoleToggle userRole={userRole} toggleUserRole={toggleUserRole} />
           
