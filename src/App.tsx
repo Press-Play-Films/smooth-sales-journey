@@ -15,77 +15,79 @@ const TeamView = lazy(() => import("./pages/TeamView"));
 const ExecutiveDashboard = lazy(() => import("./pages/ExecutiveDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+// Create a new client for each rendering cycle to avoid invalid hook call errors
+function App() {
+  // Create a client instance inside the function component
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: false,
+        retry: 1,
+        staleTime: 5 * 60 * 1000, // 5 minutes
+      },
     },
-  },
-});
+  });
 
-// Browser compatibility component wrapper
-const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  React.useEffect(() => {
-    // Initialize browser compatibility features
-    const applyEmailClientStyles = () => {
-      const isEmailClient = window.navigator.userAgent.indexOf('Outlook') !== -1 || 
-        window.navigator.userAgent.indexOf('Gmail') !== -1 ||
-        window.navigator.userAgent.indexOf('Yahoo') !== -1 ||
-        document.documentElement.className.indexOf('mail') !== -1;
+  // Browser compatibility component wrapper
+  const BrowserCompatibilityProvider = ({ children }: {children: React.ReactNode}) => {
+    React.useEffect(() => {
+      // Initialize browser compatibility features
+      const applyEmailClientStyles = () => {
+        const isEmailClient = window.navigator.userAgent.indexOf('Outlook') !== -1 || 
+          window.navigator.userAgent.indexOf('Gmail') !== -1 ||
+          window.navigator.userAgent.indexOf('Yahoo') !== -1 ||
+          document.documentElement.className.indexOf('mail') !== -1;
+        
+        if (isEmailClient) {
+          const emailStyleElement = document.createElement('style');
+          emailStyleElement.innerHTML = `
+            /* Email client specific overrides */
+            body, table, td, p, a, li, blockquote {
+              -webkit-text-size-adjust: 100%;
+              -ms-text-size-adjust: 100%;
+            }
+            
+            table, td {
+              mso-table-lspace: 0pt;
+              mso-table-rspace: 0pt;
+            }
+            
+            img {
+              -ms-interpolation-mode: bicubic;
+            }
+          `;
+          document.head.appendChild(emailStyleElement);
+        }
+      };
       
-      if (isEmailClient) {
-        const emailStyleElement = document.createElement('style');
-        emailStyleElement.innerHTML = `
-          /* Email client specific overrides */
-          body, table, td, p, a, li, blockquote {
-            -webkit-text-size-adjust: 100%;
-            -ms-text-size-adjust: 100%;
-          }
-          
-          table, td {
-            mso-table-lspace: 0pt;
-            mso-table-rspace: 0pt;
-          }
-          
-          img {
-            -ms-interpolation-mode: bicubic;
-          }
-        `;
-        document.head.appendChild(emailStyleElement);
-      }
-    };
-    
-    // Apply any browser-specific polyfills or styles
-    const applyCrossBrowserSupport = () => {
-      // Add Safari flex gap support
-      if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-        document.documentElement.classList.add('safari');
-        const safariStyleFix = document.createElement('style');
-        safariStyleFix.innerHTML = `
-          .safari .gap-fix {
-            margin-right: var(--gap-size, 1rem);
-            margin-bottom: var(--gap-size, 1rem);
-          }
-        `;
-        document.head.appendChild(safariStyleFix);
-      }
+      // Apply any browser-specific polyfills or styles
+      const applyCrossBrowserSupport = () => {
+        // Add Safari flex gap support
+        if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+          document.documentElement.classList.add('safari');
+          const safariStyleFix = document.createElement('style');
+          safariStyleFix.innerHTML = `
+            .safari .gap-fix {
+              margin-right: var(--gap-size, 1rem);
+              margin-bottom: var(--gap-size, 1rem);
+            }
+          `;
+          document.head.appendChild(safariStyleFix);
+        }
+        
+        // Add Firefox specific styles if needed
+        if (navigator.userAgent.indexOf("Firefox") > -1) {
+          document.documentElement.classList.add('firefox');
+        }
+      };
       
-      // Add Firefox specific styles if needed
-      if (navigator.userAgent.indexOf("Firefox") > -1) {
-        document.documentElement.classList.add('firefox');
-      }
-    };
+      applyEmailClientStyles();
+      applyCrossBrowserSupport();
+    }, []);
     
-    applyEmailClientStyles();
-    applyCrossBrowserSupport();
-  }, []);
-  
-  return <>{children}</>;
-};
+    return <>{children}</>;
+  };
 
-const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
@@ -119,6 +121,6 @@ const App = () => {
       </TooltipProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
