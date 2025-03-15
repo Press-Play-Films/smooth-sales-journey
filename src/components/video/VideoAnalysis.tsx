@@ -20,7 +20,7 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
   const [loadFailed, setLoadFailed] = useState(false);
   const analysisInterval = 2000; // Check every 2 seconds
   
-  // Force simulation mode for preview and production
+  // Always use simulation mode - critical for publishing
   const forceSimulation = true;
   
   // Initialize analysis
@@ -29,15 +29,16 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     
     const initializeAnalysis = async () => {
       try {
+        // Always use simulation in production/preview
         if (forceSimulation) {
-          console.log('Using simulated analysis in preview/production mode');
+          console.log('Using simulated video analysis');
           if (isMounted) {
             setIsAnalysisEnabled(true);
           }
           return;
         }
         
-        // Skip actual loading in preview/production
+        // This code path should never be reached in production/preview
         await loadTensorFlow();
         if (isMounted) {
           setIsAnalysisEnabled(true);
@@ -65,7 +66,7 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     
     analyzeInterval = window.setInterval(async () => {
       try {
-        // Always use simulated analysis mode
+        // Always use simulated analysis
         if (forceSimulation) {
           // Generate a random status for simulation
           const statuses: ['engaged', 'distracted', 'away'] = ['engaged', 'distracted', 'away'];
@@ -78,7 +79,7 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
           return;
         }
         
-        // Use real analysis in development if enabled
+        // This code path should never be reached in production/preview
         const analysisResult = await analyzeVideoFrame(videoElement);
         const newStatus = determineClientStatus(analysisResult);
         

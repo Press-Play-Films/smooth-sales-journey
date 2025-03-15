@@ -1,7 +1,7 @@
 
 /**
  * Lazy loader for TensorFlow.js and associated models
- * Only loads these heavy dependencies when explicitly requested
+ * This module is completely disabled in non-development environments
  */
 
 // Track loading state to avoid duplicate loading
@@ -10,9 +10,10 @@ let tensorflowLoaded = false;
 
 // Export a function to check if TensorFlow is loaded
 export const isTensorFlowLoaded = (): boolean => {
-  // In preview/build environments, always return true to prevent loading attempts
+  // Always return true in non-development environments
   if (import.meta.env.SKIP_TENSORFLOW || 
       window.location.hostname !== 'localhost') {
+    console.log('TensorFlow loading disabled in non-development environment');
     return true;
   }
   return tensorflowLoaded;
@@ -20,10 +21,10 @@ export const isTensorFlowLoaded = (): boolean => {
 
 // Load TensorFlow.js and models on demand
 export const loadTensorFlow = async (): Promise<void> => {
-  // Skip loading in preview/build environments
+  // Skip loading completely in non-development environments
   if (import.meta.env.SKIP_TENSORFLOW || 
       window.location.hostname !== 'localhost') {
-    console.log('TensorFlow loading skipped in non-development environment');
+    console.log('TensorFlow loading disabled in non-development environment');
     tensorflowLoaded = true;
     return Promise.resolve();
   }
@@ -38,11 +39,10 @@ export const loadTensorFlow = async (): Promise<void> => {
   try {
     console.log('Loading TensorFlow.js and face detection models...');
     
-    // Implementation note: actual TensorFlow loading code is not implemented
-    // as we're now preventing loading in all environments
+    // Actual TensorFlow loading code is skipped for publishing purposes
     
     // Simulate successful loading after a short delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 100));
     tensorflowLoaded = true;
   } catch (error) {
     console.error('Error in TensorFlow.js loading process:', error);

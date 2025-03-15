@@ -24,11 +24,10 @@ const preloadResources = () => {
 // Execute preload
 preloadResources();
 
-// Register service worker only in production
-if ('serviceWorker' in navigator && 
-    import.meta.env.PROD) {
+// Register service worker - conditionally based on environment
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+    navigator.serviceWorker.register('/service-worker.js')
       .then(registration => {
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
       })

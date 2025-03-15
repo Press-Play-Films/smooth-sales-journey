@@ -27,7 +27,7 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      // Always treat TensorFlow as external
+      // Always treat TensorFlow as external during build
       external: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
       output: {
         manualChunks: (id) => {
@@ -63,7 +63,7 @@ export default defineConfig(({ mode }) => ({
     exclude: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
   },
   define: {
-    // Always skip TensorFlow in non-development environments
+    // Force TensorFlow to be skipped in ALL environments for publishing
     'import.meta.env.SKIP_TENSORFLOW': JSON.stringify(true),
   }
 }));
