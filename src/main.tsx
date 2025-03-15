@@ -24,10 +24,10 @@ const preloadResources = () => {
 // Execute preload
 preloadResources();
 
-// Register service worker
+// Register service worker - fixed service worker registration
 if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
+    navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
       .then(registration => {
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
       })

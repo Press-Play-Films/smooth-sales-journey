@@ -12,6 +12,7 @@ const urlsToCache = [
 
 // Install event - cache key assets
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -33,10 +34,19 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  // Ensure service worker takes control immediately
+  return self.clients.claim();
 });
 
 // Fetch event - serve from cache, fall back to network
 self.addEventListener('fetch', event => {
+  // Skip non-GET requests
+  if (event.request.method !== 'GET') return;
+  
+  // Skip browser-sync and other dev resources
+  if (event.request.url.includes('/browser-sync/') || 
+      event.request.url.includes('sockjs-node')) return;
+  
   event.respondWith(
     caches.match(event.request)
       .then(response => {
@@ -58,7 +68,8 @@ self.addEventListener('fetch', event => {
             caches.open(CACHE_NAME)
               .then(cache => {
                 cache.put(event.request, responseToCache);
-              });
+              })
+              .catch(err => console.error('Cache put error:', err));
               
             return response;
           })
@@ -66,6 +77,11 @@ self.addEventListener('fetch', event => {
             // If offline and requesting a page, show offline page
             if (event.request.mode === 'navigate') {
               return caches.match('/offline.html');
+            }
+            
+            // For image requests, you might want to return a fallback image
+            if (event.request.destination === 'image') {
+              return caches.match('/placeholder.svg');
             }
           });
       })

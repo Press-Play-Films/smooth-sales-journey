@@ -24,11 +24,13 @@ export default defineConfig(({ mode }) => ({
     minify: 'terser',
     cssMinify: true,
     sourcemap: false,
+    outDir: 'dist',
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@/components/ui'],
+          ui: ['@/components/ui/button', '@/components/ui/card'], // Reference specific UI components instead of the whole directory
           charts: ['recharts'],
           // Separate TensorFlow into its own chunks to allow code-splitting
           tensorflow: ['@tensorflow/tfjs'],
