@@ -56,8 +56,12 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
 };
 
 // Use createRoot for React 18
-createRoot(document.getElementById("root")!).render(
-  <ErrorBoundary FallbackComponent={ErrorFallback}>
-    <App />
-  </ErrorBoundary>
-);
+// Ensure we only create the root once to prevent "container has already been passed to createRoot()" warnings
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  createRoot(rootElement).render(
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <App />
+    </ErrorBoundary>
+  );
+}
