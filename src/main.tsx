@@ -76,19 +76,14 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   );
 };
 
-// Ensure the DOM is fully loaded before rendering
-document.addEventListener('DOMContentLoaded', () => {
-  const rootElement = document.getElementById("root");
-  if (rootElement) {
-    // Make sure we're not trying to render to an already populated root
-    if (!rootElement.hasChildNodes()) {
-      createRoot(rootElement).render(
-        <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <App />
-        </ErrorBoundary>
-      );
-    }
-  } else {
-    console.error("Root element not found");
-  }
-});
+// Render the app
+const rootElement = document.getElementById("root");
+if (rootElement) {
+  createRoot(rootElement).render(
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <App />
+    </ErrorBoundary>
+  );
+} else {
+  console.error("Root element not found");
+}
