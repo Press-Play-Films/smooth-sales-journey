@@ -10,16 +10,53 @@ const urlsToCache = [
   '/lovable-uploads/c3826d58-1386-4834-9056-11611e468d2a.png'
 ];
 
-// Basic passthrough service worker
-self.addEventListener('install', () => {
+// Install event - cache critical assets
+self.addEventListener('install', event => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
+  );
 });
 
-self.addEventListener('activate', () => {
-  self.clients.claim();
+// Activate event - clean up old caches
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(cacheName => {
+          return cacheName !== CACHE_NAME;
+        }).map(cacheName => {
+          return caches.delete(cacheName);
+        })
+      );
+    }).then(() => {
+      return self.clients.claim();
+    })
+  );
 });
 
-// Passthrough fetch for all environments
+// Fetch event - network first, fallback to cache
 self.addEventListener('fetch', event => {
-  event.respondWith(fetch(event.request));
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      return caches.match(event.request).then(response => {
+        if (response) {
+          return response;
+        }
+        
+        // For navigation requests, return the offline page
+        if (event.request.mode === 'navigate') {
+          return caches.match('/offline.html');
+        }
+        
+        return new Response('Network error happened', {
+          status: 408,
+          headers: { 'Content-Type': 'text/plain' }
+        });
+      });
+    })
+  );
 });

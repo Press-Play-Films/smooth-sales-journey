@@ -12,8 +12,7 @@ let tensorflowLoaded = false;
 export const isTensorFlowLoaded = (): boolean => {
   // In preview/build environments, always return true to prevent loading attempts
   if (import.meta.env.SKIP_TENSORFLOW || 
-      window.location.hostname.includes('lovable') || 
-      import.meta.env.PROD) {
+      window.location.hostname !== 'localhost') {
     return true;
   }
   return tensorflowLoaded;
@@ -23,9 +22,8 @@ export const isTensorFlowLoaded = (): boolean => {
 export const loadTensorFlow = async (): Promise<void> => {
   // Skip loading in preview/build environments
   if (import.meta.env.SKIP_TENSORFLOW || 
-      window.location.hostname.includes('lovable') || 
-      import.meta.env.PROD) {
-    console.log('TensorFlow loading skipped in preview/build environment');
+      window.location.hostname !== 'localhost') {
+    console.log('TensorFlow loading skipped in non-development environment');
     tensorflowLoaded = true;
     return Promise.resolve();
   }

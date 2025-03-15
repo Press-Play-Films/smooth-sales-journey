@@ -1,4 +1,3 @@
-
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import App from './App.tsx'
@@ -24,9 +23,9 @@ const preloadResources = () => {
 // Execute preload
 preloadResources();
 
-// Skip service worker registration in preview/production environments
+// Register service worker only in production
 if ('serviceWorker' in navigator && 
-    location.hostname === 'localhost') {
+    import.meta.env.PROD) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
       .then(registration => {
