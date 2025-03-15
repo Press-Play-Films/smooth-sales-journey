@@ -1,4 +1,3 @@
-
 import React, { lazy, Suspense } from "react";
 import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -88,9 +87,9 @@ function App() {
   });
 
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
-        <BrowserCompatibilityProvider>
+    <QueryClientProvider client={queryClient}>
+      <BrowserCompatibilityProvider>
+        <BrowserRouter>
           <TooltipProvider>
             <Toaster />
             <Suspense 
@@ -116,9 +115,9 @@ function App() {
               </Routes>
             </Suspense>
           </TooltipProvider>
-        </BrowserCompatibilityProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+        </BrowserRouter>
+      </BrowserCompatibilityProvider>
+    </QueryClientProvider>
   );
 }
 
