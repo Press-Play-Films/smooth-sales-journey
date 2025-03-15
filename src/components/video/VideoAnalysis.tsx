@@ -17,6 +17,7 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
   onStatusChange
 }) => {
   const [isAnalysisEnabled, setIsAnalysisEnabled] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
   const analysisInterval = 2000; // Check every 2 seconds
   
   // Load TensorFlow when component mounts
@@ -31,6 +32,9 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
         }
       } catch (err) {
         console.error('Failed to initialize video analysis:', err);
+        if (isMounted) {
+          setLoadFailed(true);
+        }
       }
     };
     
@@ -44,7 +48,7 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
   // Start analyzing video frames once TensorFlow is loaded
   useEffect(() => {
     // Only start analysis if both the video element exists and TensorFlow is loaded
-    if (!videoElement || !isAnalysisEnabled) return;
+    if (!videoElement || !isAnalysisEnabled || loadFailed) return;
     
     let analyzeInterval: number;
     
@@ -65,7 +69,7 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     return () => {
       clearInterval(analyzeInterval);
     };
-  }, [videoElement, clientId, currentStatus, onStatusChange, isAnalysisEnabled]);
+  }, [videoElement, clientId, currentStatus, onStatusChange, isAnalysisEnabled, loadFailed]);
   
   // This component doesn't render anything visible
   return null;

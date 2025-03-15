@@ -28,26 +28,48 @@ export default defineConfig(({ mode }) => ({
     emptyOutDir: true,
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@/components/ui/button', '@/components/ui/card'], // Reference specific UI components instead of the whole directory
-          charts: ['recharts'],
-          // Separate TensorFlow into its own chunks to allow code-splitting
-          tensorflow: ['@tensorflow/tfjs'],
-          faceDetection: ['@tensorflow-models/face-detection'],
-        }
-      },
+        manualChunks: (id) => {
+          // Main vendor dependencies
+          if (id.includes('node_modules/react') || 
+              id.includes('node_modules/react-dom') || 
+              id.includes('node_modules/react-router-dom')) {
+            return 'vendor';
+          }
+          
+          // UI components - reference specific ones to avoid directory issues
+          if (id.includes('components/ui/button') || 
+              id.includes('components/ui/card')) {
+            return 'ui';
+          }
+          
+          // Charts library
+          if (id.includes('recharts')) {
+            return 'charts';
+          }
+          
+          // Exclude TensorFlow from chunking to avoid empty chunk issues
+          if (id.includes('@tensorflow') || id.includes('face-detection')) {
+            return null; // Don't create separate chunks for TensorFlow
+          }
+          
+          return null; // Default: no chunking for other modules
+        },
+      }
     },
     terserOptions: {
       compress: {
-        drop_console: mode === 'production', // Only drop console in production
+        drop_console: mode === 'production',
         drop_debugger: true,
       },
     },
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'react-router-dom'],
-    // Exclude TensorFlow from initial bundle - will be loaded on demand
     exclude: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
   },
+  // Force Vite to treat TensorFlow imports as external to avoid build issues
+  ssr: {
+    noExternal: true, // Process all dependencies, except explicitly external ones
+    external: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
+  }
 }));
