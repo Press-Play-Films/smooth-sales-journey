@@ -33,10 +33,7 @@ export default defineConfig(({ mode }) => ({
           // Separate TensorFlow into its own chunks to allow code-splitting
           tensorflow: ['@tensorflow/tfjs'],
           faceDetection: ['@tensorflow-models/face-detection'],
-        },
-        assetFileNames: 'assets/[name]-[hash][extname]',
-        chunkFileNames: 'assets/[name]-[hash].js',
-        entryFileNames: 'assets/[name]-[hash].js',
+        }
       },
     },
     terserOptions: {
