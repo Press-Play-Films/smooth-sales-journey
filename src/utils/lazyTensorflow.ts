@@ -1,7 +1,7 @@
 
 /**
  * Lazy loader for TensorFlow.js and associated models
- * This module is completely disabled in non-development environments
+ * This module is completely disabled in production environments
  */
 
 // Track loading state to avoid duplicate loading
@@ -10,10 +10,11 @@ let tensorflowLoaded = false;
 
 // Export a function to check if TensorFlow is loaded
 export const isTensorFlowLoaded = (): boolean => {
-  // Always return true in non-development environments
+  // Always return true in non-development or publishing environments
   if (import.meta.env.SKIP_TENSORFLOW || 
+      import.meta.env.PROD || 
       window.location.hostname !== 'localhost') {
-    console.log('TensorFlow loading disabled in non-development environment');
+    console.log('TensorFlow loading disabled in production environment');
     return true;
   }
   return tensorflowLoaded;
@@ -21,10 +22,11 @@ export const isTensorFlowLoaded = (): boolean => {
 
 // Load TensorFlow.js and models on demand
 export const loadTensorFlow = async (): Promise<void> => {
-  // Skip loading completely in non-development environments
+  // Skip loading completely in non-development or publishing environments
   if (import.meta.env.SKIP_TENSORFLOW || 
+      import.meta.env.PROD || 
       window.location.hostname !== 'localhost') {
-    console.log('TensorFlow loading disabled in non-development environment');
+    console.log('TensorFlow loading disabled in production environment');
     tensorflowLoaded = true;
     return Promise.resolve();
   }
@@ -37,7 +39,7 @@ export const loadTensorFlow = async (): Promise<void> => {
   tensorflowLoading = true;
   
   try {
-    console.log('Loading TensorFlow.js and face detection models...');
+    console.log('Loading TensorFlow.js and face detection models... (development mode only)');
     
     // Actual TensorFlow loading code is skipped for publishing purposes
     

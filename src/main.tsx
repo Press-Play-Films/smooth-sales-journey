@@ -76,14 +76,18 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   );
 };
 
-// Render the app
+// Check if root element has already been rendered to
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  createRoot(rootElement).render(
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <App />
-    </ErrorBoundary>
-  );
+  // Only create root if element doesn't already have children
+  // This prevents the "already been passed to createRoot()" warning
+  if (!rootElement.hasChildNodes()) {
+    createRoot(rootElement).render(
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <App />
+      </ErrorBoundary>
+    );
+  }
 } else {
   console.error("Root element not found");
 }
