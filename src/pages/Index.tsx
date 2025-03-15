@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import Dashboard from '@/components/Dashboard';
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const Index: React.FC = () => {
-  const [welcomeDismissed, setWelcomeDismissed] = React.useState(false);
-  const [demoMode, setDemoMode] = React.useState(true);
+  const [welcomeDismissed, setWelcomeDismissed] = useState(false);
+  const [demoMode, setDemoMode] = useState(true);
   
   // Show welcome toast for demo purposes
-  React.useEffect(() => {
+  useEffect(() => {
     const timer = setTimeout(() => {
       toast.success("Welcome to the Brio Sales Management demo!", {
         description: "This demonstration is optimized for all browsers and email clients.",
@@ -23,7 +23,7 @@ const Index: React.FC = () => {
   }, []);
   
   // Simulate notifications for demo purposes
-  React.useEffect(() => {
+  useEffect(() => {
     if (demoMode) {
       const notifications = [
         { title: "New client registered", message: "The Andersons have scheduled a presentation" },

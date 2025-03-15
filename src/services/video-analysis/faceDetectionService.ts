@@ -22,43 +22,26 @@ export const initializeFaceDetection = async (): Promise<any | null> => {
       // Only load TensorFlow if not already loaded
       if (!isTensorFlowLoaded()) {
         await loadTensorFlow();
-        // If TensorFlow failed to load, exit early
-        if (!isTensorFlowLoaded()) {
-          console.warn('Face detection unavailable: TensorFlow.js could not be loaded');
-          return null;
-        }
       }
       
-      // Safely attempt to dynamically import modules
-      try {
-        if (!tf) {
-          tf = await import('@tensorflow/tfjs');
-        }
-        
-        if (!faceDetection) {
-          faceDetection = await import('@tensorflow-models/face-detection');
-        }
-      } catch (err) {
-        console.warn('Face detection models could not be loaded:', err);
-        return null;
+      // Dynamically import the face detection module
+      if (!faceDetection) {
+        tf = await import('@tensorflow/tfjs');
+        faceDetection = await import('@tensorflow-models/face-detection');
       }
       
-      // Only proceed if both modules are available
-      if (tf && faceDetection) {
-        // Using SSD MobileNet model - optimized for small faces and faster performance
-        const model = faceDetection.SupportedModels.MediaPipeFaceDetector;
-        const detectorConfig = {
-          runtime: 'tfjs', // Use TensorFlow.js runtime
-          modelType: 'short', // Use lightweight model for better performance
-          maxFaces: 1, // Optimize for single face detection in thumbnails
-        } as const;
-        
-        faceDetector = await faceDetection.createDetector(model, detectorConfig);
-        console.log('Face detection model loaded successfully');
-      }
+      // Using SSD MobileNet model - optimized for small faces and faster performance
+      const model = faceDetection.SupportedModels.MediaPipeFaceDetector;
+      const detectorConfig = {
+        runtime: 'tfjs', // Use TensorFlow.js runtime
+        modelType: 'short', // Use lightweight model for better performance
+        maxFaces: 1, // Optimize for single face detection in thumbnails
+      } as const;
+      
+      faceDetector = await faceDetection.createDetector(model, detectorConfig);
+      console.log('Face detection model loaded successfully');
     } catch (error) {
       console.error('Error initializing face detection:', error);
-      faceDetector = null;
     }
   }
   return faceDetector;
@@ -72,14 +55,10 @@ export const initializeFaceDetection = async (): Promise<any | null> => {
 export const detectFaces = async (
   videoElement: HTMLVideoElement
 ): Promise<any[]> => {
-  // Fail gracefully if video element is invalid
-  if (!videoElement || !videoElement.videoWidth || !videoElement.videoHeight) {
-    return [];
-  }
-  
   // Ensure face detector is initialized
   const detector = await initializeFaceDetection();
   if (!detector) {
+    console.error('Face detector not available');
     return [];
   }
   
@@ -97,8 +76,6 @@ export const detectFaces = async (
  * Check if eyes are visible based on face landmarks
  */
 export const checkEyesVisible = (face: any): boolean => {
-  if (!face) return false;
-  
   // If keypoints are available, use them to check eye visibility
   if (face.keypoints && face.keypoints.length >= 6) {
     // MediaPipe face detector provides these keypoints

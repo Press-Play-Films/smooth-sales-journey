@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { analyzeVideoFrame, determineClientStatus } from '@/services/video-analysis';
-import { loadTensorFlow, isTensorFlowLoaded } from '@/utils/lazyTensorflow';
+import { loadTensorFlow } from '@/utils/lazyTensorflow';
 
 interface VideoAnalysisProps {
   videoElement: HTMLVideoElement | null;
@@ -17,30 +17,20 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
   onStatusChange
 }) => {
   const [isAnalysisEnabled, setIsAnalysisEnabled] = useState(false);
-  const [loadFailed, setLoadFailed] = useState(false);
   const analysisInterval = 2000; // Check every 2 seconds
   
-  // ALWAYS use simulation mode in ANY environment except local development
-  // This is critical for publishing success
-  const forceSimulation = true; // Force simulation in all environments for safety
-  
-  // Initialize analysis
+  // Load TensorFlow when component mounts
   useEffect(() => {
     let isMounted = true;
     
     const initializeAnalysis = async () => {
       try {
-        // Always use simulation mode - this is the safest approach
-        console.log('Using simulated video analysis (forced for publishing safety)');
+        await loadTensorFlow();
         if (isMounted) {
           setIsAnalysisEnabled(true);
         }
-        return;
       } catch (err) {
         console.error('Failed to initialize video analysis:', err);
-        if (isMounted) {
-          setLoadFailed(true);
-        }
       }
     };
     
@@ -51,18 +41,17 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     };
   }, []);
   
-  // Start analyzing video frames once enabled
+  // Start analyzing video frames once TensorFlow is loaded
   useEffect(() => {
+    // Only start analysis if both the video element exists and TensorFlow is loaded
     if (!videoElement || !isAnalysisEnabled) return;
     
     let analyzeInterval: number;
     
     analyzeInterval = window.setInterval(async () => {
       try {
-        // Always use simulated analysis - critical for publishing
-        // Generate a random status for simulation
-        const statuses: ['engaged', 'distracted', 'away'] = ['engaged', 'distracted', 'away'];
-        const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        const analysisResult = await analyzeVideoFrame(videoElement);
+        const newStatus = determineClientStatus(analysisResult);
         
         // Only update if status has changed
         if (newStatus !== currentStatus) {

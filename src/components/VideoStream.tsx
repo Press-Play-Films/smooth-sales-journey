@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Client } from '@/types/dashboard'; // Import the Client type from dashboard types
+import { connectToExternalVideoSource } from '@/services/video-analysis';
+import { Client } from '@/types/dashboard';
 import VideoDisplay from './video/VideoDisplay';
 import VideoAnalysis from './video/VideoAnalysis';
 import StatusIndicator from './video/StatusIndicator';
@@ -18,10 +19,6 @@ const VideoStream: React.FC<VideoStreamProps> = ({
 }) => {
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
   const [analysisEnabled, setAnalysisEnabled] = useState<boolean>(() => {
-    // In preview mode, always disable real analysis
-    if (window.location.hostname.includes('lovable.ai')) {
-      return false;
-    }
     // Read initial setting from localStorage
     const savedSetting = localStorage.getItem('enableAnalysis');
     return savedSetting ? savedSetting === 'true' : true; // Default to enabled
@@ -29,6 +26,13 @@ const VideoStream: React.FC<VideoStreamProps> = ({
   
   // Set up video stream from external source if needed
   const handleVideoReady = async (video: HTMLVideoElement) => {
+    if (sourceId) {
+      try {
+        await connectToExternalVideoSource(video, sourceId);
+      } catch (err) {
+        console.error('Error connecting to external video source:', err);
+      }
+    }
     setVideoElement(video);
   };
   
@@ -56,7 +60,7 @@ const VideoStream: React.FC<VideoStreamProps> = ({
       />
       
       {/* Only render VideoAnalysis component if analysis is enabled */}
-      {videoElement && (analysisEnabled || window.location.hostname.includes('lovable.ai')) && (
+      {videoElement && analysisEnabled && (
         <VideoAnalysis
           videoElement={videoElement}
           clientId={client.id}
@@ -68,7 +72,7 @@ const VideoStream: React.FC<VideoStreamProps> = ({
       <StatusIndicator status={client.status} />
       
       {/* Show notice when analysis is disabled */}
-      {!analysisEnabled && !window.location.hostname.includes('lovable.ai') && (
+      {!analysisEnabled && (
         <div className="absolute bottom-6 left-0 right-0 mx-auto text-center">
           <span className="bg-black/70 text-white text-xs px-2 py-1 rounded">
             Analysis disabled
