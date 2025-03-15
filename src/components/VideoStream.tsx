@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { Client } from '@/types/dashboard'; // Import the Client type from dashboard types
 import VideoDisplay from './video/VideoDisplay';
 import VideoAnalysis from './video/VideoAnalysis';
 import StatusIndicator from './video/StatusIndicator';
