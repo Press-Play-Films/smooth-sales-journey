@@ -1,0 +1,4 @@
+
+User-agent: *
+Allow: /
+Sitemap: https://brio-sales-management.lovable.app/sitemap.xml
