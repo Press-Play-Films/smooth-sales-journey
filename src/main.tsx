@@ -8,7 +8,8 @@ import './index.css'
 const preloadResources = () => {
   const links = [
     '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png',
-    // Add more critical resources here
+    '/lovable-uploads/05981032-1579-4d42-815d-7970b7d6939a.png',
+    '/lovable-uploads/c3826d58-1386-4834-9056-11611e468d2a.png'
   ];
   
   links.forEach(href => {
@@ -22,6 +23,19 @@ const preloadResources = () => {
 
 // Execute preload
 preloadResources();
+
+// Register service worker
+if ('serviceWorker' in navigator && location.hostname !== 'localhost') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('ServiceWorker registration successful with scope: ', registration.scope);
+      })
+      .catch(error => {
+        console.error('ServiceWorker registration failed: ', error);
+      });
+  });
+}
 
 // Error fallback component
 const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => {

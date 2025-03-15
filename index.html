@@ -1,50 +1,29 @@
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <title>Brio Sales Management System</title>
-    <meta name="description" content="Brio Vacation Sales Management Dashboard" />
-    <meta name="author" content="Brio Vacations" />
-    <meta property="og:image" content="/og-image.png" />
-    <meta property="og:title" content="Brio Sales Management System" />
-    <meta property="og:description" content="Track presentations, manage clients, and monitor performance metrics" />
-    
-    <!-- Apple Meta Tags -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    
-    <!-- Edge Compatibility -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/favicon.ico">
-    
-    <!-- Preload Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Polyfills for older browsers -->
-    <script>
-      if (!('IntersectionObserver' in window)) {
-        document.write('<script src="https://polyfill.io/v3/polyfill.min.js?features=IntersectionObserver"><\/script>');
-      }
-    </script>
+    <meta name="description" content="Brio Sales Management - Professional sales tracking and client management platform" />
+    <meta name="theme-color" content="#1e3a8a" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>Brio Sales Management</title>
+    <!-- Preconnect to critical domains -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
-
   <body>
     <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
     <noscript>
-      <div style="padding: 2rem; text-align: center;">
-        <h1>JavaScript Required</h1>
-        <p>This application requires JavaScript to function. Please enable JavaScript in your browser settings.</p>
+      <div style="text-align: center; padding: 2rem;">
+        <img src="/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png" alt="Brio Vacations" style="max-width: 120px; margin-bottom: 1.5rem;" />
+        <h1 style="color: #1e3a8a; font-size: 1.5rem; margin-bottom: 1rem;">JavaScript Required</h1>
+        <p style="color: #64748b; max-width: 500px; margin: 0 auto; line-height: 1.5;">
+          The Brio Sales Management application requires JavaScript to function. Please enable JavaScript in your browser settings and reload the page.
+        </p>
       </div>
     </noscript>
-    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
-    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
