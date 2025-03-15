@@ -37,9 +37,8 @@ export default defineConfig(({ mode }) => ({
             return 'vendor';
           }
           
-          // UI components - specific files only
-          if (id.includes('components/ui/button.tsx') || 
-              id.includes('components/ui/card.tsx')) {
+          // UI components
+          if (id.includes('components/ui/')) {
             return 'ui';
           }
           
@@ -63,7 +62,7 @@ export default defineConfig(({ mode }) => ({
     exclude: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
   },
   define: {
-    // Define global constants for conditional code
+    // Define global constants to control TensorFlow loading
     'import.meta.env.SKIP_TENSORFLOW': JSON.stringify(true),
   }
 }));

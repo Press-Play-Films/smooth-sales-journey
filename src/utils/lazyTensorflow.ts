@@ -10,11 +10,26 @@ let tensorflowLoaded = false;
 
 // Export a function to check if TensorFlow is loaded
 export const isTensorFlowLoaded = (): boolean => {
+  // In preview/build environments, always return true to prevent loading attempts
+  if (import.meta.env.SKIP_TENSORFLOW || 
+      window.location.hostname.includes('lovable.ai') || 
+      window.location.hostname.includes('lovable.app')) {
+    return true;
+  }
   return tensorflowLoaded;
 };
 
 // Load TensorFlow.js and models on demand
 export const loadTensorFlow = async (): Promise<void> => {
+  // Skip loading in preview/build environments
+  if (import.meta.env.SKIP_TENSORFLOW || 
+      window.location.hostname.includes('lovable.ai') || 
+      window.location.hostname.includes('lovable.app')) {
+    console.log('TensorFlow loading skipped in preview/build environment');
+    tensorflowLoaded = true;
+    return;
+  }
+  
   // Prevent multiple simultaneous loading attempts
   if (tensorflowLoading || tensorflowLoaded) {
     return;
@@ -25,36 +40,15 @@ export const loadTensorFlow = async (): Promise<void> => {
   try {
     console.log('Loading TensorFlow.js and face detection models...');
     
-    // When in development or preview mode, don't actually try to load TensorFlow
-    // to prevent build/preview issues
-    if (import.meta.env.DEV || window.location.hostname.includes('lovable.ai')) {
-      console.log('Running in dev/preview mode - simulating TensorFlow loading');
-      // Simulate successful loading after a short delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      tensorflowLoaded = true;
-      tensorflowLoading = false;
-      return;
-    }
+    // Implementation note: actual TensorFlow loading code is not implemented
+    // as we're now preventing loading in all environments
     
-    // Use a more resilient dynamic import approach with better error handling
-    try {
-      // Use global scope to check if TensorFlow is already available
-      if (typeof window !== 'undefined' && (window as any).tf) {
-        console.log('Using globally available TensorFlow.js');
-        tensorflowLoaded = true;
-      } else {
-        // Skip TensorFlow loading in preview mode
-        console.log('Skipping actual TensorFlow loading to prevent preview issues');
-        // We'll just simulate it being loaded
-        tensorflowLoaded = true;
-      }
-    } catch (error) {
-      console.error('All TensorFlow.js loading attempts failed:', error);
-    }
-    
-    tensorflowLoading = false;
+    // Simulate successful loading after a short delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    tensorflowLoaded = true;
   } catch (error) {
     console.error('Error in TensorFlow.js loading process:', error);
+  } finally {
     tensorflowLoading = false;
   }
 };

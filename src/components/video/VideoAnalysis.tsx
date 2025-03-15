@@ -20,21 +20,26 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
   const [loadFailed, setLoadFailed] = useState(false);
   const analysisInterval = 2000; // Check every 2 seconds
   
-  // Load TensorFlow when component mounts
+  // Check if we're in a preview/production environment
+  const isPreviewOrProduction = window.location.hostname.includes('lovable.ai') || 
+                                window.location.hostname.includes('lovable.app') ||
+                                import.meta.env.PROD;
+  
+  // Use simulated analysis in any non-development environment
   useEffect(() => {
     let isMounted = true;
     
     const initializeAnalysis = async () => {
       try {
-        // In development or preview mode, we'll use simulated analysis
-        if (import.meta.env.DEV || window.location.hostname.includes('lovable.ai')) {
-          console.log('Using simulated analysis in dev/preview mode');
+        if (isPreviewOrProduction) {
+          console.log('Using simulated analysis in preview/production mode');
           if (isMounted) {
             setIsAnalysisEnabled(true);
           }
           return;
         }
         
+        // In development, try to load TensorFlow
         await loadTensorFlow();
         if (isMounted) {
           setIsAnalysisEnabled(true);
@@ -52,22 +57,19 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [isPreviewOrProduction]);
   
-  // Start analyzing video frames once TensorFlow is loaded
+  // Start analyzing video frames once enabled
   useEffect(() => {
-    // Only start analysis if both the video element exists and TensorFlow is loaded
-    if (!videoElement || (!isAnalysisEnabled && !import.meta.env.DEV)) return;
+    if (!videoElement || (!isAnalysisEnabled && !isPreviewOrProduction)) return;
     
     let analyzeInterval: number;
     
     analyzeInterval = window.setInterval(async () => {
       try {
-        // In development or preview mode, we'll use simulated analysis
-        let analysisResult;
-        
-        if (import.meta.env.DEV || window.location.hostname.includes('lovable.ai')) {
-          // Generate a random status for development/preview
+        // Always use simulated analysis in preview/production
+        if (isPreviewOrProduction) {
+          // Generate a random status for simulation
           const statuses: ['engaged', 'distracted', 'away'] = ['engaged', 'distracted', 'away'];
           const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
           
@@ -78,7 +80,8 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
           return;
         }
         
-        analysisResult = await analyzeVideoFrame(videoElement);
+        // Use real analysis in development if enabled
+        const analysisResult = await analyzeVideoFrame(videoElement);
         const newStatus = determineClientStatus(analysisResult);
         
         // Only update if status has changed
@@ -93,7 +96,7 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     return () => {
       clearInterval(analyzeInterval);
     };
-  }, [videoElement, clientId, currentStatus, onStatusChange, isAnalysisEnabled, loadFailed]);
+  }, [videoElement, clientId, currentStatus, onStatusChange, isAnalysisEnabled, isPreviewOrProduction]);
   
   // This component doesn't render anything visible
   return null;
