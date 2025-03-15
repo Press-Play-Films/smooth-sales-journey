@@ -15,7 +15,66 @@ const TeamView = lazy(() => import("./pages/TeamView"));
 const ExecutiveDashboard = lazy(() => import("./pages/ExecutiveDashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-// Create a new client for each rendering cycle to avoid invalid hook call errors
+// Browser compatibility component
+const BrowserCompatibilityProvider = ({ children }: {children: React.ReactNode}) => {
+  React.useEffect(() => {
+    // Initialize browser compatibility features
+    const applyEmailClientStyles = () => {
+      const isEmailClient = window.navigator.userAgent.indexOf('Outlook') !== -1 || 
+        window.navigator.userAgent.indexOf('Gmail') !== -1 ||
+        window.navigator.userAgent.indexOf('Yahoo') !== -1 ||
+        document.documentElement.className.indexOf('mail') !== -1;
+      
+      if (isEmailClient) {
+        const emailStyleElement = document.createElement('style');
+        emailStyleElement.innerHTML = `
+          /* Email client specific overrides */
+          body, table, td, p, a, li, blockquote {
+            -webkit-text-size-adjust: 100%;
+            -ms-text-size-adjust: 100%;
+          }
+          
+          table, td {
+            mso-table-lspace: 0pt;
+            mso-table-rspace: 0pt;
+          }
+          
+          img {
+            -ms-interpolation-mode: bicubic;
+          }
+        `;
+        document.head.appendChild(emailStyleElement);
+      }
+    };
+    
+    // Apply any browser-specific polyfills or styles
+    const applyCrossBrowserSupport = () => {
+      // Add Safari flex gap support
+      if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
+        document.documentElement.classList.add('safari');
+        const safariStyleFix = document.createElement('style');
+        safariStyleFix.innerHTML = `
+          .safari .gap-fix {
+            margin-right: var(--gap-size, 1rem);
+            margin-bottom: var(--gap-size, 1rem);
+          }
+        `;
+        document.head.appendChild(safariStyleFix);
+      }
+      
+      // Add Firefox specific styles if needed
+      if (navigator.userAgent.indexOf("Firefox") > -1) {
+        document.documentElement.classList.add('firefox');
+      }
+    };
+    
+    applyEmailClientStyles();
+    applyCrossBrowserSupport();
+  }, []);
+  
+  return <>{children}</>;
+};
+
 function App() {
   // Create a client instance inside the function component
   const queryClient = new QueryClient({
@@ -28,72 +87,12 @@ function App() {
     },
   });
 
-  // Browser compatibility component wrapper
-  const BrowserCompatibilityProvider = ({ children }: {children: React.ReactNode}) => {
-    React.useEffect(() => {
-      // Initialize browser compatibility features
-      const applyEmailClientStyles = () => {
-        const isEmailClient = window.navigator.userAgent.indexOf('Outlook') !== -1 || 
-          window.navigator.userAgent.indexOf('Gmail') !== -1 ||
-          window.navigator.userAgent.indexOf('Yahoo') !== -1 ||
-          document.documentElement.className.indexOf('mail') !== -1;
-        
-        if (isEmailClient) {
-          const emailStyleElement = document.createElement('style');
-          emailStyleElement.innerHTML = `
-            /* Email client specific overrides */
-            body, table, td, p, a, li, blockquote {
-              -webkit-text-size-adjust: 100%;
-              -ms-text-size-adjust: 100%;
-            }
-            
-            table, td {
-              mso-table-lspace: 0pt;
-              mso-table-rspace: 0pt;
-            }
-            
-            img {
-              -ms-interpolation-mode: bicubic;
-            }
-          `;
-          document.head.appendChild(emailStyleElement);
-        }
-      };
-      
-      // Apply any browser-specific polyfills or styles
-      const applyCrossBrowserSupport = () => {
-        // Add Safari flex gap support
-        if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-          document.documentElement.classList.add('safari');
-          const safariStyleFix = document.createElement('style');
-          safariStyleFix.innerHTML = `
-            .safari .gap-fix {
-              margin-right: var(--gap-size, 1rem);
-              margin-bottom: var(--gap-size, 1rem);
-            }
-          `;
-          document.head.appendChild(safariStyleFix);
-        }
-        
-        // Add Firefox specific styles if needed
-        if (navigator.userAgent.indexOf("Firefox") > -1) {
-          document.documentElement.classList.add('firefox');
-        }
-      };
-      
-      applyEmailClientStyles();
-      applyCrossBrowserSupport();
-    }, []);
-    
-    return <>{children}</>;
-  };
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
         <BrowserCompatibilityProvider>
-          <BrowserRouter>
+          <TooltipProvider>
+            <Toaster />
             <Suspense 
               fallback={
                 <div className="flex items-center justify-center h-screen bg-white">
@@ -116,10 +115,10 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </BrowserRouter>
+          </TooltipProvider>
         </BrowserCompatibilityProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   );
 }
 
