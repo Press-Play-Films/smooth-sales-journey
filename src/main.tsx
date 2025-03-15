@@ -1,3 +1,4 @@
+
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import App from './App.tsx'
@@ -75,12 +76,19 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   );
 };
 
-// Use createRoot for React 18
-const rootElement = document.getElementById("root");
-if (rootElement) {
-  createRoot(rootElement).render(
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <App />
-    </ErrorBoundary>
-  );
-}
+// Ensure the DOM is fully loaded before rendering
+document.addEventListener('DOMContentLoaded', () => {
+  const rootElement = document.getElementById("root");
+  if (rootElement) {
+    // Make sure we're not trying to render to an already populated root
+    if (!rootElement.hasChildNodes()) {
+      createRoot(rootElement).render(
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <App />
+        </ErrorBoundary>
+      );
+    }
+  } else {
+    console.error("Root element not found");
+  }
+});
