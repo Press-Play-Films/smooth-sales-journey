@@ -1,5 +1,6 @@
+
 // Service Worker for Brio Sales Management
-const CACHE_NAME = 'brio-sales-cache-v2';
+const CACHE_NAME = 'brio-sales-cache-v3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -45,35 +46,38 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event - simple cache strategy
+// Fetch event - network-first strategy for app routes, cache-first for assets
 self.addEventListener('fetch', event => {
-  // Skip non-GET requests
   if (event.request.method !== 'GET') return;
   
-  // Skip cross-origin requests
   if (!event.request.url.startsWith(self.location.origin)) return;
   
-  // Handle the fetch event with a cache-first strategy
+  // Use network-first strategy for HTML routes
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.match(event.request) || caches.match('/offline.html');
+        })
+    );
+    return;
+  }
+  
+  // Cache-first for assets
   event.respondWith(
     caches.match(event.request)
       .then(cachedResponse => {
         if (cachedResponse) {
-          // Return cached response
           return cachedResponse;
         }
         
-        // Otherwise try to fetch from network
         return fetch(event.request)
           .then(response => {
-            // Check if we received a valid response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
+            if (!response || response.status !== 200) {
               return response;
             }
             
-            // Clone the response
             const responseToCache = response.clone();
-            
-            // Cache the fetched response for future
             caches.open(CACHE_NAME)
               .then(cache => {
                 cache.put(event.request, responseToCache);
@@ -82,23 +86,17 @@ self.addEventListener('fetch', event => {
             return response;
           })
           .catch(() => {
-            // Network failed, try to return offline page for navigation requests
-            if (event.request.mode === 'navigate') {
-              return caches.match('/offline.html');
+            if (event.request.destination === 'image') {
+              return caches.match('/placeholder.svg');
             }
-            
-            return new Response('Network error occurred', {
-              status: 408,
-              headers: { 'Content-Type': 'text/plain' }
-            });
           });
       })
   );
 });
 
-// Handle service worker message events
+// Skip waiting when receiving skip-waiting message
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data === 'skipWaiting') {
     self.skipWaiting();
   }
 });

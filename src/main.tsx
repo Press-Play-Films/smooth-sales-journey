@@ -1,4 +1,3 @@
-
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import App from './App.tsx'
@@ -26,14 +25,35 @@ preloadResources();
 
 // Register service worker - conditionally based on environment
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      })
-      .catch(error => {
-        console.error('ServiceWorker registration failed: ', error);
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/service-worker.js');
+      console.log('ServiceWorker registration successful:', registration);
+      
+      // Handle updates
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // New content is available, skip waiting
+              newWorker.postMessage('skipWaiting');
+            }
+          });
+        }
       });
+      
+      // Reload when the new Service Worker takes over
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+    } catch (error) {
+      console.error('ServiceWorker registration failed:', error);
+    }
   });
 }
 
@@ -56,7 +76,6 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
 };
 
 // Use createRoot for React 18
-// Ensure we only create the root once to prevent "container has already been passed to createRoot()" warnings
 const rootElement = document.getElementById("root");
 if (rootElement) {
   createRoot(rootElement).render(
