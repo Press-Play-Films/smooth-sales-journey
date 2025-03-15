@@ -20,18 +20,16 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
   const [loadFailed, setLoadFailed] = useState(false);
   const analysisInterval = 2000; // Check every 2 seconds
   
-  // Check if we're in a preview/production environment
-  const isPreviewOrProduction = window.location.hostname.includes('lovable.ai') || 
-                                window.location.hostname.includes('lovable.app') ||
-                                import.meta.env.PROD;
+  // Force simulation mode for preview and production
+  const forceSimulation = true;
   
-  // Use simulated analysis in any non-development environment
+  // Initialize analysis
   useEffect(() => {
     let isMounted = true;
     
     const initializeAnalysis = async () => {
       try {
-        if (isPreviewOrProduction) {
+        if (forceSimulation) {
           console.log('Using simulated analysis in preview/production mode');
           if (isMounted) {
             setIsAnalysisEnabled(true);
@@ -39,7 +37,7 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
           return;
         }
         
-        // In development, try to load TensorFlow
+        // Skip actual loading in preview/production
         await loadTensorFlow();
         if (isMounted) {
           setIsAnalysisEnabled(true);
@@ -57,18 +55,18 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     return () => {
       isMounted = false;
     };
-  }, [isPreviewOrProduction]);
+  }, []);
   
   // Start analyzing video frames once enabled
   useEffect(() => {
-    if (!videoElement || (!isAnalysisEnabled && !isPreviewOrProduction)) return;
+    if (!videoElement || (!isAnalysisEnabled && !forceSimulation)) return;
     
     let analyzeInterval: number;
     
     analyzeInterval = window.setInterval(async () => {
       try {
-        // Always use simulated analysis in preview/production
-        if (isPreviewOrProduction) {
+        // Always use simulated analysis mode
+        if (forceSimulation) {
           // Generate a random status for simulation
           const statuses: ['engaged', 'distracted', 'away'] = ['engaged', 'distracted', 'away'];
           const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
@@ -96,7 +94,7 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     return () => {
       clearInterval(analyzeInterval);
     };
-  }, [videoElement, clientId, currentStatus, onStatusChange, isAnalysisEnabled, isPreviewOrProduction]);
+  }, [videoElement, clientId, currentStatus, onStatusChange, isAnalysisEnabled, forceSimulation]);
   
   // This component doesn't render anything visible
   return null;

@@ -26,9 +26,7 @@ preloadResources();
 
 // Skip service worker registration in preview/production environments
 if ('serviceWorker' in navigator && 
-    location.hostname !== 'localhost' && 
-    !window.location.hostname.includes('lovable.ai') && 
-    !window.location.hostname.includes('lovable.app')) {
+    location.hostname === 'localhost') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
       .then(registration => {

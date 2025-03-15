@@ -12,8 +12,8 @@ let tensorflowLoaded = false;
 export const isTensorFlowLoaded = (): boolean => {
   // In preview/build environments, always return true to prevent loading attempts
   if (import.meta.env.SKIP_TENSORFLOW || 
-      window.location.hostname.includes('lovable.ai') || 
-      window.location.hostname.includes('lovable.app')) {
+      window.location.hostname.includes('lovable') || 
+      import.meta.env.PROD) {
     return true;
   }
   return tensorflowLoaded;
@@ -23,16 +23,16 @@ export const isTensorFlowLoaded = (): boolean => {
 export const loadTensorFlow = async (): Promise<void> => {
   // Skip loading in preview/build environments
   if (import.meta.env.SKIP_TENSORFLOW || 
-      window.location.hostname.includes('lovable.ai') || 
-      window.location.hostname.includes('lovable.app')) {
+      window.location.hostname.includes('lovable') || 
+      import.meta.env.PROD) {
     console.log('TensorFlow loading skipped in preview/build environment');
     tensorflowLoaded = true;
-    return;
+    return Promise.resolve();
   }
   
   // Prevent multiple simultaneous loading attempts
   if (tensorflowLoading || tensorflowLoaded) {
-    return;
+    return Promise.resolve();
   }
   
   tensorflowLoading = true;
@@ -50,5 +50,6 @@ export const loadTensorFlow = async (): Promise<void> => {
     console.error('Error in TensorFlow.js loading process:', error);
   } finally {
     tensorflowLoading = false;
+    return Promise.resolve();
   }
 };
