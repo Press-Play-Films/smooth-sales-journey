@@ -55,7 +55,9 @@ const Dashboard: React.FC = () => {
             
             // Show toast for important status changes (away only)
             if (newStatus === 'away') {
-              toast(`Client Status Change: ${updatedClients[clientIndex].names} is now away from their screen.`);
+              toast(`Client Status Change: ${updatedClients[clientIndex].names} is now away from their screen.`, {
+                description: "They may have left their computer or device."
+              });
             }
           }
           
