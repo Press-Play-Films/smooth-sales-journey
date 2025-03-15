@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useToast } from "@/hooks/use-toast";
+
+import React from 'react';
+import { toast } from "sonner";
 import StatsCard from './dashboard/StatsCard';
 import ActivePresentationCard from './dashboard/ActivePresentationCard';
 import UpcomingPresentationList from './dashboard/UpcomingPresentationList';
@@ -14,14 +15,13 @@ import {
 } from '@/utils/demoData';
 
 const Dashboard: React.FC = () => {
-  const { toast } = useToast();
-  const [showNewPresentationForm, setShowNewPresentationForm] = useState(false);
+  const [showNewPresentationForm, setShowNewPresentationForm] = React.useState(false);
   
   // State for active presentations with auto-updating client statuses
-  const [activePresentations, setActivePresentations] = useState<ActivePresentation[]>(demoActivePresentations);
+  const [activePresentations, setActivePresentations] = React.useState<ActivePresentation[]>(demoActivePresentations);
   
   // Simulate real-time status updates (in a more controlled way for demo purposes)
-  useEffect(() => {
+  React.useEffect(() => {
     // Only update status every 45 seconds to avoid flickering and for a more polished demo
     const statusUpdateInterval = setInterval(() => {
       setActivePresentations(prevPresentations => {
@@ -68,7 +68,7 @@ const Dashboard: React.FC = () => {
     }, 45000); // Update every 45 seconds for a smoother demo
     
     return () => clearInterval(statusUpdateInterval);
-  }, [toast]);
+  }, []);
 
   // Get all clients from all active presentations
   const getAllClients = (): Client[] => {
