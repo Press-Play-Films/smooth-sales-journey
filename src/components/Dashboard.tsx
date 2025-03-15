@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { toast } from "sonner";
 import StatsCard from './dashboard/StatsCard';
@@ -55,10 +54,7 @@ const Dashboard: React.FC = () => {
             
             // Show toast for important status changes (away only)
             if (newStatus === 'away') {
-              toast({
-                title: "Client Status Change",
-                description: `${updatedClients[clientIndex].names} is now away from their screen.`,
-              });
+              toast(`Client Status Change: ${updatedClients[clientIndex].names} is now away from their screen.`);
             }
           }
           
