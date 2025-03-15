@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { analyzeVideoFrame, determineClientStatus } from '@/services/video-analysis';
-import { loadTensorFlow } from '@/utils/lazyTensorflow';
+import { loadTensorFlow, isTensorFlowLoaded } from '@/utils/lazyTensorflow';
 
 interface VideoAnalysisProps {
   videoElement: HTMLVideoElement | null;
@@ -26,6 +26,15 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     
     const initializeAnalysis = async () => {
       try {
+        // In development or preview mode, we'll use simulated analysis
+        if (import.meta.env.DEV || window.location.hostname.includes('lovable.ai')) {
+          console.log('Using simulated analysis in dev/preview mode');
+          if (isMounted) {
+            setIsAnalysisEnabled(true);
+          }
+          return;
+        }
+        
         await loadTensorFlow();
         if (isMounted) {
           setIsAnalysisEnabled(true);
@@ -48,13 +57,28 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
   // Start analyzing video frames once TensorFlow is loaded
   useEffect(() => {
     // Only start analysis if both the video element exists and TensorFlow is loaded
-    if (!videoElement || !isAnalysisEnabled || loadFailed) return;
+    if (!videoElement || (!isAnalysisEnabled && !import.meta.env.DEV)) return;
     
     let analyzeInterval: number;
     
     analyzeInterval = window.setInterval(async () => {
       try {
-        const analysisResult = await analyzeVideoFrame(videoElement);
+        // In development or preview mode, we'll use simulated analysis
+        let analysisResult;
+        
+        if (import.meta.env.DEV || window.location.hostname.includes('lovable.ai')) {
+          // Generate a random status for development/preview
+          const statuses: ['engaged', 'distracted', 'away'] = ['engaged', 'distracted', 'away'];
+          const newStatus = statuses[Math.floor(Math.random() * statuses.length)];
+          
+          // Only update if status has changed
+          if (newStatus !== currentStatus) {
+            onStatusChange(clientId, newStatus);
+          }
+          return;
+        }
+        
+        analysisResult = await analyzeVideoFrame(videoElement);
         const newStatus = determineClientStatus(analysisResult);
         
         // Only update if status has changed

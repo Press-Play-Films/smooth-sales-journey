@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
+      external: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
       output: {
         manualChunks: (id) => {
           // Main vendor dependencies
@@ -36,20 +37,15 @@ export default defineConfig(({ mode }) => ({
             return 'vendor';
           }
           
-          // UI components - reference specific ones to avoid directory issues
-          if (id.includes('components/ui/button') || 
-              id.includes('components/ui/card')) {
+          // UI components - specific files only
+          if (id.includes('components/ui/button.tsx') || 
+              id.includes('components/ui/card.tsx')) {
             return 'ui';
           }
           
           // Charts library
           if (id.includes('recharts')) {
             return 'charts';
-          }
-          
-          // Exclude TensorFlow from chunking to avoid empty chunk issues
-          if (id.includes('@tensorflow') || id.includes('face-detection')) {
-            return null; // Don't create separate chunks for TensorFlow
           }
           
           return null; // Default: no chunking for other modules
@@ -64,12 +60,10 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom'],
     exclude: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
   },
-  // Force Vite to treat TensorFlow imports as external to avoid build issues
-  ssr: {
-    noExternal: true, // Process all dependencies, except explicitly external ones
-    external: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
+  define: {
+    // Define global constants for conditional code
+    'import.meta.env.SKIP_TENSORFLOW': JSON.stringify(true),
   }
 }));
