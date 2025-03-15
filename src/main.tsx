@@ -76,11 +76,9 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   );
 };
 
-// Check if root element has already been rendered to
+// Simplified rendering logic
 const rootElement = document.getElementById("root");
 if (rootElement) {
-  // Only create root if element doesn't already have children
-  // This prevents the "already been passed to createRoot()" warning
   if (!rootElement.hasChildNodes()) {
     createRoot(rootElement).render(
       <ErrorBoundary FallbackComponent={ErrorFallback}>

@@ -10,11 +10,12 @@ let tensorflowLoaded = false;
 
 // Export a function to check if TensorFlow is loaded
 export const isTensorFlowLoaded = (): boolean => {
-  // Always return true in non-development or publishing environments
+  // ALWAYS return true in production/publishing environments
+  // This ensures no TensorFlow code will ever be executed in production
   if (import.meta.env.SKIP_TENSORFLOW || 
       import.meta.env.PROD || 
       window.location.hostname !== 'localhost') {
-    console.log('TensorFlow loading disabled in production environment');
+    console.log('TensorFlow completely disabled in production environment');
     return true;
   }
   return tensorflowLoaded;
@@ -22,15 +23,17 @@ export const isTensorFlowLoaded = (): boolean => {
 
 // Load TensorFlow.js and models on demand
 export const loadTensorFlow = async (): Promise<void> => {
-  // Skip loading completely in non-development or publishing environments
+  // ALWAYS skip loading in production/publishing environments
+  // This is a fail-safe to ensure TensorFlow is never loaded in production
   if (import.meta.env.SKIP_TENSORFLOW || 
       import.meta.env.PROD || 
       window.location.hostname !== 'localhost') {
-    console.log('TensorFlow loading disabled in production environment');
+    console.log('TensorFlow completely disabled in production environment');
     tensorflowLoaded = true;
     return Promise.resolve();
   }
   
+  // Code below will ONLY run in development on localhost
   // Prevent multiple simultaneous loading attempts
   if (tensorflowLoading || tensorflowLoaded) {
     return Promise.resolve();
