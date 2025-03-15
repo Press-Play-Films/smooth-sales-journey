@@ -7,7 +7,6 @@ import ClientContactInfo from './client-profile/ClientContactInfo';
 import PresentationHistory from './client-profile/PresentationHistory';
 import ClientMetricsSection from './client-profile/ClientMetricsSection';
 import ClientTabContent from './client-profile/ClientTabContent';
-import SalesforceIntegration from './salesforce/SalesforceIntegration';
 
 interface ClientProfileProps {
   clientId: string;
@@ -67,13 +66,6 @@ const ClientProfile: React.FC<ClientProfileProps> = ({ clientId }) => {
           </div>
         </CardContent>
       </Card>
-      
-      {/* Add Salesforce Integration Card */}
-      <SalesforceIntegration 
-        clientId={client.id}
-        clientNames={client.names}
-        clientData={client}
-      />
       
       <ClientMetricsSection 
         engagementData={client.engagementData} 
