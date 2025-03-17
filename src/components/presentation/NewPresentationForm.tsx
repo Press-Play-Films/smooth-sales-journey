@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +18,6 @@ interface NewPresentationFormProps {
 }
 
 const NewPresentationForm: React.FC<NewPresentationFormProps> = ({ onClose }) => {
-  const { toast } = useToast();
   const [title, setTitle] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
   const [waveTime, setWaveTime] = useState('');
@@ -30,19 +28,16 @@ const NewPresentationForm: React.FC<NewPresentationFormProps> = ({ onClose }) =>
     
     // Validate form
     if (!title || !roomNumber || !waveTime) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill out all required fields",
-        variant: "destructive",
+      toast.error("Missing Information", {
+        description: "Please fill out all required fields"
       });
       return;
     }
     
     // In a real app, this would create a new presentation
     // For demo purposes, just show a success message
-    toast({
-      title: "Presentation Created",
-      description: `${title} has been scheduled for ${waveTime} in Room ${roomNumber}`,
+    toast.success("Presentation Created", {
+      description: `${title} has been scheduled for ${waveTime} in Room ${roomNumber}`
     });
     
     onClose();
