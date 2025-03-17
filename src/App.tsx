@@ -32,12 +32,33 @@ const queryClient = new QueryClient({
   },
 });
 
-// Setup query error logging
-queryClient.getLogger().setLogger({
-  log: (message) => debug(`Query Client: ${message}`, null, LogLevel.DEBUG),
-  warn: (message) => debug(`Query Client: ${message}`, null, LogLevel.WARN),
-  error: (message) => debug(`Query Client: ${message}`, null, LogLevel.ERROR),
-});
+// Setup custom query logging
+// In React Query v5, we can just use the standard console methods
+// that will be called internally by React Query
+const originalConsoleError = console.error;
+const originalConsoleWarn = console.warn;
+const originalConsoleLog = console.log;
+
+console.error = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
+    debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.ERROR);
+  }
+  originalConsoleError(...args);
+};
+
+console.warn = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
+    debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.WARN);
+  }
+  originalConsoleWarn(...args);
+};
+
+console.log = (...args) => {
+  if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
+    debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.DEBUG);
+  }
+  originalConsoleLog(...args);
+};
 
 // Route change tracker component
 const RouteChangeTracker = () => {
