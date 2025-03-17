@@ -1,3 +1,4 @@
+
 import React, { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -29,11 +30,13 @@ const queryClient = new QueryClient({
       }
     },
   },
-  logger: {
-    log: (message) => debug(`Query Client: ${message}`, null, LogLevel.DEBUG),
-    warn: (message) => debug(`Query Client: ${message}`, null, LogLevel.WARN),
-    error: (message) => debug(`Query Client: ${message}`, null, LogLevel.ERROR),
-  },
+});
+
+// Setup query error logging
+queryClient.getLogger().setLogger({
+  log: (message) => debug(`Query Client: ${message}`, null, LogLevel.DEBUG),
+  warn: (message) => debug(`Query Client: ${message}`, null, LogLevel.WARN),
+  error: (message) => debug(`Query Client: ${message}`, null, LogLevel.ERROR),
 });
 
 // Route change tracker component
