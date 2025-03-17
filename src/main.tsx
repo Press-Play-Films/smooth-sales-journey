@@ -24,13 +24,11 @@ const preloadResources = () => {
 // Execute preload
 preloadResources();
 
-// Skip service worker registration in preview/production environments
+// Register service worker
 if ('serviceWorker' in navigator && 
-    location.hostname !== 'localhost' && 
-    !window.location.hostname.includes('lovable.ai') && 
-    !window.location.hostname.includes('lovable.app')) {
+    location.hostname !== 'localhost') {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js', { scope: '/' })
+    navigator.serviceWorker.register('/service-worker.js')
       .then(registration => {
         console.log('ServiceWorker registration successful with scope: ', registration.scope);
       })

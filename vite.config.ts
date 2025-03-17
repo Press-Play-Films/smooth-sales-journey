@@ -27,7 +27,6 @@ export default defineConfig(({ mode }) => ({
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      external: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
       output: {
         manualChunks: (id) => {
           // Main vendor dependencies
@@ -57,9 +56,6 @@ export default defineConfig(({ mode }) => ({
         drop_debugger: true,
       },
     },
-  },
-  optimizeDeps: {
-    exclude: ['@tensorflow/tfjs', '@tensorflow-models/face-detection'],
   },
   define: {
     // Define global constants to control TensorFlow loading
