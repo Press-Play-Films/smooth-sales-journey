@@ -1,8 +1,9 @@
 
-import React, { lazy, Suspense } from "react";
+import React, { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { debug, LogLevel, trackPerformance } from './utils/debugUtils';
 
 // Lazy load page components
 const Index = lazy(() => import("./pages/Index"));
@@ -12,17 +13,48 @@ const AnalyticsPage = lazy(() => import("./pages/AnalyticsPage"));
 const ClientView = lazy(() => import("./pages/ClientView"));
 const TeamView = lazy(() => import("./pages/TeamView"));
 const ExecutiveDashboard = lazy(() => import("./pages/ExecutiveDashboard"));
+const DebugPage = lazy(() => import("./pages/DebugPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
+// Create QueryClient with debugging
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
       staleTime: 5 * 60 * 1000, // 5 minutes
+      onError: (error) => {
+        debug('Query error', error, LogLevel.ERROR);
+      },
     },
   },
+  logger: {
+    log: (message) => debug(`Query Client: ${message}`, null, LogLevel.DEBUG),
+    warn: (message) => debug(`Query Client: ${message}`, null, LogLevel.WARN),
+    error: (message) => debug(`Query Client: ${message}`, null, LogLevel.ERROR),
+  },
 });
+
+// Route change tracker component
+const RouteChangeTracker = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    const perfTracker = trackPerformance(`Route change to ${location.pathname}`);
+    debug(`Route changed to: ${location.pathname}`, {
+      search: location.search,
+      hash: location.hash,
+      state: location.state,
+    }, LogLevel.INFO);
+    
+    // End performance tracking after component mount
+    return () => {
+      perfTracker.end();
+    };
+  }, [location]);
+  
+  return null;
+};
 
 // Browser compatibility component wrapper
 const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
@@ -84,21 +116,42 @@ const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ c
   return <>{children}</>;
 };
 
+// Loading fallback with better debugging
+const LoadingFallback = () => {
+  useEffect(() => {
+    debug('Suspense fallback rendered - component is loading', null, LogLevel.DEBUG);
+    const perfTracker = trackPerformance('Component lazy loading');
+    
+    return () => {
+      const duration = perfTracker.end();
+      debug('Component finished loading', { durationMs: duration }, LogLevel.DEBUG);
+    };
+  }, []);
+  
+  return (
+    <div className="flex items-center justify-center h-screen bg-white">
+      <div className="text-center">
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brio-navy"></div>
+        <p className="mt-4 text-brio-navy font-medium">Loading Brio Sales Management...</p>
+      </div>
+    </div>
+  );
+};
+
 const App = () => {
+  useEffect(() => {
+    debug('App component mounted', null, LogLevel.INFO);
+    return () => {
+      debug('App component unmounted', null, LogLevel.INFO);
+    };
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserCompatibilityProvider>
         <BrowserRouter>
-          <Suspense 
-            fallback={
-              <div className="flex items-center justify-center h-screen bg-white">
-                <div className="text-center">
-                  <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brio-navy"></div>
-                  <p className="mt-4 text-brio-navy font-medium">Loading Brio Sales Management...</p>
-                </div>
-              </div>
-            }
-          >
+          <RouteChangeTracker />
+          <Suspense fallback={<LoadingFallback />}>
             <Toaster position="top-right" />
             <Routes>
               <Route path="/" element={<Index />} />
@@ -108,6 +161,7 @@ const App = () => {
               <Route path="/team" element={<TeamView />} />
               <Route path="/analytics" element={<AnalyticsPage />} />
               <Route path="/executive" element={<ExecutiveDashboard />} />
+              <Route path="/debug" element={<DebugPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
