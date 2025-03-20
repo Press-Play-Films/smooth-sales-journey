@@ -5,8 +5,19 @@ import App from './App.tsx'
 import './index.css'
 import { debug, LogLevel, initGlobalErrorHandling, initNetworkMonitoring, getBrowserInfo, debugServiceWorker } from './utils/debugUtils'
 
+// Safe DOM operations wrapper
+const safeDomOperations = (fn: () => void, fallback: () => void) => {
+  try {
+    fn();
+  } catch (error) {
+    debug('DOM operation failed', { error }, LogLevel.ERROR);
+    fallback();
+  }
+};
+
 // Initialize debugging utilities without circular dependencies
 const initApp = () => {
+  // Initialize core functionality first
   debug('Application starting', { timestamp: new Date().toISOString() }, LogLevel.INFO);
   
   // Initialize error handling and monitoring
@@ -14,14 +25,40 @@ const initApp = () => {
   initNetworkMonitoring();
   getBrowserInfo();
   
-  // Preload critical resources
-  preloadResources();
+  // Preload critical resources - wrapped in safe operation
+  safeDomOperations(
+    preloadResources,
+    () => debug('Skipped resource preloading due to DOM issues', null, LogLevel.WARN)
+  );
   
   // Register service worker safely
-  registerServiceWorker();
+  if (import.meta.env.PROD) {
+    registerServiceWorker();
+  } else {
+    debug('ServiceWorker not registered in development mode', null, LogLevel.INFO);
+  }
   
-  // Render the application
-  renderApp();
+  // Render the application with additional safeguards
+  safeDomOperations(
+    renderApp,
+    () => {
+      // Last resort rendering if normal rendering fails
+      debug('Attempting emergency rendering...', null, LogLevel.WARN);
+      const rootElement = document.getElementById("root");
+      if (rootElement) {
+        try {
+          // Clear the root element first
+          rootElement.innerHTML = '';
+          const root = createRoot(rootElement);
+          root.render(<App />);
+          debug('Emergency rendering completed', null, LogLevel.INFO);
+        } catch (error) {
+          debug('Emergency rendering failed', { error }, LogLevel.ERROR);
+          document.body.innerHTML = '<div class="error-fallback"><h1>Something went wrong</h1><p>The application could not be loaded. Please try refreshing the page.</p></div>';
+        }
+      }
+    }
+  );
 };
 
 // Preload critical resources
@@ -111,10 +148,20 @@ const renderApp = () => {
     throw new Error("Failed to find the root element");
   }
 
+  // Clean up any existing content before rendering
+  if (rootElement.hasChildNodes()) {
+    debug('Clearing root element before rendering', null, LogLevel.INFO);
+    rootElement.innerHTML = '';
+  }
+
   const root = createRoot(rootElement);
   root.render(
     <ErrorBoundary 
       FallbackComponent={ErrorFallback}
+      onReset={() => {
+        debug('Error boundary reset', null, LogLevel.INFO);
+        window.location.href = '/';
+      }}
       onError={(error, info) => {
         debug('Error caught by ErrorBoundary', {
           error,

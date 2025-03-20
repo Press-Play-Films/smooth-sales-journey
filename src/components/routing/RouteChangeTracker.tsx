@@ -7,24 +7,36 @@ const RouteChangeTracker: React.FC = () => {
   const location = useLocation();
   
   useEffect(() => {
+    // Guard against null locations or incomplete initialization
     if (!location || !location.pathname) {
-      return; // Guard against null locations
+      debug('Route tracker received invalid location', { location }, LogLevel.WARN);
+      return;
     }
     
     try {
       const perfTracker = trackPerformance(`Route change to ${location.pathname}`);
-      debug(`Route changed to: ${location.pathname}`, {
-        search: location.search,
-        hash: location.hash,
-        state: location.state,
-      }, LogLevel.INFO);
+      
+      // Create a safe copy of location data for logging
+      const locationData = {
+        pathname: location.pathname,
+        search: location.search || '',
+        hash: location.hash || '',
+        // Don't log potentially circular state object
+        hasState: location.state !== null && location.state !== undefined
+      };
+      
+      debug(`Route changed to: ${location.pathname}`, locationData, LogLevel.INFO);
       
       // End performance tracking after component mount
       return () => {
-        perfTracker?.end?.();
+        try {
+          perfTracker?.end?.();
+        } catch (error) {
+          // Silently handle any performance tracking errors
+        }
       };
     } catch (error) {
-      console.error("Error in route tracking:", error);
+      debug("Error in route tracking:", error, LogLevel.ERROR);
     }
   }, [location]);
   

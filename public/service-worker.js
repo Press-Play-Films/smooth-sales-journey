@@ -1,5 +1,6 @@
+
 // Service Worker for Brio Sales Management
-const CACHE_NAME = 'brio-sales-cache-v1';
+const CACHE_NAME = 'brio-sales-cache-v2'; // Updated cache version
 const DEBUG = false; // Set to false for production
 
 // Debug helper with fallbacks to prevent errors
@@ -28,23 +29,39 @@ const urlsToCache = [
   '/lovable-uploads/c3826d58-1386-4834-9056-11611e468d2a.png'
 ];
 
+// Safe DOM operation helper
+const safeOperation = (fn, fallback) => {
+  try {
+    return fn();
+  } catch (error) {
+    debug('Operation failed', error);
+    if (typeof fallback === 'function') {
+      return fallback();
+    }
+    return null;
+  }
+};
+
 // Installation event - cache key assets
 self.addEventListener('install', event => {
   debug('Service Worker installing');
   self.skipWaiting();
   
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        debug('Cache opened, adding resources', urlsToCache);
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => {
-        debug('Initial cache complete');
-      })
-      .catch(err => {
-        debug('Cache installation error', err);
-      })
+    safeOperation(
+      () => caches.open(CACHE_NAME)
+        .then(cache => {
+          debug('Cache opened, adding resources', urlsToCache);
+          return cache.addAll(urlsToCache);
+        })
+        .then(() => {
+          debug('Initial cache complete');
+        })
+        .catch(err => {
+          debug('Cache installation error', err);
+        }),
+      () => debug('Cache installation failed completely')
+    )
   );
 });
 
@@ -53,31 +70,38 @@ self.addEventListener('activate', event => {
   debug('Service Worker activating');
   
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      debug('Found caches', cacheNames);
-      return Promise.all(
-        cacheNames.filter(cacheName => {
-          return cacheName !== CACHE_NAME;
-        }).map(cacheName => {
-          debug('Deleting old cache', cacheName);
-          return caches.delete(cacheName);
-        })
-      );
-    }).then(() => {
-      debug('Service Worker activated and controlling');
-      return self.clients.claim();
-    })
+    safeOperation(
+      () => caches.keys().then(cacheNames => {
+        debug('Found caches', cacheNames);
+        return Promise.all(
+          cacheNames.filter(cacheName => {
+            return cacheName !== CACHE_NAME;
+          }).map(cacheName => {
+            debug('Deleting old cache', cacheName);
+            return caches.delete(cacheName);
+          })
+        );
+      }).then(() => {
+        debug('Service Worker activated and controlling');
+        return self.clients.claim();
+      }),
+      () => debug('Cache activation failed')
+    )
   );
 });
 
 // Communicate with clients
 const notifyClients = (message) => {
-  self.clients.matchAll().then(clients => {
-    clients.forEach(client => {
-      debug('Sending message to client', { clientId: client.id, message });
-      client.postMessage(message);
-    });
-  });
+  safeOperation(
+    () => {
+      self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+          debug('Sending message to client', { clientId: client.id, message });
+          client.postMessage(message);
+        });
+      });
+    }
+  );
 };
 
 // Fetch event - serve from cache, fall back to network
@@ -100,66 +124,79 @@ self.addEventListener('fetch', event => {
   
   // Basic network-first strategy with fallbacks
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Check if valid response
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          debug('Non-cacheable response', {
-            status: response.status,
-            type: response.type,
-            url: response.url
-          });
+    safeOperation(
+      () => fetch(event.request)
+        .then(response => {
+          // Check if valid response
+          if (!response || response.status !== 200 || response.type !== 'basic') {
+            debug('Non-cacheable response', {
+              status: response?.status,
+              type: response?.type,
+              url: response?.url
+            });
+            return response;
+          }
+          
+          debug('Network response ok, caching', response.url);
+          
+          // Clone the response
+          const responseToCache = response.clone();
+          
+          // Cache the new resource
+          safeOperation(
+            () => caches.open(CACHE_NAME)
+              .then(cache => {
+                debug('Updating cache for', event.request.url);
+                return cache.put(event.request, responseToCache);
+              })
+              .catch(err => {
+                debug('Cache put error', err);
+              })
+          );
+            
           return response;
-        }
-        
-        debug('Network response ok, caching', response.url);
-        
-        // Clone the response
-        const responseToCache = response.clone();
-        
-        // Cache the new resource
-        caches.open(CACHE_NAME)
-          .then(cache => {
-            debug('Updating cache for', event.request.url);
-            cache.put(event.request, responseToCache);
-          })
-          .catch(err => {
-            debug('Cache put error', err);
-            console.error('Cache put error:', err);
+        })
+        .catch(error => {
+          debug('Network request failed, trying cache', {
+            url: event.request.url,
+            error: error.message
           });
           
-        return response;
+          // Fall back to cache
+          return safeOperation(
+            () => caches.match(event.request)
+              .then(cachedResponse => {
+                if (cachedResponse) {
+                  debug('Serving from cache', event.request.url);
+                  return cachedResponse;
+                }
+                
+                debug('No cache found for', event.request.url);
+                
+                // If offline and requesting a page, show offline page
+                if (event.request.mode === 'navigate') {
+                  debug('Returning offline page for navigation request');
+                  return caches.match('/offline.html');
+                }
+                
+                // No cached response
+                debug('No offline fallback, returning error response');
+                return new Response('Network error', {
+                  status: 408,
+                  headers: { 'Content-Type': 'text/plain' }
+                });
+              }),
+            () => new Response('Service worker error', { 
+              status: 500, 
+              headers: { 'Content-Type': 'text/plain' } 
+            })
+          );
+        }),
+      () => new Response('Service worker critical error', { 
+        status: 500, 
+        headers: { 'Content-Type': 'text/plain' } 
       })
-      .catch(error => {
-        debug('Network request failed, trying cache', {
-          url: event.request.url,
-          error: error.message
-        });
-        
-        // Fall back to cache
-        return caches.match(event.request)
-          .then(cachedResponse => {
-            if (cachedResponse) {
-              debug('Serving from cache', event.request.url);
-              return cachedResponse;
-            }
-            
-            debug('No cache found for', event.request.url);
-            
-            // If offline and requesting a page, show offline page
-            if (event.request.mode === 'navigate') {
-              debug('Returning offline page for navigation request');
-              return caches.match('/offline.html');
-            }
-            
-            // No cached response
-            debug('No offline fallback, returning error response');
-            return new Response('Network error', {
-              status: 408,
-              headers: { 'Content-Type': 'text/plain' }
-            });
-          });
-      })
+    )
   );
 });
 
@@ -175,9 +212,11 @@ self.addEventListener('message', (event) => {
   // Ping/pong for debugging service worker connectivity
   if (event.data && event.data.type === 'PING') {
     debug('Ping received, sending pong');
-    event.ports[0].postMessage({
-      type: 'PONG',
-      timestamp: Date.now()
+    safeOperation(() => {
+      event.ports[0].postMessage({
+        type: 'PONG',
+        timestamp: Date.now()
+      });
     });
   }
 });
