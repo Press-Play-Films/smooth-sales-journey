@@ -8,14 +8,30 @@ import QueryProvider from './components/providers/QueryProvider';
 import RouteChangeTracker from './components/routing/RouteChangeTracker';
 import AppRoutes from './components/routing/AppRoutes';
 
-// Initialize query logging
-initQueryLogging();
+// Initialize query logging safely
+const initializeApp = () => {
+  try {
+    initQueryLogging();
+    return true;
+  } catch (error) {
+    console.error("Failed to initialize app:", error);
+    return false;
+  }
+};
+
+// Run initialization outside of component render
+const initialized = initializeApp();
 
 const App = () => {
   useEffect(() => {
-    debug('App component mounted', null, LogLevel.INFO);
+    if (initialized) {
+      debug('App component mounted', null, LogLevel.INFO);
+    }
+    
     return () => {
-      debug('App component unmounted', null, LogLevel.INFO);
+      if (initialized) {
+        debug('App component unmounted', null, LogLevel.INFO);
+      }
     };
   }, []);
 

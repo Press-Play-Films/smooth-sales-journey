@@ -1,4 +1,3 @@
-
 // Debugging levels
 export enum LogLevel {
   INFO = 'info',
@@ -17,12 +16,12 @@ export const debugConfig = {
   logStateChanges: true
 };
 
-// Original console methods
+// Original console methods stored immediately to prevent circular references
 const originalConsole = {
-  log: console.log,
-  warn: console.warn,
-  error: console.error,
-  debug: console.debug
+  log: console.log.bind(console),
+  warn: console.warn.bind(console),
+  error: console.error.bind(console),
+  debug: console.debug.bind(console)
 };
 
 // Flag to track if console is already patched
@@ -55,30 +54,37 @@ export const debug = (
   }
 };
 
-// Initialize console patching for React Query
+// Initialize console patching for React Query safely
 export const initQueryLogging = () => {
   if (consolePatched) return;
+
+  // Store original methods again to ensure we have the current references
+  const currentConsole = {
+    error: console.error,
+    warn: console.warn,
+    log: console.log
+  };
 
   // Override console methods to capture React Query logs
   console.error = (...args) => {
     if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
       debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.ERROR);
     }
-    originalConsole.error(...args);
+    currentConsole.error(...args);
   };
 
   console.warn = (...args) => {
     if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
       debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.WARN);
     }
-    originalConsole.warn(...args);
+    currentConsole.warn(...args);
   };
 
   console.log = (...args) => {
     if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
       debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.DEBUG);
     }
-    originalConsole.log(...args);
+    currentConsole.log(...args);
   };
   
   consolePatched = true;

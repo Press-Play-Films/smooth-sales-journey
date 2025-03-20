@@ -1,16 +1,19 @@
-
 // Service Worker for Brio Sales Management
 const CACHE_NAME = 'brio-sales-cache-v1';
-const DEBUG = true;
+const DEBUG = false; // Set to false for production
 
-// Debug helper
+// Debug helper with fallbacks to prevent errors
 const debug = (message, data) => {
   if (DEBUG) {
-    const timestamp = new Date().toISOString();
-    if (data) {
-      console.log(`[ServiceWorker][${timestamp}] ${message}`, data);
-    } else {
-      console.log(`[ServiceWorker][${timestamp}] ${message}`);
+    try {
+      const timestamp = new Date().toISOString();
+      if (data) {
+        console.log(`[ServiceWorker][${timestamp}] ${message}`, data);
+      } else {
+        console.log(`[ServiceWorker][${timestamp}] ${message}`);
+      }
+    } catch (e) {
+      // Silent fail to prevent breaking in production
     }
   }
 };
@@ -41,7 +44,6 @@ self.addEventListener('install', event => {
       })
       .catch(err => {
         debug('Cache installation error', err);
-        console.error('Cache installation error:', err);
       })
   );
 });

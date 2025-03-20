@@ -5,11 +5,24 @@ import App from './App.tsx'
 import './index.css'
 import { debug, LogLevel, initGlobalErrorHandling, initNetworkMonitoring, getBrowserInfo, debugServiceWorker } from './utils/debugUtils'
 
-// Initialize debugging utilities first, before any other code runs
-debug('Application starting', { timestamp: new Date().toISOString() }, LogLevel.INFO);
-initGlobalErrorHandling();
-initNetworkMonitoring();
-getBrowserInfo();
+// Initialize debugging utilities without circular dependencies
+const initApp = () => {
+  debug('Application starting', { timestamp: new Date().toISOString() }, LogLevel.INFO);
+  
+  // Initialize error handling and monitoring
+  initGlobalErrorHandling();
+  initNetworkMonitoring();
+  getBrowserInfo();
+  
+  // Preload critical resources
+  preloadResources();
+  
+  // Register service worker safely
+  registerServiceWorker();
+  
+  // Render the application
+  renderApp();
+};
 
 // Preload critical resources
 const preloadResources = () => {
@@ -32,30 +45,29 @@ const preloadResources = () => {
   debug('Resources preloaded successfully', null, LogLevel.DEBUG);
 };
 
-// Execute preload
-preloadResources();
-
-// Register service worker
-if ('serviceWorker' in navigator && 
-    location.hostname !== 'localhost') {
-  window.addEventListener('load', () => {
-    debug('Registering service worker...', null, LogLevel.INFO);
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        debug('ServiceWorker registration successful', {
-          scope: registration.scope
-        }, LogLevel.INFO);
-        
-        // Debug service worker status
-        debugServiceWorker();
-      })
-      .catch(error => {
-        debug('ServiceWorker registration failed', error, LogLevel.ERROR);
-      });
-  });
-} else {
-  debug('ServiceWorker not registered - either not supported or on localhost', null, LogLevel.WARN);
-}
+// Register service worker safely
+const registerServiceWorker = () => {
+  if ('serviceWorker' in navigator && 
+      location.hostname !== 'localhost') {
+    window.addEventListener('load', () => {
+      debug('Registering service worker...', null, LogLevel.INFO);
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(registration => {
+          debug('ServiceWorker registration successful', {
+            scope: registration.scope
+          }, LogLevel.INFO);
+          
+          // Debug service worker status
+          debugServiceWorker();
+        })
+        .catch(error => {
+          debug('ServiceWorker registration failed', error, LogLevel.ERROR);
+        });
+    });
+  } else {
+    debug('ServiceWorker not registered - either not supported or on localhost', null, LogLevel.WARN);
+  }
+};
 
 // Enhanced error fallback component
 const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetErrorBoundary: () => void }) => {
@@ -87,29 +99,35 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   );
 };
 
-// Log when the app starts rendering
-debug('Rendering application root component', null, LogLevel.INFO);
+// Render the application
+const renderApp = () => {
+  // Log when the app starts rendering
+  debug('Rendering application root component', null, LogLevel.INFO);
 
-// Use createRoot for React 18
-const rootElement = document.getElementById("root");
-if (!rootElement) {
-  debug('Root element not found', null, LogLevel.ERROR);
-  throw new Error("Failed to find the root element");
-}
+  // Use createRoot for React 18
+  const rootElement = document.getElementById("root");
+  if (!rootElement) {
+    debug('Root element not found', null, LogLevel.ERROR);
+    throw new Error("Failed to find the root element");
+  }
 
-const root = createRoot(rootElement);
-root.render(
-  <ErrorBoundary 
-    FallbackComponent={ErrorFallback}
-    onError={(error, info) => {
-      debug('Error caught by ErrorBoundary', {
-        error,
-        componentStack: info.componentStack
-      }, LogLevel.ERROR);
-    }}
-  >
-    <App />
-  </ErrorBoundary>
-);
+  const root = createRoot(rootElement);
+  root.render(
+    <ErrorBoundary 
+      FallbackComponent={ErrorFallback}
+      onError={(error, info) => {
+        debug('Error caught by ErrorBoundary', {
+          error,
+          componentStack: info.componentStack
+        }, LogLevel.ERROR);
+      }}
+    >
+      <App />
+    </ErrorBoundary>
+  );
 
-debug('Root component rendered', null, LogLevel.INFO);
+  debug('Root component rendered', null, LogLevel.INFO);
+};
+
+// Start the application
+initApp();
