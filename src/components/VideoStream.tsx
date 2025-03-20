@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Client } from '@/types/dashboard'; // Import the Client type from dashboard types
 import VideoDisplay from './video/VideoDisplay';
 import VideoAnalysis from './video/VideoAnalysis';
@@ -17,6 +17,7 @@ const VideoStream: React.FC<VideoStreamProps> = ({
   sourceId 
 }) => {
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+  const mountedRef = useRef(true);
   const [analysisEnabled, setAnalysisEnabled] = useState<boolean>(() => {
     // In preview mode, always disable real analysis
     if (window.location.hostname.includes('lovable.ai')) {
@@ -29,19 +30,24 @@ const VideoStream: React.FC<VideoStreamProps> = ({
   
   // Set up video stream from external source if needed
   const handleVideoReady = async (video: HTMLVideoElement) => {
-    setVideoElement(video);
+    if (mountedRef.current) {
+      setVideoElement(video);
+    }
   };
   
   // Listen for changes to the analysis setting
   useEffect(() => {
     const handleAnalysisSettingChange = (event: Event) => {
       const customEvent = event as CustomEvent<{enabled: boolean}>;
-      setAnalysisEnabled(customEvent.detail.enabled);
+      if (mountedRef.current) {
+        setAnalysisEnabled(customEvent.detail.enabled);
+      }
     };
     
     window.addEventListener('analysisSettingChanged', handleAnalysisSettingChange as EventListener);
     
     return () => {
+      mountedRef.current = false;
       window.removeEventListener('analysisSettingChanged', handleAnalysisSettingChange as EventListener);
     };
   }, []);
@@ -55,8 +61,8 @@ const VideoStream: React.FC<VideoStreamProps> = ({
         onVideoReady={handleVideoReady}
       />
       
-      {/* Only render VideoAnalysis component if analysis is enabled */}
-      {videoElement && (analysisEnabled || window.location.hostname.includes('lovable.ai')) && (
+      {/* Only render VideoAnalysis component if analysis is enabled and we have a video element */}
+      {videoElement && mountedRef.current && (analysisEnabled || window.location.hostname.includes('lovable.ai')) && (
         <VideoAnalysis
           videoElement={videoElement}
           clientId={client.id}

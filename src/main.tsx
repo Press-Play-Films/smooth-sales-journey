@@ -1,11 +1,10 @@
-
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import App from './App.tsx'
 import './index.css'
 import { debug, LogLevel, initGlobalErrorHandling, initNetworkMonitoring, getBrowserInfo, debugServiceWorker } from './utils/debugUtils'
 
-// Safe DOM operations wrapper
+// Safe DOM operations wrapper with more robust error handling
 const safeDomOperations = (fn: () => void, fallback: () => void) => {
   try {
     fn();
@@ -25,40 +24,15 @@ const initApp = () => {
   initNetworkMonitoring();
   getBrowserInfo();
   
-  // Preload critical resources - wrapped in safe operation
-  safeDomOperations(
-    preloadResources,
-    () => debug('Skipped resource preloading due to DOM issues', null, LogLevel.WARN)
-  );
+  // Enhanced rendering with DOM node cleanup
+  renderApp();
   
-  // Register service worker safely
+  // Register service worker safely in production only
   if (import.meta.env.PROD) {
     registerServiceWorker();
   } else {
     debug('ServiceWorker not registered in development mode', null, LogLevel.INFO);
   }
-  
-  // Render the application with additional safeguards
-  safeDomOperations(
-    renderApp,
-    () => {
-      // Last resort rendering if normal rendering fails
-      debug('Attempting emergency rendering...', null, LogLevel.WARN);
-      const rootElement = document.getElementById("root");
-      if (rootElement) {
-        try {
-          // Clear the root element first
-          rootElement.innerHTML = '';
-          const root = createRoot(rootElement);
-          root.render(<App />);
-          debug('Emergency rendering completed', null, LogLevel.INFO);
-        } catch (error) {
-          debug('Emergency rendering failed', { error }, LogLevel.ERROR);
-          document.body.innerHTML = '<div class="error-fallback"><h1>Something went wrong</h1><p>The application could not be loaded. Please try refreshing the page.</p></div>';
-        }
-      }
-    }
-  );
 };
 
 // Preload critical resources
@@ -136,12 +110,12 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error, resetError
   );
 };
 
-// Render the application
+// Improved rendering with DOM cleanup first
 const renderApp = () => {
   // Log when the app starts rendering
   debug('Rendering application root component', null, LogLevel.INFO);
 
-  // Use createRoot for React 18
+  // Find the root element
   const rootElement = document.getElementById("root");
   if (!rootElement) {
     debug('Root element not found', null, LogLevel.ERROR);
@@ -149,31 +123,54 @@ const renderApp = () => {
   }
 
   // Clean up any existing content before rendering
-  if (rootElement.hasChildNodes()) {
-    debug('Clearing root element before rendering', null, LogLevel.INFO);
+  try {
+    // More thorough cleanup - remove all children one by one
+    while (rootElement.firstChild) {
+      rootElement.removeChild(rootElement.firstChild);
+    }
+    debug('Root element cleared successfully', null, LogLevel.DEBUG);
+  } catch (error) {
+    debug('Error clearing root element', { error }, LogLevel.WARN);
+    // Try simple innerHTML clear as fallback
     rootElement.innerHTML = '';
   }
 
-  const root = createRoot(rootElement);
-  root.render(
-    <ErrorBoundary 
-      FallbackComponent={ErrorFallback}
-      onReset={() => {
-        debug('Error boundary reset', null, LogLevel.INFO);
-        window.location.href = '/';
-      }}
-      onError={(error, info) => {
-        debug('Error caught by ErrorBoundary', {
-          error,
-          componentStack: info.componentStack
-        }, LogLevel.ERROR);
-      }}
-    >
-      <App />
-    </ErrorBoundary>
-  );
-
-  debug('Root component rendered', null, LogLevel.INFO);
+  // Create and render with proper error handling
+  try {
+    const root = createRoot(rootElement);
+    root.render(
+      <ErrorBoundary 
+        FallbackComponent={ErrorFallback}
+        onReset={() => {
+          debug('Error boundary reset', null, LogLevel.INFO);
+          // Use reload rather than navigation to ensure clean slate
+          window.location.reload();
+        }}
+        onError={(error, info) => {
+          debug('Error caught by ErrorBoundary', {
+            error,
+            componentStack: info.componentStack
+          }, LogLevel.ERROR);
+        }}
+      >
+        <App />
+      </ErrorBoundary>
+    );
+    debug('Root component rendered successfully', null, LogLevel.INFO);
+  } catch (error) {
+    debug('Critical error during React rendering', { error }, LogLevel.ERROR);
+    // Show a simple error message if React fails to render at all
+    rootElement.innerHTML = `
+      <div style="text-align: center; padding: 2rem; font-family: sans-serif;">
+        <h2 style="color: #e11d48;">Unable to load application</h2>
+        <p>Please try refreshing the page. If the problem persists, contact support.</p>
+        <button style="margin-top: 1rem; padding: 0.5rem 1rem; background: #1e3a8a; color: white; border: none; border-radius: 0.25rem;"
+          onclick="window.location.reload()">
+          Refresh Page
+        </button>
+      </div>
+    `;
+  }
 };
 
 // Start the application

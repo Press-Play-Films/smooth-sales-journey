@@ -1,6 +1,6 @@
 
 // Service Worker for Brio Sales Management
-const CACHE_NAME = 'brio-sales-cache-v2'; // Updated cache version
+const CACHE_NAME = 'brio-sales-cache-v3'; // Incremented cache version
 const DEBUG = false; // Set to false for production
 
 // Debug helper with fallbacks to prevent errors
@@ -29,22 +29,61 @@ const urlsToCache = [
   '/lovable-uploads/c3826d58-1386-4834-9056-11611e468d2a.png'
 ];
 
-// Safe DOM operation helper
-const safeOperation = (fn, fallback) => {
-  try {
-    return fn();
-  } catch (error) {
-    debug('Operation failed', error);
-    if (typeof fallback === 'function') {
-      return fallback();
+// Enhanced safe operation helper with timeout
+const safeOperation = (fn, fallback, timeout = 5000) => {
+  return new Promise((resolve) => {
+    // Create timeout to prevent hanging operations
+    const timeoutId = setTimeout(() => {
+      debug('Operation timed out after ' + timeout + 'ms');
+      if (typeof fallback === 'function') {
+        resolve(fallback());
+      } else {
+        resolve(null);
+      }
+    }, timeout);
+    
+    // Attempt the operation
+    try {
+      const result = fn();
+      
+      // Handle both Promise and non-Promise returns
+      if (result && typeof result.then === 'function') {
+        result
+          .then(data => {
+            clearTimeout(timeoutId);
+            resolve(data);
+          })
+          .catch(err => {
+            clearTimeout(timeoutId);
+            debug('Operation failed', err);
+            if (typeof fallback === 'function') {
+              resolve(fallback(err));
+            } else {
+              resolve(null);
+            }
+          });
+      } else {
+        // For synchronous functions
+        clearTimeout(timeoutId);
+        resolve(result);
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      debug('Operation threw exception', error);
+      if (typeof fallback === 'function') {
+        resolve(fallback(error));
+      } else {
+        resolve(null);
+      }
     }
-    return null;
-  }
+  });
 };
 
 // Installation event - cache key assets
 self.addEventListener('install', event => {
   debug('Service Worker installing');
+  
+  // Force activation without waiting for all tabs to close
   self.skipWaiting();
   
   event.waitUntil(
@@ -52,13 +91,19 @@ self.addEventListener('install', event => {
       () => caches.open(CACHE_NAME)
         .then(cache => {
           debug('Cache opened, adding resources', urlsToCache);
-          return cache.addAll(urlsToCache);
+          // Use addAll with error handling for individual files
+          return Promise.all(
+            urlsToCache.map(url => 
+              cache.add(url).catch(err => {
+                debug(`Failed to cache: ${url}`, err);
+                // Continue despite individual file failures
+                return Promise.resolve();
+              })
+            )
+          );
         })
         .then(() => {
           debug('Initial cache complete');
-        })
-        .catch(err => {
-          debug('Cache installation error', err);
         }),
       () => debug('Cache installation failed completely')
     )
@@ -119,13 +164,18 @@ self.addEventListener('fetch', event => {
     return;
   }
   
+  // Skip chrome-extension URLs and other non-http/https URLs
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+  
   // Debug request
   debug('Fetch event for', event.request.url);
   
   // Basic network-first strategy with fallbacks
   event.respondWith(
     safeOperation(
-      () => fetch(event.request)
+      () => fetch(event.request.clone())
         .then(response => {
           // Check if valid response
           if (!response || response.status !== 200 || response.type !== 'basic') {

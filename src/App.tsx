@@ -8,21 +8,49 @@ import QueryProvider from './components/providers/QueryProvider';
 import RouteChangeTracker from './components/routing/RouteChangeTracker';
 import AppRoutes from './components/routing/AppRoutes';
 
-// Safer initialization pattern
+// More robust initialization pattern
 const App = () => {
   const [initialized, setInitialized] = useState(false);
+  const [mountError, setMountError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Simple initialization with reduced complexity
-    debug('App component mounted', null, LogLevel.INFO);
-    setInitialized(true);
-    
-    return () => {
-      debug('App component unmounted', null, LogLevel.INFO);
-    };
+    // Safer initialization with try/catch
+    try {
+      debug('App component mounted', null, LogLevel.INFO);
+      // Delayed initialization to ensure DOM is ready
+      const timer = setTimeout(() => {
+        setInitialized(true);
+      }, 50); // Small delay to ensure browser painting cycle completes
+      
+      return () => {
+        clearTimeout(timer);
+        debug('App component unmounted', null, LogLevel.INFO);
+      };
+    } catch (error) {
+      debug('Error during App initialization', { error }, LogLevel.ERROR);
+      setMountError(error instanceof Error ? error : new Error('Unknown initialization error'));
+    }
   }, []);
 
-  // Simple loading state
+  // Handle initialization errors
+  if (mountError) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center p-6 max-w-md">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Initialization Error</h2>
+          <p className="text-gray-700 mb-4">{mountError.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-brio-navy text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Restart Application
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Simple loading state with clear UI
   if (!initialized) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -34,6 +62,7 @@ const App = () => {
     );
   }
 
+  // Render the full application once initialized
   return (
     <QueryProvider>
       <BrowserCompatibilityProvider>

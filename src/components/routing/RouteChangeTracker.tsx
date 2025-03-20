@@ -7,25 +7,30 @@ const RouteChangeTracker: React.FC = () => {
   const location = useLocation();
   
   useEffect(() => {
-    // Guard against null locations or incomplete initialization
-    if (!location || !location.pathname) {
-      debug('Route tracker received invalid location', { location }, LogLevel.WARN);
+    // Additional guard against null or invalid locations
+    if (!location || typeof location !== 'object') {
+      debug('RouteTracker: Invalid location object', null, LogLevel.WARN);
+      return;
+    }
+    
+    // Guard against incomplete location properties
+    if (typeof location.pathname !== 'string') {
+      debug('RouteTracker: Missing pathname in location', { location }, LogLevel.WARN);
       return;
     }
     
     try {
       const perfTracker = trackPerformance(`Route change to ${location.pathname}`);
       
-      // Create a safe copy of location data for logging
-      const locationData = {
-        pathname: location.pathname,
-        search: location.search || '',
-        hash: location.hash || '',
-        // Don't log potentially circular state object
+      // Create a safe, non-circular copy of location data
+      const safeLocationData = {
+        pathname: location.pathname || '/',
+        search: typeof location.search === 'string' ? location.search : '',
+        hash: typeof location.hash === 'string' ? location.hash : '',
         hasState: location.state !== null && location.state !== undefined
       };
       
-      debug(`Route changed to: ${location.pathname}`, locationData, LogLevel.INFO);
+      debug(`Route changed to: ${safeLocationData.pathname}`, safeLocationData, LogLevel.INFO);
       
       // End performance tracking after component mount
       return () => {
@@ -33,10 +38,11 @@ const RouteChangeTracker: React.FC = () => {
           perfTracker?.end?.();
         } catch (error) {
           // Silently handle any performance tracking errors
+          debug('Performance tracker error', { error }, LogLevel.DEBUG);
         }
       };
     } catch (error) {
-      debug("Error in route tracking:", error, LogLevel.ERROR);
+      debug("Error in route tracking:", { error, location: location?.pathname }, LogLevel.ERROR);
     }
   }, [location]);
   
