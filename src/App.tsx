@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, StrictMode } from "react";
 import { Toaster } from "sonner";
 import { BrowserRouter } from "react-router-dom";
 import { debug, LogLevel } from './utils/debugUtils';
@@ -8,22 +8,20 @@ import QueryProvider from './components/providers/QueryProvider';
 import RouteChangeTracker from './components/routing/RouteChangeTracker';
 import AppRoutes from './components/routing/AppRoutes';
 
-// More robust initialization pattern
+// Simplified initialization pattern without unnecessary timers
 const App = () => {
-  const [initialized, setInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [mountError, setMountError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Safer initialization with try/catch
+    // Simple initialization with try/catch
     try {
       debug('App component mounted', null, LogLevel.INFO);
-      // Delayed initialization to ensure DOM is ready
-      const timer = setTimeout(() => {
-        setInitialized(true);
-      }, 50); // Small delay to ensure browser painting cycle completes
+      
+      // Immediately set initialized without delay
+      setIsLoading(false);
       
       return () => {
-        clearTimeout(timer);
         debug('App component unmounted', null, LogLevel.INFO);
       };
     } catch (error) {
@@ -50,8 +48,8 @@ const App = () => {
     );
   }
 
-  // Simple loading state with clear UI
-  if (!initialized) {
+  // Simple loading state
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
@@ -62,17 +60,19 @@ const App = () => {
     );
   }
 
-  // Render the full application once initialized
+  // Render the full application once initialized - strip to bare essentials for preview
   return (
-    <QueryProvider>
-      <BrowserCompatibilityProvider>
-        <BrowserRouter>
-          <RouteChangeTracker />
-          <Toaster position="top-right" />
-          <AppRoutes />
-        </BrowserRouter>
-      </BrowserCompatibilityProvider>
-    </QueryProvider>
+    <StrictMode>
+      <QueryProvider>
+        <BrowserCompatibilityProvider>
+          <BrowserRouter>
+            <RouteChangeTracker />
+            <Toaster position="top-right" />
+            <AppRoutes />
+          </BrowserRouter>
+        </BrowserCompatibilityProvider>
+      </QueryProvider>
+    </StrictMode>
   );
 };
 

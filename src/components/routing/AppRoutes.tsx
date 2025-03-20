@@ -1,5 +1,5 @@
 
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useCallback } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import LoadingFallback from '@/components/ui/LoadingFallback';
 
@@ -15,8 +15,11 @@ const DebugPage = lazy(() => import("@/pages/DebugPage"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const AppRoutes: React.FC = () => {
+  // Memoize the fallback to prevent re-renders
+  const fallback = useCallback(() => <LoadingFallback />, []);
+  
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={fallback()}>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/clients" element={<ClientsPage />} />

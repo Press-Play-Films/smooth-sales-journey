@@ -17,20 +17,31 @@ const VideoStream: React.FC<VideoStreamProps> = ({
   sourceId 
 }) => {
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
-  const mountedRef = useRef(true);
+  const isMounted = useRef(true);
   const [analysisEnabled, setAnalysisEnabled] = useState<boolean>(() => {
     // In preview mode, always disable real analysis
     if (window.location.hostname.includes('lovable.ai')) {
       return false;
     }
     // Read initial setting from localStorage
-    const savedSetting = localStorage.getItem('enableAnalysis');
-    return savedSetting ? savedSetting === 'true' : true; // Default to enabled
+    try {
+      const savedSetting = localStorage.getItem('enableAnalysis');
+      return savedSetting ? savedSetting === 'true' : true; // Default to enabled
+    } catch (e) {
+      return true; // Default to enabled if localStorage fails
+    }
   });
   
+  // Set up cleanup on unmount
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
   // Set up video stream from external source if needed
-  const handleVideoReady = async (video: HTMLVideoElement) => {
-    if (mountedRef.current) {
+  const handleVideoReady = (video: HTMLVideoElement) => {
+    if (isMounted.current) {
       setVideoElement(video);
     }
   };
@@ -38,19 +49,35 @@ const VideoStream: React.FC<VideoStreamProps> = ({
   // Listen for changes to the analysis setting
   useEffect(() => {
     const handleAnalysisSettingChange = (event: Event) => {
-      const customEvent = event as CustomEvent<{enabled: boolean}>;
-      if (mountedRef.current) {
-        setAnalysisEnabled(customEvent.detail.enabled);
+      if (isMounted.current) {
+        try {
+          const customEvent = event as CustomEvent<{enabled: boolean}>;
+          setAnalysisEnabled(customEvent.detail.enabled);
+        } catch (error) {
+          console.error('Error handling analysis setting change:', error);
+        }
       }
     };
     
-    window.addEventListener('analysisSettingChanged', handleAnalysisSettingChange as EventListener);
+    // Safe event listener addition
+    try {
+      window.addEventListener('analysisSettingChanged', handleAnalysisSettingChange as EventListener);
+    } catch (error) {
+      console.error('Error adding event listener:', error);
+    }
     
     return () => {
-      mountedRef.current = false;
-      window.removeEventListener('analysisSettingChanged', handleAnalysisSettingChange as EventListener);
+      // Safe event listener removal
+      try {
+        window.removeEventListener('analysisSettingChanged', handleAnalysisSettingChange as EventListener);
+      } catch (error) {
+        // Silently handle removal errors
+      }
     };
   }, []);
+  
+  // Determine if we're in a preview environment
+  const isPreviewEnvironment = window.location.hostname.includes('lovable.ai');
   
   return (
     <div className="relative rounded-md overflow-hidden w-full h-full">
@@ -62,7 +89,7 @@ const VideoStream: React.FC<VideoStreamProps> = ({
       />
       
       {/* Only render VideoAnalysis component if analysis is enabled and we have a video element */}
-      {videoElement && mountedRef.current && (analysisEnabled || window.location.hostname.includes('lovable.ai')) && (
+      {videoElement && isMounted.current && (analysisEnabled || isPreviewEnvironment) && (
         <VideoAnalysis
           videoElement={videoElement}
           clientId={client.id}
@@ -74,7 +101,7 @@ const VideoStream: React.FC<VideoStreamProps> = ({
       <StatusIndicator status={client.status} />
       
       {/* Show notice when analysis is disabled */}
-      {!analysisEnabled && !window.location.hostname.includes('lovable.ai') && (
+      {!analysisEnabled && !isPreviewEnvironment && (
         <div className="absolute bottom-6 left-0 right-0 mx-auto text-center">
           <span className="bg-black/70 text-white text-xs px-2 py-1 rounded">
             Analysis disabled

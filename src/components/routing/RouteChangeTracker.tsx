@@ -1,48 +1,48 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { debug, LogLevel, trackPerformance } from '@/utils/debugUtils';
+import { debug, LogLevel } from '@/utils/debugUtils';
 
 const RouteChangeTracker: React.FC = () => {
   const location = useLocation();
+  const isMounted = useRef(true);
   
   useEffect(() => {
-    // Additional guard against null or invalid locations
-    if (!location || typeof location !== 'object') {
-      debug('RouteTracker: Invalid location object', null, LogLevel.WARN);
-      return;
-    }
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
+  useEffect(() => {
+    // Guard against React strict mode double rendering or stale closures
+    if (!isMounted.current) return;
     
-    // Guard against incomplete location properties
-    if (typeof location.pathname !== 'string') {
-      debug('RouteTracker: Missing pathname in location', { location }, LogLevel.WARN);
+    // Basic guard against null location
+    if (!location) {
+      debug('RouteTracker: Location is null or undefined', null, LogLevel.WARN);
       return;
     }
     
     try {
-      const perfTracker = trackPerformance(`Route change to ${location.pathname}`);
-      
-      // Create a safe, non-circular copy of location data
+      // Create a safe copy of location data (primitive values only)
       const safeLocationData = {
-        pathname: location.pathname || '/',
+        pathname: typeof location.pathname === 'string' ? location.pathname : '/',
         search: typeof location.search === 'string' ? location.search : '',
         hash: typeof location.hash === 'string' ? location.hash : '',
         hasState: location.state !== null && location.state !== undefined
       };
       
       debug(`Route changed to: ${safeLocationData.pathname}`, safeLocationData, LogLevel.INFO);
-      
-      // End performance tracking after component mount
-      return () => {
-        try {
-          perfTracker?.end?.();
-        } catch (error) {
-          // Silently handle any performance tracking errors
-          debug('Performance tracker error', { error }, LogLevel.DEBUG);
-        }
-      };
     } catch (error) {
-      debug("Error in route tracking:", { error, location: location?.pathname }, LogLevel.ERROR);
+      // Safely log any errors without breaking the app
+      try {
+        debug("Error in route tracking:", { 
+          error: error instanceof Error ? error.message : 'Unknown error',
+          path: location?.pathname || 'unknown'
+        }, LogLevel.ERROR);
+      } catch (e) {
+        // Silently fail if even debug logging fails
+      }
     }
   }, [location]);
   
