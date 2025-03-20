@@ -1,9 +1,11 @@
-
 import React, { lazy, Suspense, useEffect } from "react";
 import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { debug, LogLevel, trackPerformance } from './utils/debugUtils';
+import { debug, LogLevel, trackPerformance, initQueryLogging } from './utils/debugUtils';
+
+// Initialize query logging
+initQueryLogging();
 
 // Lazy load page components
 const Index = lazy(() => import("./pages/Index"));
@@ -31,34 +33,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-// Setup custom query logging
-// In React Query v5, we can just use the standard console methods
-// that will be called internally by React Query
-const originalConsoleError = console.error;
-const originalConsoleWarn = console.warn;
-const originalConsoleLog = console.log;
-
-console.error = (...args) => {
-  if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
-    debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.ERROR);
-  }
-  originalConsoleError(...args);
-};
-
-console.warn = (...args) => {
-  if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
-    debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.WARN);
-  }
-  originalConsoleWarn(...args);
-};
-
-console.log = (...args) => {
-  if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
-    debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.DEBUG);
-  }
-  originalConsoleLog(...args);
-};
 
 // Route change tracker component
 const RouteChangeTracker = () => {

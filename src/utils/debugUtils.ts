@@ -17,6 +17,17 @@ export const debugConfig = {
   logStateChanges: true
 };
 
+// Original console methods
+const originalConsole = {
+  log: console.log,
+  warn: console.warn,
+  error: console.error,
+  debug: console.debug
+};
+
+// Flag to track if console is already patched
+let consolePatched = false;
+
 // Enhanced logging function
 export const debug = (
   message: string, 
@@ -30,18 +41,47 @@ export const debug = (
   
   switch (level) {
     case LogLevel.ERROR:
-      console.error(`${prefix} ${message}`, data ? data : '');
+      originalConsole.error(`${prefix} ${message}`, data ? data : '');
       break;
     case LogLevel.WARN:
-      console.warn(`${prefix} ${message}`, data ? data : '');
+      originalConsole.warn(`${prefix} ${message}`, data ? data : '');
       break;
     case LogLevel.DEBUG:
-      console.debug(`${prefix} ${message}`, data ? data : '');
+      originalConsole.debug(`${prefix} ${message}`, data ? data : '');
       break;
     case LogLevel.INFO:
     default:
-      console.log(`${prefix} ${message}`, data ? data : '');
+      originalConsole.log(`${prefix} ${message}`, data ? data : '');
   }
+};
+
+// Initialize console patching for React Query
+export const initQueryLogging = () => {
+  if (consolePatched) return;
+
+  // Override console methods to capture React Query logs
+  console.error = (...args) => {
+    if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
+      debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.ERROR);
+    }
+    originalConsole.error(...args);
+  };
+
+  console.warn = (...args) => {
+    if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
+      debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.WARN);
+    }
+    originalConsole.warn(...args);
+  };
+
+  console.log = (...args) => {
+    if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
+      debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.DEBUG);
+    }
+    originalConsole.log(...args);
+  };
+  
+  consolePatched = true;
 };
 
 // Capture uncaught errors

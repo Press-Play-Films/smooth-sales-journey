@@ -5,13 +5,11 @@ import App from './App.tsx'
 import './index.css'
 import { debug, LogLevel, initGlobalErrorHandling, initNetworkMonitoring, getBrowserInfo, debugServiceWorker } from './utils/debugUtils'
 
-// Initialize debugging utilities
+// Initialize debugging utilities first, before any other code runs
+debug('Application starting', { timestamp: new Date().toISOString() }, LogLevel.INFO);
 initGlobalErrorHandling();
 initNetworkMonitoring();
 getBrowserInfo();
-
-// Log application startup
-debug('Application starting', { timestamp: new Date().toISOString() }, LogLevel.INFO);
 
 // Preload critical resources
 const preloadResources = () => {
