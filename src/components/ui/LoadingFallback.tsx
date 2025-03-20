@@ -2,11 +2,16 @@
 import React, { useEffect, useRef } from 'react';
 import { debug, LogLevel } from '@/utils/debugUtils';
 
+interface PerformanceTracker {
+  startTime: number;
+  end: () => number;
+}
+
 const LoadingFallback: React.FC = () => {
   const isMounted = useRef(true);
   
   useEffect(() => {
-    let perfTracker: { end: () => number } | null = null;
+    let perfTracker: PerformanceTracker | null = null;
     
     try {
       debug('Suspense fallback rendered - component is loading', null, LogLevel.DEBUG);
