@@ -1,3 +1,4 @@
+
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import App from './App.tsx'
@@ -27,11 +28,32 @@ const initApp = () => {
   // Enhanced rendering with DOM node cleanup
   renderApp();
   
-  // Register service worker safely in production only
-  if (import.meta.env.PROD) {
+  // Register service worker safely in production only, never in dev/preview environments
+  const isDevOrPreviewEnv = window.location.hostname.includes('localhost') || 
+                             window.location.hostname.includes('lovable.ai') || 
+                             window.location.hostname.includes('lovable.app') || 
+                             window.location.hostname.includes('lovableproject.com');
+  
+  if (import.meta.env.PROD && !isDevOrPreviewEnv) {
     registerServiceWorker();
   } else {
-    debug('ServiceWorker not registered in development mode', null, LogLevel.INFO);
+    debug('ServiceWorker not registered in development/preview mode', null, LogLevel.INFO);
+    // Unregister any existing service workers in development/preview
+    unregisterServiceWorkers();
+  }
+};
+
+// Unregister any existing service workers
+const unregisterServiceWorkers = () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(registrations => {
+      for (let registration of registrations) {
+        registration.unregister();
+        debug('ServiceWorker unregistered', { scope: registration.scope }, LogLevel.INFO);
+      }
+    }).catch(error => {
+      debug('Error unregistering ServiceWorker', { error }, LogLevel.ERROR);
+    });
   }
 };
 
