@@ -1,7 +1,11 @@
 
 import { debug, safeOperation } from './core';
-import { LogLevel, debugConfig, initialized, consolePatched } from './types';
+import { LogLevel, debugConfig } from './types';
 import { isDebugMode } from './urlUtils';
+
+// Tracking initialization status
+let initialized = false;
+let consolePatched = false;
 
 // Initialize query logging
 export const initQueryLogging = () => {
@@ -83,7 +87,11 @@ export const initNetworkMonitoring = () => {
       const response = await originalFetch(...args);
       
       const endTime = performance.now();
-      const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'unknown';
+      const url = typeof args[0] === 'string' 
+        ? args[0] 
+        : args[0] instanceof Request 
+          ? args[0].url 
+          : String(args[0]);
       
       debug('Fetch completed', {
         url,
@@ -95,8 +103,14 @@ export const initNetworkMonitoring = () => {
       return response;
     } catch (error) {
       const endTime = performance.now();
+      const url = typeof args[0] === 'string' 
+        ? args[0] 
+        : args[0] instanceof Request 
+          ? args[0].url 
+          : String(args[0]);
+          
       debug('Fetch failed', {
-        url: typeof args[0] === 'string' ? args[0] : args[0]?.url || 'unknown',
+        url,
         error: error.message,
         duration: `${(endTime - startTime).toFixed(2)}ms`
       }, LogLevel.ERROR);
