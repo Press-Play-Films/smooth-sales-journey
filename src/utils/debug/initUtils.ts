@@ -1,129 +1,127 @@
 
 import { debug, safeOperation } from './core';
-import { LogLevel, initialized, consolePatched } from './types';
+import { LogLevel, debugConfig, initialized, consolePatched } from './types';
+import { isDebugMode } from './urlUtils';
 
-// Initialize console patching for React Query safely
+// Initialize query logging
 export const initQueryLogging = () => {
-  // Prevent double initialization
-  if (consolePatched) return;
+  debug('Initializing query logging', null, LogLevel.INFO);
+};
 
-  safeOperation(() => {
-    // Store original methods again to ensure we have the current references
-    const currentConsole = {
-      error: console.error,
-      warn: console.warn,
-      log: console.log
-    };
+// Initialize all debug utilities
+export const initDebugUtils = () => {
+  if (initialized) {
+    debug('Debug utilities already initialized', null, LogLevel.WARN);
+    return;
+  }
+  
+  debug('Initializing debug utilities', { 
+    level: debugConfig.logLevel 
+  }, LogLevel.INFO);
+  
+  initialized = true;
+};
 
-    // Override console methods to capture React Query logs
+// Initialize error handling
+export const initGlobalErrorHandling = () => {
+  if (!debugConfig.enabled) return;
+  
+  debug('Setting up global error handlers', null, LogLevel.INFO);
+  
+  // Set up window error handler
+  window.addEventListener('error', (event) => {
+    debug('Uncaught error', {
+      message: event.message,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+      error: event.error
+    }, LogLevel.ERROR);
+  });
+  
+  // Set up promise rejection handler
+  window.addEventListener('unhandledrejection', (event) => {
+    debug('Unhandled promise rejection', {
+      reason: event.reason
+    }, LogLevel.ERROR);
+  });
+  
+  // Handle React render errors
+  if (!consolePatched) {
+    const originalConsoleError = console.error;
     console.error = (...args) => {
-      if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
-        debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.ERROR);
+      // Check for React-specific errors
+      const errorText = args.join(' ');
+      if (
+        errorText.includes('React will try to recreate this component tree') ||
+        errorText.includes('Consider adding an error boundary')
+      ) {
+        debug('React rendering error detected', {
+          error: args[0]
+        }, LogLevel.ERROR);
       }
-      currentConsole.error(...args);
-    };
-
-    console.warn = (...args) => {
-      if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
-        debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.WARN);
-      }
-      currentConsole.warn(...args);
-    };
-
-    console.log = (...args) => {
-      if (typeof args[0] === 'string' && args[0].includes('[TanStack Query]')) {
-        debug(`Query Client: ${args[0]}`, args.slice(1), LogLevel.DEBUG);
-      }
-      currentConsole.log(...args);
+      
+      // Call original
+      originalConsoleError.apply(console, args);
     };
     
-    // Update the flag through module reference
-    (consolePatched as boolean) = true;
-  });
+    consolePatched = true;
+  }
 };
 
-// Initialize all debugging features
-export const initDebugUtils = () => {
-  if (initialized) return;
-  
-  safeOperation(() => {
-    initGlobalErrorHandling();
-    initNetworkMonitoring();
-    getBrowserInfo();
-    (initialized as boolean) = true;
-  });
-};
-
-// Capture uncaught errors
-export const initGlobalErrorHandling = () => {
-  safeOperation(() => {
-    window.addEventListener('error', (event) => {
-      debug(`Uncaught error: ${event.message}`, {
-        error: event.error,
-        filename: event.filename,
-        lineno: event.lineno,
-        colno: event.colno
-      }, LogLevel.ERROR);
-    });
-
-    window.addEventListener('unhandledrejection', (event) => {
-      debug('Unhandled Promise rejection', event.reason, LogLevel.ERROR);
-    });
-  });
-};
-
-// Network request monitoring
+// Set up network request monitoring
 export const initNetworkMonitoring = () => {
-  if (!debugConfig.logNetworkRequests) return;
+  if (!debugConfig.enabled || !debugConfig.logNetworkRequests) return;
   
-  safeOperation(() => {
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      const [resource, config] = args;
-      debug(`Fetch request to: ${resource}`, { config }, LogLevel.INFO);
+  debug('Setting up network monitoring', null, LogLevel.INFO);
+  
+  // Use a more reliable approach for intercepting fetch
+  const originalFetch = window.fetch;
+  window.fetch = async (...args) => {
+    const startTime = performance.now();
+    try {
+      const response = await originalFetch(...args);
       
-      try {
-        const response = await originalFetch(resource, config);
-        debug(`Fetch response from: ${resource}`, { 
-          status: response.status,
-          statusText: response.statusText,
-          headers: Object.fromEntries(response.headers.entries())
-        }, LogLevel.DEBUG);
-        return response;
-      } catch (error) {
-        debug(`Fetch error for: ${resource}`, error, LogLevel.ERROR);
-        throw error;
-      }
-    };
-  });
+      const endTime = performance.now();
+      const url = typeof args[0] === 'string' ? args[0] : args[0]?.url || 'unknown';
+      
+      debug('Fetch completed', {
+        url,
+        status: response.status,
+        duration: `${(endTime - startTime).toFixed(2)}ms`,
+        ok: response.ok
+      }, response.ok ? LogLevel.DEBUG : LogLevel.WARN);
+      
+      return response;
+    } catch (error) {
+      const endTime = performance.now();
+      debug('Fetch failed', {
+        url: typeof args[0] === 'string' ? args[0] : args[0]?.url || 'unknown',
+        error: error.message,
+        duration: `${(endTime - startTime).toFixed(2)}ms`
+      }, LogLevel.ERROR);
+      throw error;
+    }
+  };
 };
 
-// Get detailed browser info for debugging
+// Get browser information for debugging
 export const getBrowserInfo = () => {
   try {
     const browserInfo = {
       userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      vendor: navigator.vendor,
       language: navigator.language,
+      platform: navigator.platform,
       cookiesEnabled: navigator.cookieEnabled,
-      online: navigator.onLine,
-      screenSize: {
-        width: window.screen.width,
-        height: window.screen.height,
-        availWidth: window.screen.availWidth,
-        availHeight: window.screen.availHeight,
-      },
-      viewport: {
-        width: window.innerWidth,
-        height: window.innerHeight,
-      }
+      doNotTrack: navigator.doNotTrack,
+      onLine: navigator.onLine,
+      debugMode: isDebugMode()
     };
     
-    debug('Browser information', browserInfo, LogLevel.DEBUG);
+    debug('Browser information', browserInfo, LogLevel.INFO);
     return browserInfo;
   } catch (error) {
-    debug('Failed to get browser info', error, LogLevel.WARN);
-    return { error: 'Failed to get browser info' };
+    debug('Error collecting browser info', error, LogLevel.ERROR);
+    return { error: error.message };
   }
 };
