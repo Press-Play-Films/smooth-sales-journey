@@ -1,4 +1,3 @@
-
 import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import App from './App.tsx'
@@ -15,10 +14,45 @@ const safeDomOperations = (fn: () => void, fallback: () => void) => {
   }
 };
 
+// Aggressively unregister any existing service workers
+const forceUnregisterServiceWorkers = () => {
+  if ('serviceWorker' in navigator) {
+    debug('Forcefully unregistering all service workers', null, LogLevel.INFO);
+    navigator.serviceWorker.getRegistrations()
+      .then(registrations => {
+        const unregisterPromises = registrations.map(registration => {
+          debug('Unregistering service worker', { scope: registration.scope }, LogLevel.INFO);
+          return registration.unregister();
+        });
+        return Promise.all(unregisterPromises);
+      })
+      .then(results => {
+        debug('Service worker unregistration complete', { count: results.length }, LogLevel.INFO);
+        if (results.some(result => result === true)) {
+          // Reload the page if any service workers were unregistered to clear cache
+          window.location.reload();
+        }
+      })
+      .catch(error => {
+        debug('Error unregistering service workers', { error }, LogLevel.ERROR);
+      });
+  }
+};
+
 // Initialize debugging utilities without circular dependencies
 const initApp = () => {
   // Initialize core functionality first
   debug('Application starting', { timestamp: new Date().toISOString() }, LogLevel.INFO);
+  
+  // Always check for and unregister service workers in development/preview
+  const isDevOrPreviewEnv = window.location.hostname.includes('localhost') || 
+                           window.location.hostname.includes('lovable.ai') || 
+                           window.location.hostname.includes('lovable.app') || 
+                           window.location.hostname.includes('lovableproject.com');
+  
+  if (isDevOrPreviewEnv) {
+    forceUnregisterServiceWorkers();
+  }
   
   // Initialize error handling and monitoring
   initGlobalErrorHandling();
@@ -29,17 +63,10 @@ const initApp = () => {
   renderApp();
   
   // Register service worker safely in production only, never in dev/preview environments
-  const isDevOrPreviewEnv = window.location.hostname.includes('localhost') || 
-                             window.location.hostname.includes('lovable.ai') || 
-                             window.location.hostname.includes('lovable.app') || 
-                             window.location.hostname.includes('lovableproject.com');
-  
   if (import.meta.env.PROD && !isDevOrPreviewEnv) {
     registerServiceWorker();
   } else {
     debug('ServiceWorker not registered in development/preview mode', null, LogLevel.INFO);
-    // Unregister any existing service workers in development/preview
-    unregisterServiceWorkers();
   }
 };
 

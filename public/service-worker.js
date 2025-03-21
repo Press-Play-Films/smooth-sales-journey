@@ -1,4 +1,3 @@
-
 // Service Worker for Brio Sales Management
 const CACHE_NAME = 'brio-sales-cache-v3'; // Incremented cache version
 const DEBUG = false; // Set to false for production
@@ -27,88 +26,28 @@ const debug = (message, data) => {
   }
 };
 
-// Resources to cache
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/offline.html',
-  '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png',
-  '/lovable-uploads/05981032-1579-4d42-815d-7970b7d6939a.png',
-  '/lovable-uploads/c3826d58-1386-4834-9056-11611e468d2a.png'
-];
-
-// Enhanced safe operation helper with timeout
-const safeOperation = (fn, fallback, timeout = 5000) => {
-  return new Promise((resolve) => {
-    // Create timeout to prevent hanging operations
-    const timeoutId = setTimeout(() => {
-      debug('Operation timed out after ' + timeout + 'ms');
-      if (typeof fallback === 'function') {
-        resolve(fallback());
-      } else {
-        resolve(null);
-      }
-    }, timeout);
-    
-    // Attempt the operation
-    try {
-      const result = fn();
-      
-      // Handle both Promise and non-Promise returns
-      if (result && typeof result.then === 'function') {
-        result
-          .then(data => {
-            clearTimeout(timeoutId);
-            resolve(data);
-          })
-          .catch(err => {
-            clearTimeout(timeoutId);
-            debug('Operation failed', err);
-            if (typeof fallback === 'function') {
-              resolve(fallback(err));
-            } else {
-              resolve(null);
-            }
-          });
-      } else {
-        // For synchronous functions
-        clearTimeout(timeoutId);
-        resolve(result);
-      }
-    } catch (error) {
-      clearTimeout(timeoutId);
-      debug('Operation threw exception', error);
-      if (typeof fallback === 'function') {
-        resolve(fallback(error));
-      } else {
-        resolve(null);
-      }
-    }
-  });
-};
-
-// Skip active service worker operations in development/preview
+// Immediately self-destruct in development/preview environments
 if (isDevOrPreview()) {
-  // For development/preview, we'll make the service worker inactive
   self.addEventListener('install', event => {
     debug('Development environment detected, skipping service worker installation');
     self.skipWaiting();
   });
   
   self.addEventListener('activate', event => {
-    debug('Development environment detected, clearing caches and deactivating');
+    debug('Development environment detected, self-destructing service worker');
     event.waitUntil(
       caches.keys().then(cacheNames => {
         return Promise.all(
           cacheNames.map(cacheName => caches.delete(cacheName))
         );
-      }).then(() => self.clients.claim())
+      }).then(() => self.registration.unregister())
+        .then(() => self.clients.claim())
     );
   });
   
-  // Fetch handler that doesn't interfere with normal navigation
+  // Empty fetch handler to prevent any caching in development
   self.addEventListener('fetch', event => {
-    // Let the browser handle all requests normally
+    // No-op: let the browser handle all requests normally
     return;
   });
   

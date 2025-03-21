@@ -63,7 +63,12 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
   useEffect(() => {
     if (!videoElement || (!isAnalysisEnabled && !isPreviewOrProduction)) return;
     
-    let analyzeInterval: number;
+    let analyzeInterval: number | undefined;
+    
+    // Clear any existing interval before setting a new one
+    if (analyzeInterval) {
+      clearInterval(analyzeInterval);
+    }
     
     analyzeInterval = window.setInterval(async () => {
       try {
@@ -94,7 +99,10 @@ const VideoAnalysis: React.FC<VideoAnalysisProps> = ({
     }, analysisInterval);
     
     return () => {
-      clearInterval(analyzeInterval);
+      if (analyzeInterval) {
+        clearInterval(analyzeInterval);
+        analyzeInterval = undefined;
+      }
     };
   }, [videoElement, clientId, currentStatus, onStatusChange, isAnalysisEnabled, isPreviewOrProduction]);
   

@@ -1,54 +1,53 @@
 
-/**
- * Lazy loader for TensorFlow.js and associated models
- * Only loads these heavy dependencies when explicitly requested
- */
+// Mock TensorFlow lazy loading 
+// This prevents actual TensorFlow from loading in preview environments
 
-// Track loading state to avoid duplicate loading
-let tensorflowLoading = false;
-let tensorflowLoaded = false;
+// Flag to track loading status
+let tfLoaded = false;
+let loadPromise: Promise<void> | null = null;
 
-// Export a function to check if TensorFlow is loaded
-export const isTensorFlowLoaded = (): boolean => {
-  // In preview/build environments, always return true to prevent loading attempts
-  if (import.meta.env.SKIP_TENSORFLOW || 
-      window.location.hostname.includes('lovable.ai') || 
-      window.location.hostname.includes('lovable.app')) {
-    return true;
-  }
-  return tensorflowLoaded;
+export const isTensorFlowLoaded = () => {
+  return tfLoaded;
 };
 
-// Load TensorFlow.js and models on demand
-export const loadTensorFlow = async (): Promise<void> => {
-  // Skip loading in preview/build environments
-  if (import.meta.env.SKIP_TENSORFLOW || 
-      window.location.hostname.includes('lovable.ai') || 
-      window.location.hostname.includes('lovable.app')) {
-    console.log('TensorFlow loading skipped in preview/build environment');
-    tensorflowLoaded = true;
-    return;
+// Mock loadTensorFlow function
+export const loadTensorFlow = async () => {
+  // Do not attempt to load TensorFlow in preview or lovable environments
+  if (window.location.hostname.includes('lovable.ai') || 
+      window.location.hostname.includes('lovable.app') ||
+      window.location.hostname.includes('lovableproject.com')) {
+    console.log('Skipping TensorFlow loading in preview environment');
+    tfLoaded = true;
+    return Promise.resolve();
   }
   
-  // Prevent multiple simultaneous loading attempts
-  if (tensorflowLoading || tensorflowLoaded) {
-    return;
+  // Use a shared loading promise to prevent multiple loads
+  if (loadPromise) {
+    return loadPromise;
   }
   
-  tensorflowLoading = true;
-  
-  try {
-    console.log('Loading TensorFlow.js and face detection models...');
+  loadPromise = new Promise<void>((resolve) => {
+    // Simulate successful loading without actually loading TensorFlow
+    console.log('Simulating TensorFlow loading...');
     
-    // Implementation note: actual TensorFlow loading code is not implemented
-    // as we're now preventing loading in all environments
-    
-    // Simulate successful loading after a short delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-    tensorflowLoaded = true;
-  } catch (error) {
-    console.error('Error in TensorFlow.js loading process:', error);
-  } finally {
-    tensorflowLoading = false;
-  }
+    // Simulate a delay to mimic loading
+    setTimeout(() => {
+      tfLoaded = true;
+      console.log('TensorFlow loading simulation complete');
+      resolve();
+    }, 500);
+  });
+  
+  return loadPromise;
+};
+
+// Export a fake TensorFlow object to prevent errors
+export const getFakeTensorFlow = () => {
+  return {
+    ready: () => Promise.resolve(),
+    dispose: () => {},
+    browser: {
+      fromPixels: () => ({ dispose: () => {} })
+    }
+  };
 };

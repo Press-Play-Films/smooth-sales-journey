@@ -4,7 +4,7 @@
   "short_name": "Brio Sales",
   "description": "Comprehensive sales management platform for Brio Vacations",
   "start_url": "/",
-  "display": "browser",
+  "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e3a8a",
   "icons": [
