@@ -1,55 +1,23 @@
 
-import React, { useEffect, useRef } from 'react';
-import { debug, LogLevel } from '@/utils/debugUtils';
-
-interface PerformanceTracker {
-  startTime: number;
-  end: () => number;
-}
+import React, { useEffect } from 'react';
+import { debug, LogLevel, trackPerformance } from '@/utils/debugUtils';
 
 const LoadingFallback: React.FC = () => {
-  const isMounted = useRef(true);
-  
   useEffect(() => {
-    let perfTracker: PerformanceTracker | null = null;
-    
-    try {
-      debug('Suspense fallback rendered - component is loading', null, LogLevel.DEBUG);
-      
-      // Store performance tracking in a variable so we can safely clean it up
-      perfTracker = {
-        startTime: performance.now(),
-        end: function() {
-          const duration = performance.now() - this.startTime;
-          return duration;
-        }
-      };
-    } catch (error) {
-      // Prevent any errors in debug from breaking the component
-    }
+    debug('Suspense fallback rendered - component is loading', null, LogLevel.DEBUG);
+    const perfTracker = trackPerformance('Component lazy loading');
     
     return () => {
-      isMounted.current = false;
-      
-      // Only run cleanup logic if we have a performance tracker
-      if (perfTracker) {
-        try {
-          const duration = perfTracker.end();
-          if (isMounted.current) {
-            debug('Component finished loading', { durationMs: duration }, LogLevel.DEBUG);
-          }
-        } catch (error) {
-          // Silently handle any errors in performance tracking
-        }
-      }
+      const duration = perfTracker.end();
+      debug('Component finished loading', { durationMs: duration }, LogLevel.DEBUG);
     };
   }, []);
   
   return (
-    <div className="flex items-center justify-center min-h-[400px] bg-white">
+    <div className="flex items-center justify-center h-screen bg-white">
       <div className="text-center">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brio-navy"></div>
-        <p className="mt-4 text-brio-navy font-medium">Loading content...</p>
+        <p className="mt-4 text-brio-navy font-medium">Loading Brio Sales Management...</p>
       </div>
     </div>
   );
