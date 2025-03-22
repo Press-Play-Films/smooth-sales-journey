@@ -160,7 +160,19 @@ export const isPrivateMode = async (): Promise<boolean> => {
       localStorage.removeItem(testKey);
       
       // If we get here, localStorage works, but let's check quota
-      const fs = window.RequestFileSystem || (window as any).webkitRequestFileSystem;
+      // Type definition for RequestFileSystem from the old FileSystem API
+      interface RequestFileSystemFunction {
+        (type: number, size: number, 
+         successCallback: () => void, 
+         errorCallback?: (error: Error) => void): void;
+      }
+      
+      // Define the TEMPORARY constant value
+      const TEMPORARY = 0;
+      
+      // Get the RequestFileSystem API with proper type assertion
+      const fs = (window as any).RequestFileSystem || (window as any).webkitRequestFileSystem as RequestFileSystemFunction | undefined;
+      
       if (!fs) {
         // Can't use this method, assume not private
         resolve(false);
@@ -168,7 +180,7 @@ export const isPrivateMode = async (): Promise<boolean> => {
       }
       
       // Try to allocate 1MB of storage - often restricted in private mode
-      fs(window.TEMPORARY, 1024*1024, 
+      fs(TEMPORARY, 1024 * 1024, 
         () => resolve(false),  // Storage quota allowed - not private mode
         () => resolve(true)    // Storage quota denied - likely private mode
       );
