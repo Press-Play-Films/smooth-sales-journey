@@ -6,7 +6,6 @@ import App from './App';
 
 console.log('Application starting...');
 
-// Simple root element detection and rendering
 const rootElement = document.getElementById('root');
 
 if (!rootElement) {
