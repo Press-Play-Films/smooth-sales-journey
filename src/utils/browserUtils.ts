@@ -61,8 +61,54 @@ export const getBrowserInfo = () => {
     isDesktop: !isMobile,
     isIOS: /iPhone|iPad|iPod/i.test(userAgent),
     isAndroid: /Android/i.test(userAgent),
-    userAgent
+    userAgent,
+    hasWebGL: checkWebGLSupport(),
+    hasCanvas: checkCanvasSupport(),
+    hasWebWorker: typeof Worker !== 'undefined',
+    hasSpeechSynthesis: 'speechSynthesis' in window,
+    hasGeolocation: 'geolocation' in navigator,
+    hasNotifications: 'Notification' in window,
+    hasTouchScreen: isTouchDevice(),
   };
+};
+
+// Check for WebGL support
+const checkWebGLSupport = (): boolean => {
+  if (!isBrowser) return false;
+  
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(
+      window.WebGLRenderingContext &&
+      (canvas.getContext('webgl') || canvas.getContext('experimental-webgl'))
+    );
+  } catch (e) {
+    return false;
+  }
+};
+
+// Check for canvas support
+const checkCanvasSupport = (): boolean => {
+  if (!isBrowser) return false;
+  
+  try {
+    const canvas = document.createElement('canvas');
+    return !!(canvas.getContext && canvas.getContext('2d'));
+  } catch (e) {
+    return false;
+  }
+};
+
+// Check for touch device
+const isTouchDevice = (): boolean => {
+  if (!isBrowser) return false;
+  
+  return (
+    'ontouchstart' in window ||
+    navigator.maxTouchPoints > 0 ||
+    // @ts-ignore - MSMaxTouchPoints is not in the standard type definitions
+    navigator.msMaxTouchPoints > 0
+  );
 };
 
 // Safe localStorage wrapper with fallbacks
@@ -100,6 +146,37 @@ export const safeStorage = {
       return false;
     }
   }
+};
+
+// Check if browser is in private/incognito mode
+export const isPrivateMode = async (): Promise<boolean> => {
+  if (!isBrowser) return false;
+  
+  return new Promise((resolve) => {
+    try {
+      // Try to use localStorage as a test
+      const testKey = 'test-private-mode';
+      localStorage.setItem(testKey, '1');
+      localStorage.removeItem(testKey);
+      
+      // If we get here, localStorage works, but let's check quota
+      const fs = window.RequestFileSystem || (window as any).webkitRequestFileSystem;
+      if (!fs) {
+        // Can't use this method, assume not private
+        resolve(false);
+        return;
+      }
+      
+      // Try to allocate 1MB of storage - often restricted in private mode
+      fs(window.TEMPORARY, 1024*1024, 
+        () => resolve(false),  // Storage quota allowed - not private mode
+        () => resolve(true)    // Storage quota denied - likely private mode
+      );
+    } catch (e) {
+      // If localStorage fails, likely in private mode
+      resolve(true);
+    }
+  });
 };
 
 // Example usage in conditional browser code:
