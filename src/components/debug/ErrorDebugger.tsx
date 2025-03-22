@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { getCollectedErrors, clearCollectedErrors, exportErrorReport } from '@/utils/errorCollector';
+import { getCollectedErrors, clearCollectedErrors, exportErrorReport, downloadErrorReport } from '@/utils/errorCollector';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { debug, LogLevel, getBrowserInfo } from '@/utils/debugUtils';
@@ -59,6 +59,11 @@ const ErrorDebugger: React.FC<ErrorDebuggerProps> = ({
       });
   };
   
+  // Download error report as JSON file
+  const handleDownloadReport = () => {
+    downloadErrorReport();
+  };
+  
   // Clear all errors
   const handleClearErrors = () => {
     clearCollectedErrors();
@@ -93,7 +98,13 @@ const ErrorDebugger: React.FC<ErrorDebuggerProps> = ({
                 onClick={copyErrorReport}
                 className="text-xs bg-white text-red-500 px-2 py-1 rounded"
               >
-                Export
+                Copy
+              </button>
+              <button 
+                onClick={handleDownloadReport}
+                className="text-xs bg-white text-red-500 px-2 py-1 rounded"
+              >
+                Download
               </button>
               <button 
                 onClick={() => setIsOpen(false)}

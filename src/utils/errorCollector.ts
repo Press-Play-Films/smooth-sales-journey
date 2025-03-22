@@ -62,6 +62,26 @@ export const exportErrorReport = (): string => {
   return JSON.stringify(report, null, 2);
 };
 
+// Generate and download error report as a JSON file
+export const downloadErrorReport = (): void => {
+  const report = exportErrorReport();
+  const blob = new Blob([report], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `brio-error-report-${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.json`;
+  document.body.appendChild(a);
+  a.click();
+  
+  // Clean up
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    debug('Error report downloaded', null, LogLevel.INFO);
+  }, 100);
+};
+
 // Initialize error listeners
 export const initErrorCollection = (): void => {
   // Global error handler
