@@ -12,11 +12,16 @@ if (!rootElement) {
   console.error('Root element not found');
 } else {
   const root = createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
   
-  console.log('Application rendered successfully');
+  // Wrap in try/catch to log any rendering errors
+  try {
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+    console.log('Application rendered successfully');
+  } catch (error) {
+    console.error('Failed to render application:', error);
+  }
 }
