@@ -6,36 +6,31 @@ import './index.css';
 import App from './App';
 import ErrorFallback from './components/error/ErrorFallback';
 
-// Simple initialization to avoid potential circular dependencies
-try {
-  console.log('Application starting...');
-  
-  const rootElement = document.getElementById('root');
-  if (!rootElement) {
-    throw new Error('Root element not found');
-  }
-  
-  const root = createRoot(rootElement);
-  root.render(
-    <React.StrictMode>
-      <ErrorBoundary 
-        FallbackComponent={ErrorFallback}
-        onReset={() => {
-          window.location.reload();
-        }}
-      >
-        <App />
-      </ErrorBoundary>
-    </React.StrictMode>
-  );
-  
-  console.log('Application rendered successfully');
-} catch (error) {
-  console.error('Critical initialization error:', error);
-  
-  // Show a simple error message if all else fails
-  const rootElement = document.getElementById('root');
-  if (rootElement) {
+// Very simple initialization to prevent any circular dependencies
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+  console.error('Root element not found');
+  document.body.innerHTML = '<div>Could not find root element</div>';
+} else {
+  try {
+    console.log('Application starting...');
+    
+    const root = createRoot(rootElement);
+    root.render(
+      <React.StrictMode>
+        <ErrorBoundary 
+          FallbackComponent={ErrorFallback}
+          onReset={() => window.location.reload()}
+        >
+          <App />
+        </ErrorBoundary>
+      </React.StrictMode>
+    );
+    
+    console.log('Application rendered successfully');
+  } catch (error) {
+    console.error('Critical initialization error:', error);
     rootElement.innerHTML = `
       <div style="text-align: center; padding: 2rem; font-family: sans-serif;">
         <h2 style="color: #e11d48;">Application Error</h2>

@@ -1,8 +1,7 @@
 
 import { LogLevel, debugConfig } from './types';
 
-// Store original console methods immediately before any potential overrides
-// This prevents circular references when importing this module
+// Store original console methods immediately
 const originalConsole = {
   log: console.log.bind(console),
   warn: console.warn.bind(console),
@@ -10,20 +9,19 @@ const originalConsole = {
   debug: console.debug.bind(console)
 };
 
-// Enhanced logging function with safeguards against recursive calls
+// Simple logging function with safeguards
 export const debug = (
   message: string, 
   data?: any, 
   level: LogLevel = LogLevel.INFO
 ) => {
-  // Exit early if debugging is disabled
-  if (!debugConfig.enabled) return;
-  
   try {
+    // Exit early if debugging is disabled
+    if (!debugConfig.enabled) return;
+    
     const timestamp = new Date().toISOString();
     const prefix = `[Brio:${level.toUpperCase()}][${timestamp}]`;
     
-    // Use the stored original console methods to avoid issues with overridden methods
     switch (level) {
       case LogLevel.ERROR:
         originalConsole.error(`${prefix} ${message}`, data ? data : '');
@@ -39,7 +37,7 @@ export const debug = (
         originalConsole.log(`${prefix} ${message}`, data ? data : '');
     }
   } catch (error) {
-    // Last resort fallback if something goes wrong with logging
+    // Fallback if something goes wrong with logging
     try {
       originalConsole.error('Debug logging failed:', error);
     } catch {
