@@ -3,8 +3,8 @@
   "name": "Brio Sales Management",
   "short_name": "Brio Sales",
   "description": "Comprehensive sales management platform for Brio Vacations",
-  "start_url": "/",
-  "display": "standalone",
+  "start_url": "/?source=pwa",
+  "display": "browser",
   "background_color": "#ffffff",
   "theme_color": "#1e3a8a",
   "icons": [
@@ -12,7 +12,7 @@
       "src": "/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }

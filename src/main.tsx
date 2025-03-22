@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { ErrorBoundary } from 'react-error-boundary'
 import App from './App.tsx'
 import './index.css'
-import { debug, LogLevel, initGlobalErrorHandling, initNetworkMonitoring, getBrowserInfo, debugServiceWorker } from './utils/debugUtils'
+import { debug, LogLevel, initGlobalErrorHandling, initNetworkMonitoring, getBrowserInfo } from './utils/debugUtils'
 
 // Initialize debugging utilities first, before any other code runs
 debug('Application starting', { timestamp: new Date().toISOString() }, LogLevel.INFO);
@@ -35,7 +35,8 @@ const preloadResources = () => {
 // Execute preload
 preloadResources();
 
-// Register service worker
+// Commented out service worker registration to prevent app from behaving like a native app
+/*
 if ('serviceWorker' in navigator && 
     location.hostname !== 'localhost') {
   window.addEventListener('load', () => {
@@ -55,6 +56,17 @@ if ('serviceWorker' in navigator &&
   });
 } else {
   debug('ServiceWorker not registered - either not supported or on localhost', null, LogLevel.WARN);
+}
+*/
+
+// If there are any active service workers, unregister them
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(registrations => {
+    for (const registration of registrations) {
+      registration.unregister();
+      debug('Unregistered service worker', { scope: registration.scope }, LogLevel.INFO);
+    }
+  });
 }
 
 // Enhanced error fallback component
