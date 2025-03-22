@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { debug, LogLevel } from '@/utils/debugUtils';
-import { isBrowser, getBrowserInfo } from '@/utils/browserUtils';
+import { isBrowser, getBrowserInfo } from '@/utils/browser';
 import { toast } from 'sonner';
 
 const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
