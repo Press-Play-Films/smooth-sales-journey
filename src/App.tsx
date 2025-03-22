@@ -2,17 +2,12 @@
 import React, { useEffect } from "react";
 import { Toaster } from "sonner";
 import { BrowserRouter } from "react-router-dom";
-import { debug, LogLevel, initQueryLogging } from './utils/debugUtils';
-import { initErrorCollection } from './utils/errorCollector';
+import { debug, LogLevel } from './utils/debugUtils';
 import BrowserCompatibilityProvider from './components/providers/BrowserCompatibilityProvider';
 import QueryProvider from './components/providers/QueryProvider';
 import RouteChangeTracker from './components/routing/RouteChangeTracker';
 import AppRoutes from './components/routing/AppRoutes';
-import ErrorDebugger from './components/debug/ErrorDebugger';
-
-// Initialize debugging utilities
-initQueryLogging();
-initErrorCollection();
+import SimpleErrorDebugger from './components/SimpleErrorDebugger';
 
 const App = () => {
   useEffect(() => {
@@ -22,9 +17,8 @@ const App = () => {
     };
   }, []);
 
-  // Determine if we should show the debugger
-  const showDebugger = import.meta.env.DEV || 
-                       window.location.search.includes('debug=true');
+  // Always show the debugger for simplicity
+  const showDebugger = true;
 
   return (
     <QueryProvider>
@@ -33,7 +27,7 @@ const App = () => {
           <RouteChangeTracker />
           <Toaster position="top-right" />
           <AppRoutes />
-          {showDebugger && <ErrorDebugger showOnLoad={false} />}
+          {showDebugger && <SimpleErrorDebugger />}
         </BrowserRouter>
       </BrowserCompatibilityProvider>
     </QueryProvider>
