@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { debug } from '@/utils/debugUtils';
+import { debug, LogLevel } from '@/utils/debug';
 
 const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   useEffect(() => {
@@ -54,8 +54,14 @@ const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ c
       }
     };
     
-    applyEmailClientStyles();
-    applyCrossBrowserSupport();
+    try {
+      debug('Initializing browser compatibility features', null, LogLevel.INFO);
+      applyEmailClientStyles();
+      applyCrossBrowserSupport();
+      debug('Browser compatibility features initialized', null, LogLevel.INFO);
+    } catch (error) {
+      debug('Error initializing browser compatibility', { error }, LogLevel.ERROR);
+    }
   }, []);
   
   return <>{children}</>;

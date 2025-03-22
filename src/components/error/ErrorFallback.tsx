@@ -9,10 +9,12 @@ interface ErrorFallbackProps {
 
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
   // Log the error when it occurs
-  debug('Error boundary caught an error', {
-    message: error.message,
-    stack: error.stack
-  }, LogLevel.ERROR);
+  React.useEffect(() => {
+    debug('Error boundary caught an error', {
+      message: error.message,
+      stack: error.stack
+    }, LogLevel.ERROR);
+  }, [error]);
   
   return (
     <div className="flex items-center justify-center h-screen bg-white">
