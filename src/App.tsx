@@ -2,18 +2,29 @@
 import React from "react";
 import { Toaster } from "sonner";
 import { BrowserRouter } from "react-router-dom";
-import QueryProvider from './components/providers/QueryProvider';
-import AppRoutes from './components/routing/AppRoutes';
+import { Routes, Route } from "react-router-dom";
+import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
+import Index from "@/pages/Index";
 
-// Simplified App component without complex initialization
+// Create a simple query client
+const queryClient = new QueryClient();
+
+// Extremely simplified App component for debugging
 const App = () => {
+  console.log("Rendering App component");
+  
   return (
-    <QueryProvider>
+    <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Toaster position="top-right" />
-        <AppRoutes />
+        <div className="app-container">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="*" element={<div>Page not found</div>} />
+          </Routes>
+        </div>
       </BrowserRouter>
-    </QueryProvider>
+    </QueryClientProvider>
   );
 };
 

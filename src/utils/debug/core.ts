@@ -1,14 +1,6 @@
 
 import { LogLevel, debugConfig } from './types';
 
-// Store original console methods
-const originalConsole = {
-  log: console.log.bind(console),
-  warn: console.warn.bind(console),
-  error: console.error.bind(console),
-  debug: console.debug.bind(console)
-};
-
 // Simple logging function with safeguards
 export const debug = (
   message: string, 
@@ -24,22 +16,22 @@ export const debug = (
     
     switch (level) {
       case LogLevel.ERROR:
-        originalConsole.error(`${prefix} ${message}`, data ? data : '');
+        console.error(`${prefix} ${message}`, data ? data : '');
         break;
       case LogLevel.WARN:
-        originalConsole.warn(`${prefix} ${message}`, data ? data : '');
+        console.warn(`${prefix} ${message}`, data ? data : '');
         break;
       case LogLevel.DEBUG:
-        originalConsole.debug(`${prefix} ${message}`, data ? data : '');
+        console.debug(`${prefix} ${message}`, data ? data : '');
         break;
       case LogLevel.INFO:
       default:
-        originalConsole.log(`${prefix} ${message}`, data ? data : '');
+        console.log(`${prefix} ${message}`, data ? data : '');
     }
   } catch (error) {
     // Fallback if logging fails
     try {
-      originalConsole.error('Debug logging failed:', error);
+      console.error('Debug logging failed:', error);
     } catch {
       // Silent fallback if all else fails
     }
