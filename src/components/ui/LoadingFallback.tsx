@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { debug, LogLevel } from '@/utils/debugUtils';
+import { debug, LogLevel } from '@/utils/debug';
 
 interface PerformanceTracker {
   startTime: number;

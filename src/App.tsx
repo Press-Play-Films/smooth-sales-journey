@@ -1,52 +1,30 @@
 
-import React, { useEffect, useState, StrictMode } from "react";
+import React, { useState } from "react";
 import { Toaster } from "sonner";
 import { BrowserRouter } from "react-router-dom";
-import { debug, LogLevel } from './utils/debug';
-import BrowserCompatibilityProvider from './components/providers/BrowserCompatibilityProvider';
 import QueryProvider from './components/providers/QueryProvider';
-import RouteChangeTracker from './components/routing/RouteChangeTracker';
+import BrowserCompatibilityProvider from './components/providers/BrowserCompatibilityProvider';
 import AppRoutes from './components/routing/AppRoutes';
+import RouteChangeTracker from './components/routing/RouteChangeTracker';
 
-// Simplified initialization pattern without unnecessary timers
+// Simplified App component without complex initialization
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [mountError, setMountError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    // Simple initialization with try/catch
-    try {
-      debug('App component mounted', null, LogLevel.INFO);
-      
-      // Immediately set initialized without delay
+  // Use a simpler approach to initialization
+  React.useEffect(() => {
+    console.log('App component mounted');
+    
+    // Set loading to false after a small delay
+    const timer = setTimeout(() => {
       setIsLoading(false);
-      
-      return () => {
-        debug('App component unmounted', null, LogLevel.INFO);
-      };
-    } catch (error) {
-      debug('Error during App initialization', { error }, LogLevel.ERROR);
-      setMountError(error instanceof Error ? error : new Error('Unknown initialization error'));
-    }
+    }, 100);
+    
+    return () => {
+      clearTimeout(timer);
+      console.log('App component unmounted');
+    };
   }, []);
-
-  // Handle initialization errors
-  if (mountError) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center p-6 max-w-md">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Initialization Error</h2>
-          <p className="text-gray-700 mb-4">{mountError.message}</p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-4 py-2 bg-brio-navy text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Restart Application
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   // Simple loading state
   if (isLoading) {
@@ -60,9 +38,9 @@ const App = () => {
     );
   }
 
-  // Render the full application once initialized - strip to bare essentials for preview
+  // Render the full application once initialized
   return (
-    <StrictMode>
+    <React.StrictMode>
       <QueryProvider>
         <BrowserCompatibilityProvider>
           <BrowserRouter>
@@ -72,7 +50,7 @@ const App = () => {
           </BrowserRouter>
         </BrowserCompatibilityProvider>
       </QueryProvider>
-    </StrictMode>
+    </React.StrictMode>
   );
 };
 

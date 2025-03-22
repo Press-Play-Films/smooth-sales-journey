@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { debug, LogLevel } from '@/utils/debugUtils';
+import { debug, LogLevel } from '@/utils/debug';
 
 // Create QueryClient with debugging
 const queryClient = new QueryClient({
