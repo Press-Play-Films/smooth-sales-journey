@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { debug } from '@/utils/debugUtils';
+import { debug, LogLevel } from '@/utils/debugUtils';
 import { isBrowser, getBrowserInfo } from '@/utils/browserUtils';
 
 const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
@@ -9,7 +9,7 @@ const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ c
     
     // Log browser information
     const browserInfo = getBrowserInfo();
-    debug('Browser detected', browserInfo, 'info');
+    debug('Browser detected', browserInfo, LogLevel.INFO);
     
     // Initialize browser compatibility features
     const applyEmailClientStyles = () => {
