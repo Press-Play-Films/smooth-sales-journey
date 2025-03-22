@@ -1,9 +1,16 @@
 
 import React, { useEffect } from 'react';
 import { debug } from '@/utils/debugUtils';
+import { isBrowser, getBrowserInfo } from '@/utils/browserUtils';
 
 const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
   useEffect(() => {
+    if (!isBrowser) return;
+    
+    // Log browser information
+    const browserInfo = getBrowserInfo();
+    debug('Browser detected', browserInfo, 'info');
+    
     // Initialize browser compatibility features
     const applyEmailClientStyles = () => {
       const isEmailClient = window.navigator.userAgent.indexOf('Outlook') !== -1 || 
@@ -35,9 +42,11 @@ const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ c
     
     // Apply any browser-specific polyfills or styles
     const applyCrossBrowserSupport = () => {
+      const { name } = getBrowserInfo();
+      document.documentElement.classList.add(`browser-${name.toLowerCase()}`);
+      
       // Add Safari flex gap support
-      if (/^((?!chrome|android).)*safari/i.test(navigator.userAgent)) {
-        document.documentElement.classList.add('safari');
+      if (name === 'Safari') {
         const safariStyleFix = document.createElement('style');
         safariStyleFix.innerHTML = `
           .safari .gap-fix {
@@ -46,11 +55,6 @@ const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ c
           }
         `;
         document.head.appendChild(safariStyleFix);
-      }
-      
-      // Add Firefox specific styles if needed
-      if (navigator.userAgent.indexOf("Firefox") > -1) {
-        document.documentElement.classList.add('firefox');
       }
     };
     
