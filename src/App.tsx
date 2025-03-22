@@ -1,41 +1,78 @@
 
-import React from "react";
+import React, { useEffect, useState, StrictMode } from "react";
 import { Toaster } from "sonner";
-import { BrowserRouter, HashRouter } from "react-router-dom";
-import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
-import AppRoutes from "@/components/routing/AppRoutes";
+import { BrowserRouter } from "react-router-dom";
+import { debug, LogLevel } from './utils/debugUtils';
+import BrowserCompatibilityProvider from './components/providers/BrowserCompatibilityProvider';
+import QueryProvider from './components/providers/QueryProvider';
+import RouteChangeTracker from './components/routing/RouteChangeTracker';
+import AppRoutes from './components/routing/AppRoutes';
 
-// Create a client
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-    },
-  },
-});
-
-// Detect if we're in a production environment where the base path might be different
-const isProduction = 
-  !window.location.hostname.includes('localhost') && 
-  !window.location.hostname.includes('lovable.');
-
-// Use HashRouter in production to avoid path issues, BrowserRouter in development
-const Router = isProduction ? HashRouter : BrowserRouter;
-
+// Simplified initialization pattern without unnecessary timers
 const App = () => {
-  console.log("Rendering App component", { isProduction });
-  
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <Toaster position="top-right" />
-        <div className="app-container min-h-screen bg-background">
-          <AppRoutes />
+  const [isLoading, setIsLoading] = useState(true);
+  const [mountError, setMountError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    // Simple initialization with try/catch
+    try {
+      debug('App component mounted', null, LogLevel.INFO);
+      
+      // Immediately set initialized without delay
+      setIsLoading(false);
+      
+      return () => {
+        debug('App component unmounted', null, LogLevel.INFO);
+      };
+    } catch (error) {
+      debug('Error during App initialization', { error }, LogLevel.ERROR);
+      setMountError(error instanceof Error ? error : new Error('Unknown initialization error'));
+    }
+  }, []);
+
+  // Handle initialization errors
+  if (mountError) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center p-6 max-w-md">
+          <h2 className="text-2xl font-bold text-red-600 mb-4">Initialization Error</h2>
+          <p className="text-gray-700 mb-4">{mountError.message}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-brio-navy text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Restart Application
+          </button>
         </div>
-      </Router>
-    </QueryClientProvider>
+      </div>
+    );
+  }
+
+  // Simple loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading application...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Render the full application once initialized - strip to bare essentials for preview
+  return (
+    <StrictMode>
+      <QueryProvider>
+        <BrowserCompatibilityProvider>
+          <BrowserRouter>
+            <RouteChangeTracker />
+            <Toaster position="top-right" />
+            <AppRoutes />
+          </BrowserRouter>
+        </BrowserCompatibilityProvider>
+      </QueryProvider>
+    </StrictMode>
   );
 };
 

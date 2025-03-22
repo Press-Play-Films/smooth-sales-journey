@@ -16,3 +16,7 @@ export const debugConfig = {
   logRouteChanges: true,
   logStateChanges: true
 };
+
+// Flag to track initialization status
+export let initialized = false;
+export let consolePatched = false;

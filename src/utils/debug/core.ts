@@ -1,7 +1,16 @@
 
 import { LogLevel, debugConfig } from './types';
 
-// Simple logging function with safeguards
+// Store original console methods immediately before any potential overrides
+// This prevents circular references when importing this module
+const originalConsole = {
+  log: console.log.bind(console),
+  warn: console.warn.bind(console),
+  error: console.error.bind(console),
+  debug: console.debug.bind(console)
+};
+
+// Enhanced logging function with safeguards against recursive calls
 export const debug = (
   message: string, 
   data?: any, 
@@ -14,26 +23,27 @@ export const debug = (
     const timestamp = new Date().toISOString();
     const prefix = `[Brio:${level.toUpperCase()}][${timestamp}]`;
     
+    // Use the stored original console methods to avoid issues with overridden methods
     switch (level) {
       case LogLevel.ERROR:
-        console.error(`${prefix} ${message}`, data ? data : '');
+        originalConsole.error(`${prefix} ${message}`, data ? data : '');
         break;
       case LogLevel.WARN:
-        console.warn(`${prefix} ${message}`, data ? data : '');
+        originalConsole.warn(`${prefix} ${message}`, data ? data : '');
         break;
       case LogLevel.DEBUG:
-        console.debug(`${prefix} ${message}`, data ? data : '');
+        originalConsole.debug(`${prefix} ${message}`, data ? data : '');
         break;
       case LogLevel.INFO:
       default:
-        console.log(`${prefix} ${message}`, data ? data : '');
+        originalConsole.log(`${prefix} ${message}`, data ? data : '');
     }
   } catch (error) {
-    // Fallback if logging fails
+    // Last resort fallback if something goes wrong with logging
     try {
-      console.error('Debug logging failed:', error);
+      originalConsole.error('Debug logging failed:', error);
     } catch {
-      // Silent fallback if all else fails
+      // Silently fail if all else fails
     }
   }
 };

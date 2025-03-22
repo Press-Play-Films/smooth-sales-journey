@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { debug, LogLevel } from '@/utils/debug';
 
 interface ErrorFallbackProps {
   error: Error;
@@ -7,9 +8,11 @@ interface ErrorFallbackProps {
 }
 
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
-  React.useEffect(() => {
-    console.error('Error boundary caught an error:', error);
-  }, [error]);
+  // Log the error when it occurs
+  debug('Error boundary caught an error', {
+    message: error.message,
+    stack: error.stack
+  }, LogLevel.ERROR);
   
   return (
     <div className="flex items-center justify-center h-screen bg-white">
@@ -20,8 +23,11 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
           <pre className="text-xs text-gray-800">{error.stack}</pre>
         </div>
         <button
-          onClick={resetErrorBoundary}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          onClick={() => {
+            debug('Error boundary reset attempted', null, LogLevel.INFO);
+            resetErrorBoundary();
+          }}
+          className="px-4 py-2 bg-brio-navy text-white rounded hover:bg-blue-700 transition-colors"
         >
           Try again
         </button>

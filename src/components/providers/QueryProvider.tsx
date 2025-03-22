@@ -1,14 +1,20 @@
 
 import React from 'react';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { debug, LogLevel } from '@/utils/debugUtils';
 
-// Create a simple client
+// Create QueryClient with debugging
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
       staleTime: 5 * 60 * 1000, // 5 minutes
+      meta: {
+        onError: (error: any) => {
+          debug('Query error', error, LogLevel.ERROR);
+        }
+      }
     },
   },
 });

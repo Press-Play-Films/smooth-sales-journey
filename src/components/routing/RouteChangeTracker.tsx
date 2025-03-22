@@ -1,15 +1,30 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { debug, LogLevel } from '@/utils/debug';
+import { debug, LogLevel } from '@/utils/debugUtils';
 
 const RouteChangeTracker: React.FC = () => {
   const location = useLocation();
+  const isMounted = useRef(true);
   
   useEffect(() => {
-    if (!location) return;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+  
+  useEffect(() => {
+    // Guard against React strict mode double rendering or stale closures
+    if (!isMounted.current) return;
+    
+    // Basic guard against null location
+    if (!location) {
+      debug('RouteTracker: Location is null or undefined', null, LogLevel.WARN);
+      return;
+    }
     
     try {
+      // Create a safe copy of location data (primitive values only)
       const safeLocationData = {
         pathname: typeof location.pathname === 'string' ? location.pathname : '/',
         search: typeof location.search === 'string' ? location.search : '',
@@ -19,7 +34,15 @@ const RouteChangeTracker: React.FC = () => {
       
       debug(`Route changed to: ${safeLocationData.pathname}`, safeLocationData, LogLevel.INFO);
     } catch (error) {
-      console.error("Error in route tracking:", error);
+      // Safely log any errors without breaking the app
+      try {
+        debug("Error in route tracking:", { 
+          error: error instanceof Error ? error.message : 'Unknown error',
+          path: location?.pathname || 'unknown'
+        }, LogLevel.ERROR);
+      } catch (e) {
+        // Silently fail if even debug logging fails
+      }
     }
   }, [location]);
   
