@@ -1,7 +1,7 @@
 
 import { LogLevel, debugConfig } from './types';
 
-// Store original console methods immediately
+// Store original console methods
 const originalConsole = {
   log: console.log.bind(console),
   warn: console.warn.bind(console),
@@ -15,10 +15,10 @@ export const debug = (
   data?: any, 
   level: LogLevel = LogLevel.INFO
 ) => {
+  // Exit early if debugging is disabled
+  if (!debugConfig.enabled) return;
+  
   try {
-    // Exit early if debugging is disabled
-    if (!debugConfig.enabled) return;
-    
     const timestamp = new Date().toISOString();
     const prefix = `[Brio:${level.toUpperCase()}][${timestamp}]`;
     
@@ -37,11 +37,11 @@ export const debug = (
         originalConsole.log(`${prefix} ${message}`, data ? data : '');
     }
   } catch (error) {
-    // Fallback if something goes wrong with logging
+    // Fallback if logging fails
     try {
       originalConsole.error('Debug logging failed:', error);
     } catch {
-      // Silently fail if all else fails
+      // Silent fallback if all else fails
     }
   }
 };

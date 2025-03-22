@@ -1,7 +1,7 @@
 
 import React, { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import LoadingFallback from '@/components/ui/LoadingFallback';
+import LoadingFallback from '../ui/LoadingFallback';
 
 // Lazy load page components
 const Index = lazy(() => import("@/pages/Index"));

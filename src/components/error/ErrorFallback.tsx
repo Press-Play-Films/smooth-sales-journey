@@ -7,7 +7,6 @@ interface ErrorFallbackProps {
 }
 
 const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary }) => {
-  // Log the error when it occurs
   React.useEffect(() => {
     console.error('Error boundary caught an error:', error);
   }, [error]);
@@ -21,10 +20,7 @@ const ErrorFallback: React.FC<ErrorFallbackProps> = ({ error, resetErrorBoundary
           <pre className="text-xs text-gray-800">{error.stack}</pre>
         </div>
         <button
-          onClick={() => {
-            console.log('Error boundary reset attempted');
-            resetErrorBoundary();
-          }}
+          onClick={resetErrorBoundary}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
         >
           Try again
