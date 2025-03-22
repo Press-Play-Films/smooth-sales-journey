@@ -2,7 +2,7 @@
 import React, { useEffect, useState, StrictMode } from "react";
 import { Toaster } from "sonner";
 import { BrowserRouter } from "react-router-dom";
-import { debug, LogLevel } from './utils/debugUtils';
+import { debug, LogLevel } from './utils/debug';
 import BrowserCompatibilityProvider from './components/providers/BrowserCompatibilityProvider';
 import QueryProvider from './components/providers/QueryProvider';
 import RouteChangeTracker from './components/routing/RouteChangeTracker';

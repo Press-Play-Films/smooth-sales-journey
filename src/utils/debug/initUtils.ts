@@ -53,7 +53,7 @@ export const initGlobalErrorHandling = () => {
   // Handle React render errors
   if (!consolePatched) {
     const originalConsoleError = console.error;
-    console.error = (...args) => {
+    console.error = (...args: any[]) => {
       // Check for React-specific errors
       const errorText = args.join(' ');
       if (
@@ -111,7 +111,7 @@ export const initNetworkMonitoring = () => {
           
       debug('Fetch failed', {
         url,
-        error: error.message,
+        error: error instanceof Error ? error.message : String(error),
         duration: `${(endTime - startTime).toFixed(2)}ms`
       }, LogLevel.ERROR);
       throw error;
@@ -136,6 +136,6 @@ export const getBrowserInfo = () => {
     return browserInfo;
   } catch (error) {
     debug('Error collecting browser info', error, LogLevel.ERROR);
-    return { error: error.message };
+    return { error: error instanceof Error ? error.message : String(error) };
   }
 };
