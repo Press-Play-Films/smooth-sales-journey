@@ -5,6 +5,7 @@ import Dashboard from '@/components/Dashboard';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import BrowserPreview from '@/components/browser/BrowserPreview';
 
 const Index: React.FC = () => {
   const [welcomeDismissed, setWelcomeDismissed] = React.useState(false);
@@ -86,6 +87,8 @@ const Index: React.FC = () => {
           </CardContent>
         </Card>
       )}
+      
+      <BrowserPreview />
       
       <Dashboard />
     </Layout>
