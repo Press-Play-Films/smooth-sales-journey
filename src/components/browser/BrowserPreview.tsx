@@ -93,13 +93,25 @@ const BrowserPreview: React.FC = () => {
                   )}
                   <div className="flex items-center justify-between">
                     <span className="font-semibold">Touch Support:</span>
-                    <Badge variant={isTouchDevice() ? "success" : "outline"} className="px-3 py-1">
+                    <Badge 
+                      variant="outline" 
+                      className={`px-3 py-1 ${isTouchDevice() ? 'bg-green-100 text-green-800 border-green-200' : ''}`}
+                    >
                       {isTouchDevice() ? 'Available' : 'Not Available'}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="font-semibold">Privacy Mode:</span>
-                    <Badge variant={privacyMode === null ? "outline" : (privacyMode ? "warning" : "success")} className="px-3 py-1">
+                    <Badge 
+                      variant="outline" 
+                      className={`px-3 py-1 ${
+                        privacyMode === null 
+                          ? '' 
+                          : (privacyMode 
+                              ? 'bg-yellow-100 text-yellow-800 border-yellow-200' 
+                              : 'bg-green-100 text-green-800 border-green-200')
+                      }`}
+                    >
                       {privacyMode === null ? 'Not Checked' : (privacyMode ? 'Private Browsing' : 'Standard Mode')}
                     </Badge>
                   </div>
