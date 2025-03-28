@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,27 +13,52 @@ import CompatibilityWarning from '../providers/CompatibilityWarning';
 import CapabilityList from './CapabilityList';
 
 const BrowserPreview: React.FC = () => {
-  const browserInfo = getBrowserInfo();
+  const [browserInfo, setBrowserInfo] = useState<ReturnType<typeof getBrowserInfo> | null>(null);
   const [showWarning, setShowWarning] = useState(false);
   const [privacyMode, setPrivacyMode] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      // Safely get browser info
+      const info = getBrowserInfo();
+      setBrowserInfo(info);
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Error loading browser info:", err);
+      setError("Could not load browser information");
+      setIsLoading(false);
+    }
+  }, []);
 
   // Check for privacy mode
   const checkPrivacyMode = async () => {
-    const result = await isPrivateMode();
-    setPrivacyMode(result);
-    toast.info(result ? 'Private browsing detected' : 'Standard browsing mode detected');
+    try {
+      const result = await isPrivateMode();
+      setPrivacyMode(result);
+      toast.info(result ? 'Private browsing detected' : 'Standard browsing mode detected');
+    } catch (err) {
+      console.error("Error checking privacy mode:", err);
+      toast.error("Could not check privacy mode");
+    }
   };
 
   // Test localStorage
   const testLocalStorage = () => {
-    const testKey = 'browser-test';
-    const success = safeStorage.setItem(testKey, 'This is a test value');
-    if (success) {
-      const value = safeStorage.getItem(testKey);
-      toast.success(`Storage test successful: "${value}" was stored and retrieved`);
-      safeStorage.removeItem(testKey);
-    } else {
-      toast.error('Storage test failed. Local storage may be restricted or disabled.');
+    try {
+      const testKey = 'browser-test';
+      const success = safeStorage.setItem(testKey, 'This is a test value');
+      if (success) {
+        const value = safeStorage.getItem(testKey);
+        toast.success(`Storage test successful: "${value}" was stored and retrieved`);
+        safeStorage.removeItem(testKey);
+      } else {
+        toast.error('Storage test failed. Local storage may be restricted or disabled.');
+      }
+    } catch (err) {
+      console.error("Error testing localStorage:", err);
+      toast.error("An error occurred while testing storage");
     }
   };
 
@@ -41,6 +66,18 @@ const BrowserPreview: React.FC = () => {
   const toggleWarning = () => {
     setShowWarning(!showWarning);
   };
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center min-h-[200px]">Loading browser information...</div>;
+  }
+  
+  if (error) {
+    return <div className="p-4 bg-red-50 text-red-800 rounded-md">{error}</div>;
+  }
+
+  if (!browserInfo) {
+    return <div className="p-4 bg-yellow-50 text-yellow-800 rounded-md">Browser information not available</div>;
+  }
 
   return (
     <>
