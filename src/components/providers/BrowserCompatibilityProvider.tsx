@@ -17,27 +17,38 @@ const BrowserCompatibilityProvider: React.FC<{children: React.ReactNode}> = ({ c
   useEffect(() => {
     if (!isBrowser) return;
     
-    // Initialize browser compatibility features
-    const initBrowserCompatibility = () => {
-      // Check for compatibility issues
-      const issue = checkBrowserCompatibility();
+    try {
+      // Initialize browser compatibility features
+      const initBrowserCompatibility = () => {
+        // Check for compatibility issues
+        const issue = checkBrowserCompatibility();
+        
+        if (issue) {
+          setCompatibilityIssue(issue);
+          debug('Browser compatibility checks failed', issue, LogLevel.WARN);
+        } else {
+          // Apply browser-specific features and fixes
+          applyEmailClientStyles();
+          applyCrossBrowserSupport();
+          addPolyfills();
+          debug('Browser compatibility checks passed', null, LogLevel.INFO);
+        }
+        
+        setIsCompatibilityChecked(true);
+      };
       
-      if (issue) {
-        setCompatibilityIssue(issue);
-        debug('Browser compatibility checks failed', issue, LogLevel.WARN);
-      } else {
-        // Apply browser-specific features and fixes
-        applyEmailClientStyles();
-        applyCrossBrowserSupport();
-        addPolyfills();
-        debug('Browser compatibility checks passed', null, LogLevel.INFO);
-      }
-      
+      initBrowserCompatibility();
+    } catch (error) {
+      // Log error but don't block rendering
+      console.error("Error in BrowserCompatibilityProvider:", error);
       setIsCompatibilityChecked(true);
-    };
-    
-    initBrowserCompatibility();
+    }
   }, []);
+  
+  // Always render children, even if compatibility check is in progress
+  if (!isCompatibilityChecked) {
+    return <>{children}</>;
+  }
   
   if (compatibilityIssue) {
     return (
