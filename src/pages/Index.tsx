@@ -88,8 +88,15 @@ const Index: React.FC = () => {
         </Card>
       )}
       
+      <h2 className="text-2xl font-bold mb-4">Browser Compatibility Tool</h2>
+      <p className="text-gray-600 mb-6">
+        This tool helps you identify your browser capabilities and compatibility with our application.
+      </p>
+      
+      {/* Browser preview component with improved visibility */}
       <BrowserPreview />
       
+      <h2 className="text-2xl font-bold mt-8 mb-4">Dashboard</h2>
       <Dashboard />
     </Layout>
   );

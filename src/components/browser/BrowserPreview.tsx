@@ -25,10 +25,14 @@ const BrowserPreview: React.FC = () => {
       const info = getBrowserInfo();
       setBrowserInfo(info);
       setIsLoading(false);
+      
+      // Notify the user that browser information has loaded
+      toast.success("Browser information loaded successfully");
     } catch (err) {
       console.error("Error loading browser info:", err);
       setError("Could not load browser information");
       setIsLoading(false);
+      toast.error("Failed to load browser information");
     }
   }, []);
 
@@ -68,15 +72,39 @@ const BrowserPreview: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center min-h-[200px]">Loading browser information...</div>;
+    return (
+      <div className="border rounded-md p-6 bg-slate-50 my-4">
+        <div className="flex justify-center items-center min-h-[200px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <span className="ml-3 text-lg">Loading browser information...</span>
+        </div>
+      </div>
+    );
   }
   
   if (error) {
-    return <div className="p-4 bg-red-50 text-red-800 rounded-md">{error}</div>;
+    return (
+      <div className="border rounded-md p-4 bg-red-50 text-red-800 my-4">
+        <h3 className="font-bold">Error Loading Browser Information</h3>
+        <p>{error}</p>
+        <Button 
+          variant="outline" 
+          className="mt-2" 
+          onClick={() => window.location.reload()}
+        >
+          Retry
+        </Button>
+      </div>
+    );
   }
 
   if (!browserInfo) {
-    return <div className="p-4 bg-yellow-50 text-yellow-800 rounded-md">Browser information not available</div>;
+    return (
+      <div className="border rounded-md p-4 bg-yellow-50 text-yellow-800 my-4">
+        <h3 className="font-bold">Browser Information Unavailable</h3>
+        <p>We couldn't detect your browser information. This could be due to privacy settings or browser restrictions.</p>
+      </div>
+    );
   }
 
   return (
@@ -88,122 +116,124 @@ const BrowserPreview: React.FC = () => {
         />
       )}
 
-      <div className="container mx-auto py-6">
-        <h1 className="text-3xl font-bold mb-6">Browser Compatibility Preview</h1>
-        
-        <Tabs defaultValue="info" className="w-full">
-          <TabsList className="grid grid-cols-3 mb-4">
-            <TabsTrigger value="info">Browser Info</TabsTrigger>
-            <TabsTrigger value="capabilities">Capabilities</TabsTrigger>
-            <TabsTrigger value="tests">Compatibility Tests</TabsTrigger>
-          </TabsList>
+      <div className="border rounded-md shadow-sm bg-white my-6">
+        <div className="container mx-auto py-6">
+          <h1 className="text-2xl font-bold mb-6 text-center">Your Browser Information</h1>
           
-          <TabsContent value="info">
-            <Card>
-              <CardHeader>
-                <CardTitle>Browser Detection</CardTitle>
-                <CardDescription>Information detected about your current browser</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">Browser:</span>
-                    <Badge variant="outline" className="px-3 py-1">{browserInfo.name} {browserInfo.version}</Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">Device Type:</span>
-                    <Badge variant={browserInfo.isMobile ? "default" : "outline"} className="px-3 py-1">
-                      {browserInfo.isMobile ? 'Mobile' : 'Desktop'}
-                    </Badge>
-                  </div>
-                  {browserInfo.isIOS && (
+          <Tabs defaultValue="info" className="w-full">
+            <TabsList className="grid grid-cols-3 mb-4">
+              <TabsTrigger value="info">Browser Info</TabsTrigger>
+              <TabsTrigger value="capabilities">Capabilities</TabsTrigger>
+              <TabsTrigger value="tests">Compatibility Tests</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="info">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Browser Detection</CardTitle>
+                  <CardDescription>Information detected about your current browser</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4">
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold">iOS Device:</span>
-                      <Badge variant="secondary" className="px-3 py-1">iOS</Badge>
+                      <span className="font-semibold">Browser:</span>
+                      <Badge variant="outline" className="px-3 py-1">{browserInfo.name} {browserInfo.version}</Badge>
                     </div>
-                  )}
-                  {browserInfo.isAndroid && (
                     <div className="flex items-center justify-between">
-                      <span className="font-semibold">Android Device:</span>
-                      <Badge variant="secondary" className="px-3 py-1">Android</Badge>
+                      <span className="font-semibold">Device Type:</span>
+                      <Badge variant={browserInfo.isMobile ? "default" : "outline"} className="px-3 py-1">
+                        {browserInfo.isMobile ? 'Mobile' : 'Desktop'}
+                      </Badge>
                     </div>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">Touch Support:</span>
-                    <Badge 
-                      variant="outline" 
-                      className={`px-3 py-1 ${isTouchDevice() ? 'bg-green-100 text-green-800 border-green-200' : ''}`}
-                    >
-                      {isTouchDevice() ? 'Available' : 'Not Available'}
-                    </Badge>
+                    {browserInfo.isIOS && (
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">iOS Device:</span>
+                        <Badge variant="secondary" className="px-3 py-1">iOS</Badge>
+                      </div>
+                    )}
+                    {browserInfo.isAndroid && (
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold">Android Device:</span>
+                        <Badge variant="secondary" className="px-3 py-1">Android</Badge>
+                      </div>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">Touch Support:</span>
+                      <Badge 
+                        variant="outline" 
+                        className={`px-3 py-1 ${isTouchDevice() ? 'bg-green-100 text-green-800 border-green-200' : ''}`}
+                      >
+                        {isTouchDevice() ? 'Available' : 'Not Available'}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold">Privacy Mode:</span>
+                      <Badge 
+                        variant="outline" 
+                        className={`px-3 py-1 ${
+                          privacyMode === null 
+                            ? '' 
+                            : (privacyMode 
+                                ? 'bg-yellow-100 text-yellow-800 border-yellow-200' 
+                                : 'bg-green-100 text-green-800 border-green-200')
+                        }`}
+                      >
+                        {privacyMode === null ? 'Not Checked' : (privacyMode ? 'Private Browsing' : 'Standard Mode')}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold">Privacy Mode:</span>
-                    <Badge 
-                      variant="outline" 
-                      className={`px-3 py-1 ${
-                        privacyMode === null 
-                          ? '' 
-                          : (privacyMode 
-                              ? 'bg-yellow-100 text-yellow-800 border-yellow-200' 
-                              : 'bg-green-100 text-green-800 border-green-200')
-                      }`}
-                    >
-                      {privacyMode === null ? 'Not Checked' : (privacyMode ? 'Private Browsing' : 'Standard Mode')}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={checkPrivacyMode} variant="outline" size="sm">
-                  Check Privacy Mode
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="capabilities">
-            <Card>
-              <CardHeader>
-                <CardTitle>Browser Capabilities</CardTitle>
-                <CardDescription>Features and APIs available in your current browser</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CapabilityList />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="tests">
-            <Card>
-              <CardHeader>
-                <CardTitle>Compatibility Tests</CardTitle>
-                <CardDescription>Test browser compatibility features</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-md bg-slate-50 p-4">
-                  <h3 className="font-medium mb-2">Storage Test</h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Test if localStorage is available and working in your browser.
-                  </p>
-                  <Button onClick={testLocalStorage} variant="outline" size="sm">
-                    Test localStorage
+                </CardContent>
+                <CardFooter>
+                  <Button onClick={checkPrivacyMode} variant="outline" size="sm">
+                    Check Privacy Mode
                   </Button>
-                </div>
+                </CardFooter>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="capabilities">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Browser Capabilities</CardTitle>
+                  <CardDescription>Features and APIs available in your current browser</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <CapabilityList />
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="tests">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Compatibility Tests</CardTitle>
+                  <CardDescription>Test browser compatibility features</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="rounded-md bg-slate-50 p-4">
+                    <h3 className="font-medium mb-2">Storage Test</h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Test if localStorage is available and working in your browser.
+                    </p>
+                    <Button onClick={testLocalStorage} variant="outline" size="sm">
+                      Test localStorage
+                    </Button>
+                  </div>
 
-                <div className="rounded-md bg-slate-50 p-4">
-                  <h3 className="font-medium mb-2">Compatibility Warning Demo</h3>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Show a sample compatibility warning message.
-                  </p>
-                  <Button onClick={toggleWarning} variant="outline" size="sm">
-                    {showWarning ? 'Hide' : 'Show'} Warning
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                  <div className="rounded-md bg-slate-50 p-4">
+                    <h3 className="font-medium mb-2">Compatibility Warning Demo</h3>
+                    <p className="text-sm text-gray-600 mb-3">
+                      Show a sample compatibility warning message.
+                    </p>
+                    <Button onClick={toggleWarning} variant="outline" size="sm">
+                      {showWarning ? 'Hide' : 'Show'} Warning
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
     </>
   );

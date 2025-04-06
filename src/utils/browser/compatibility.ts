@@ -1,3 +1,4 @@
+
 /**
  * Browser compatibility utilities for ensuring app works across browsers
  */
@@ -72,6 +73,9 @@ export const applyCrossBrowserSupport = (): void => {
     if (browserInfo.name === 'Firefox') {
       document.documentElement.classList.add('firefox-browser');
     }
+    
+    // Log successful application of cross-browser support
+    console.log("Cross-browser support applied for:", browserInfo.name);
   } catch (error) {
     console.error("Error applying cross-browser support:", error);
   }
@@ -87,7 +91,24 @@ export const addPolyfills = (): void => {
       console.warn('Promise API not available, consider adding a polyfill');
     }
     
-    // Other polyfills could be conditionally loaded here
+    // Add polyfill for requestAnimationFrame if needed
+    if (!window.requestAnimationFrame) {
+      window.requestAnimationFrame = function(callback) {
+        return window.setTimeout(callback, 1000 / 60); // 60fps
+      };
+      console.log("Added requestAnimationFrame polyfill");
+    }
+    
+    // Add polyfill for cancelAnimationFrame if needed
+    if (!window.cancelAnimationFrame) {
+      window.cancelAnimationFrame = function(id) {
+        clearTimeout(id);
+      };
+      console.log("Added cancelAnimationFrame polyfill");
+    }
+    
+    // Log successful application of polyfills
+    console.log("Browser polyfills applied successfully");
   } catch (error) {
     console.error("Error adding polyfills:", error);
   }
