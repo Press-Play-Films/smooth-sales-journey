@@ -1,35 +1,54 @@
 
-import React, { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import LoadingFallback from '@/components/ui/LoadingFallback';
+import React from 'react';
+import { Routes, Route, Navigate, Outlet, useLocation } from 'react-router-dom';
+import Index from '@/pages/Index';
+import ClientsPage from '@/pages/ClientsPage';
+import PresentationsPage from '@/pages/PresentationsPage';
+import ExecutiveDashboard from '@/pages/ExecutiveDashboard';
+import TeamView from '@/pages/TeamView';
+import AnalyticsPage from '@/pages/AnalyticsPage';
+import DebugPage from '@/pages/DebugPage';
+import ClientView from '@/pages/ClientView';
+import NotFound from '@/pages/NotFound';
+import AuthPage from '@/pages/AuthPage';
+import { useAuth } from '@/contexts/AuthContext';
 
-// Lazy load page components
-const Index = lazy(() => import("@/pages/Index"));
-const ClientsPage = lazy(() => import("@/pages/ClientsPage"));
-const PresentationsPage = lazy(() => import("@/pages/PresentationsPage"));
-const AnalyticsPage = lazy(() => import("@/pages/AnalyticsPage"));
-const ClientView = lazy(() => import("@/pages/ClientView"));
-const TeamView = lazy(() => import("@/pages/TeamView"));
-const ExecutiveDashboard = lazy(() => import("@/pages/ExecutiveDashboard"));
-const DebugPage = lazy(() => import("@/pages/DebugPage"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
+const RequireAuth = () => {
+  const { user, isLoading } = useAuth();
+  const location = useLocation();
 
-const AppRoutes: React.FC = () => {
+  if (isLoading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
+  }
+
+  if (!user) {
+    return <Navigate to="/auth" state={{ from: location }} replace />;
+  }
+
+  return <Outlet />;
+};
+
+const AppRoutes = () => {
   return (
-    <Suspense fallback={<LoadingFallback />}>
-      <Routes>
+    <Routes>
+      {/* Public routes */}
+      <Route path="/auth" element={<AuthPage />} />
+      
+      {/* Protected routes */}
+      <Route element={<RequireAuth />}>
         <Route path="/" element={<Index />} />
         <Route path="/clients" element={<ClientsPage />} />
-        <Route path="/clients/:clientId" element={<ClientView />} />
         <Route path="/presentations" element={<PresentationsPage />} />
+        <Route path="/executive" element={<ExecutiveDashboard />} />
         <Route path="/team" element={<TeamView />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/executive" element={<ExecutiveDashboard />} />
         <Route path="/debug" element={<DebugPage />} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </Suspense>
+        <Route path="/client/:clientId" element={<ClientView />} />
+      </Route>
+      
+      {/* 404 route */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 

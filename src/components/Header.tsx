@@ -1,87 +1,65 @@
-
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import RoleToggle from './header/RoleToggle';
+import { Link, useLocation } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Menu } from "lucide-react";
+import { useMobile } from '@/hooks/use-mobile';
+import NotificationButton from './header/NotificationButton';
 import DesktopNavigation from './header/DesktopNavigation';
 import MobileMenu from './header/MobileMenu';
-import NewPresentationForm from './presentation/NewPresentationForm';
+import RoleToggle from './header/RoleToggle';
+import UserProfile from './header/UserProfile';
+import { useAuth } from '@/contexts/AuthContext';
 
-interface HeaderProps {
-  userRole: 'employee' | 'executive';
-  toggleUserRole: () => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ userRole, toggleUserRole }) => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showNewPresentationForm, setShowNewPresentationForm] = useState(false);
-  
-  const openNewPresentationForm = () => {
-    setShowNewPresentationForm(true);
-    setMobileMenuOpen(false);
-  };
-  
-  const closeNewPresentationForm = () => {
-    setShowNewPresentationForm(false);
-  };
+const Header: React.FC = () => {
+  const { pathname } = useLocation();
+  const isMobile = useMobile();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, signOut, profile } = useAuth();
   
   return (
-    <header className="sticky top-0 z-50 w-full">
-      <div className="glass-nav px-4 py-3 flex items-center justify-between">
+    <header className="bg-white border-b border-gray-200 py-2 px-4 md:px-6">
+      <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Link to="/" className="flex items-center space-x-2">
-            <img 
-              src="/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png" 
-              alt="Brio Vacations" 
-              className="h-10 object-contain hidden sm:block" 
-            />
-            <span className="font-semibold text-lg tracking-tight text-brio-navy">
-              Brio Sales Management
-            </span>
-          </Link>
+          <Link to="/" className="text-2xl font-bold text-brio-navy">BRIO</Link>
+          {!isMobile && (
+            <span className="text-gray-500 text-sm">|</span>
+          )}
+          {!isMobile && (
+            <span className="text-gray-500 text-sm">Sales Management</span>
+          )}
         </div>
         
-        <div className="flex items-center space-x-4">
-          {/* User Role Toggle */}
-          <RoleToggle userRole={userRole} toggleUserRole={toggleUserRole} />
-          
-          {/* Desktop Navigation */}
-          <DesktopNavigation onNewPresentation={openNewPresentationForm} />
-          
-          {/* Mobile menu button */}
-          <button 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-md text-gray-700 hover:text-brio-navy hover:bg-gray-100 focus:outline-none"
-          >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-6 w-6" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
+        {isMobile ? (
+          <div className="flex items-center space-x-4">
+            <NotificationButton />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d={mobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} 
-              />
-            </svg>
-          </button>
-        </div>
+              <Menu className="h-6 w-6" />
+            </Button>
+          </div>
+        ) : (
+          <div className="hidden md:flex items-center space-x-6">
+            <DesktopNavigation pathname={pathname} />
+            <div className="flex items-center space-x-4">
+              <NotificationButton />
+              <RoleToggle />
+              <UserProfile user={profile || user} onSignOut={signOut} />
+            </div>
+          </div>
+        )}
       </div>
       
-      {/* Mobile menu */}
-      <MobileMenu 
-        isOpen={mobileMenuOpen}
-        userRole={userRole}
-        toggleUserRole={toggleUserRole}
-        onItemClick={() => setMobileMenuOpen(false)}
-        onNewPresentation={openNewPresentationForm}
-      />
-      
-      {/* New Presentation Form Modal */}
-      {showNewPresentationForm && (
-        <NewPresentationForm onClose={closeNewPresentationForm} />
+      {isMobile && isMobileMenuOpen && (
+        <MobileMenu 
+          pathname={pathname} 
+          onClose={() => setIsMobileMenuOpen(false)} 
+          user={profile || user}
+          onSignOut={signOut}
+        />
       )}
     </header>
   );

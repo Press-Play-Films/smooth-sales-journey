@@ -9,7 +9,219 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          assigned_agent: string | null
+          city: string | null
+          created_at: string | null
+          department: string | null
+          id: string
+          image_url: string | null
+          location: string | null
+          names: string
+          presentation_time: string | null
+          room_number: string | null
+          state: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_agent?: string | null
+          city?: string | null
+          created_at?: string | null
+          department?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          names: string
+          presentation_time?: string | null
+          room_number?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_agent?: string | null
+          city?: string | null
+          created_at?: string | null
+          department?: string | null
+          id?: string
+          image_url?: string | null
+          location?: string | null
+          names?: string
+          presentation_time?: string | null
+          room_number?: string | null
+          state?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      presentation_clients: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          id: string
+          presentation_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          id?: string
+          presentation_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          presentation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presentation_clients_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presentation_clients_presentation_id_fkey"
+            columns: ["presentation_id"]
+            isOneToOne: false
+            referencedRelation: "presentations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      presentations: {
+        Row: {
+          created_at: string | null
+          end_time: string | null
+          id: string
+          presenter: string
+          room_number: string | null
+          start_time: string
+          status: string
+          title: string
+          updated_at: string | null
+          wave_time: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          presenter: string
+          room_number?: string | null
+          start_time: string
+          status?: string
+          title: string
+          updated_at?: string | null
+          wave_time?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          presenter?: string
+          room_number?: string | null
+          start_time?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+          wave_time?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          department: string | null
+          full_name: string | null
+          id: string
+          role: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          department?: string | null
+          full_name?: string | null
+          id: string
+          role?: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          department?: string | null
+          full_name?: string | null
+          id?: string
+          role?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          amount: number
+          client_id: string
+          created_at: string | null
+          id: string
+          package_type: string
+          payment_method: string
+          presentation_id: string | null
+          room_number: string | null
+          sales_executive: string | null
+          to_manager: string | null
+          transaction_notes: string | null
+          wave_time: string | null
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          created_at?: string | null
+          id?: string
+          package_type: string
+          payment_method: string
+          presentation_id?: string | null
+          room_number?: string | null
+          sales_executive?: string | null
+          to_manager?: string | null
+          transaction_notes?: string | null
+          wave_time?: string | null
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          package_type?: string
+          payment_method?: string
+          presentation_id?: string | null
+          room_number?: string | null
+          sales_executive?: string | null
+          to_manager?: string | null
+          transaction_notes?: string | null
+          wave_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_presentation_id_fkey"
+            columns: ["presentation_id"]
+            isOneToOne: false
+            referencedRelation: "presentations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

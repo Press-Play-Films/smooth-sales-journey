@@ -8,6 +8,7 @@ import QueryProvider from './components/providers/QueryProvider';
 import RouteChangeTracker from './components/routing/RouteChangeTracker';
 import AppRoutes from './components/routing/AppRoutes';
 import SimpleErrorDebugger from './components/SimpleErrorDebugger';
+import { AuthProvider } from "./contexts/AuthContext";
 
 const App = () => {
   useEffect(() => {
@@ -23,12 +24,14 @@ const App = () => {
   return (
     <QueryProvider>
       <BrowserCompatibilityProvider>
-        <BrowserRouter>
-          <RouteChangeTracker />
-          <Toaster position="top-right" />
-          <AppRoutes />
-          {showDebugger && <SimpleErrorDebugger />}
-        </BrowserRouter>
+        <AuthProvider>
+          <BrowserRouter>
+            <RouteChangeTracker />
+            <Toaster position="top-right" />
+            <AppRoutes />
+            {showDebugger && <SimpleErrorDebugger />}
+          </BrowserRouter>
+        </AuthProvider>
       </BrowserCompatibilityProvider>
     </QueryProvider>
   );
