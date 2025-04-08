@@ -1,8 +1,9 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import NotificationButton from './header/NotificationButton';
 import DesktopNavigation from './header/DesktopNavigation';
 import MobileMenu from './header/MobileMenu';
@@ -12,9 +13,14 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Header: React.FC = () => {
   const { pathname } = useLocation();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut, profile } = useAuth();
+  
+  const handleNewPresentation = () => {
+    // Handle new presentation action
+    console.log("New presentation action triggered");
+  };
   
   return (
     <header className="bg-white border-b border-gray-200 py-2 px-4 md:px-6">
@@ -43,22 +49,18 @@ const Header: React.FC = () => {
           </div>
         ) : (
           <div className="hidden md:flex items-center space-x-6">
-            <DesktopNavigation pathname={pathname} />
-            <div className="flex items-center space-x-4">
-              <NotificationButton />
-              <RoleToggle />
-              <UserProfile user={profile || user} onSignOut={signOut} />
-            </div>
+            <DesktopNavigation onNewPresentation={handleNewPresentation} />
           </div>
         )}
       </div>
       
       {isMobile && isMobileMenuOpen && (
         <MobileMenu 
-          pathname={pathname} 
-          onClose={() => setIsMobileMenuOpen(false)} 
-          user={profile || user}
-          onSignOut={signOut}
+          isOpen={isMobileMenuOpen} 
+          userRole="employee"
+          toggleUserRole={() => {}}
+          onItemClick={() => setIsMobileMenuOpen(false)}
+          onNewPresentation={handleNewPresentation}
         />
       )}
     </header>

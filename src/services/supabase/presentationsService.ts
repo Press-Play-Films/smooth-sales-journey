@@ -39,7 +39,7 @@ export async function getActivePresentations() {
       title: presentation.title,
       presenter: presentation.presenter,
       startTime: new Date(presentation.start_time),
-      status: presentation.status,
+      status: presentation.status as 'scheduled' | 'active' | 'completed' | 'cancelled',
       roomNumber: presentation.room_number,
       waveTime: presentation.wave_time,
       clients: clients
@@ -70,7 +70,7 @@ export async function getUpcomingPresentations() {
       title: presentation.title,
       presenter: presentation.presenter,
       startTime: new Date(presentation.start_time),
-      status: presentation.status,
+      status: presentation.status as 'scheduled' | 'active' | 'completed' | 'cancelled',
       roomNumber: presentation.room_number,
       waveTime: presentation.wave_time,
       clients: presentation.clients[0].count

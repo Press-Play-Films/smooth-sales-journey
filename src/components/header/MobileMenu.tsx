@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import RoleToggle from './RoleToggle';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -18,6 +19,8 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   onItemClick,
   onNewPresentation
 }) => {
+  const { user, profile } = useAuth();
+  
   if (!isOpen) return null;
   
   return (
@@ -87,12 +90,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
         <div className="flex items-center px-5">
           <div className="flex-shrink-0">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brio-navy to-brio-teal flex items-center justify-center text-white font-medium">
-              CB
+              {profile?.full_name ? profile.full_name.substring(0, 2).toUpperCase() : 'U'}
             </div>
           </div>
           <div className="ml-3">
-            <div className="text-base font-medium text-gray-800">Craig Boure</div>
-            <div className="text-sm font-medium text-gray-500">Presenter</div>
+            <div className="text-base font-medium text-gray-800">{profile?.full_name || 'User'}</div>
+            <div className="text-sm font-medium text-gray-500">{profile?.role || 'Presenter'}</div>
           </div>
         </div>
       </div>

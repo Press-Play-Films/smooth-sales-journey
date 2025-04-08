@@ -21,7 +21,7 @@ export async function getSales() {
       id: sale.id,
       presentationId: sale.presentation_id,
       clientId: sale.client_id,
-      clientNames: sale.client.names,
+      clientNames: sale.client?.names,
       packageType: sale.package_type,
       paymentMethod: sale.payment_method,
       salesExecutive: sale.sales_executive,

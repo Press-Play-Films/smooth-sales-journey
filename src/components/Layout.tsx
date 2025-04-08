@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <SidebarProvider>
       <div className="flex flex-col min-h-screen w-full">
-        <Header userRole={userRole} toggleUserRole={toggleUserRole} />
+        <Header />
         
         <div className="flex flex-1 w-full">
           <Sidebar userRole={userRole} />
