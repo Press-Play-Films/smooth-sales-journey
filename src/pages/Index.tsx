@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Layout from '@/components/Layout';
 import Dashboard from '@/components/Dashboard';
@@ -88,16 +87,25 @@ const Index: React.FC = () => {
         </Card>
       )}
       
-      <h2 className="text-2xl font-bold mb-4">Browser Compatibility Tool</h2>
-      <p className="text-gray-600 mb-6">
-        This tool helps you identify your browser capabilities and compatibility with our application.
-      </p>
-      
-      {/* Browser preview component with improved visibility */}
-      <BrowserPreview />
-      
-      <h2 className="text-2xl font-bold mt-8 mb-4">Dashboard</h2>
-      <Dashboard />
+      <div className="space-y-8">
+        {/* Feature Browser Compatibility Tool */}
+        <section className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 shadow-sm border border-blue-100">
+          <h2 className="text-2xl font-bold mb-2 text-blue-800">Browser Compatibility Tool</h2>
+          <p className="text-gray-700 mb-6">
+            This interactive tool helps you identify your browser capabilities and ensure compatibility with our application.
+            Check if your browser supports all the features required for optimal performance.
+          </p>
+          
+          {/* Browser preview component with improved visibility */}
+          <BrowserPreview />
+        </section>
+        
+        {/* Dashboard Section */}
+        <section>
+          <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
+          <Dashboard />
+        </section>
+      </div>
     </Layout>
   );
 };
