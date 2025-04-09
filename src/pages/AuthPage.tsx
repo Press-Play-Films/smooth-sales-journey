@@ -10,7 +10,6 @@ import { toast } from "sonner";
 
 const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,8 +27,8 @@ const AuthPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email || !password) {
-      toast.error('Please enter both email and password');
+    if (!email) {
+      toast.error('Please enter your email');
       return;
     }
     
@@ -42,12 +41,11 @@ const AuthPage: React.FC = () => {
       setIsSubmitting(true);
       
       if (isSignUp) {
-        await signUp(email, password, fullName);
-        toast.success('Account created successfully! Please check your email to verify your account.');
-        setIsSignUp(false);
+        await signUp(email, fullName);
+        toast.success('Sign up link sent! Please check your email.');
       } else {
-        await signIn(email, password);
-        navigate('/');
+        await signIn(email);
+        toast.success('Login link sent! Please check your email.');
       }
     } catch (error: any) {
       console.error('Authentication error:', error);
@@ -71,7 +69,7 @@ const AuthPage: React.FC = () => {
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold text-brio-navy">BRIO Sales Management</h1>
           <p className="text-gray-600 mt-2">
-            {isSignUp ? 'Create an account to get started' : 'Log in to your account'}
+            {isSignUp ? 'Create an account to get started' : 'Sign in to your account'}
           </p>
         </div>
         
@@ -81,7 +79,7 @@ const AuthPage: React.FC = () => {
             <CardDescription>
               {isSignUp 
                 ? 'Enter your information to create an account' 
-                : 'Enter your credentials to access your account'}
+                : 'Enter your email to receive a sign in link'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -110,17 +108,6 @@ const AuthPage: React.FC = () => {
                 />
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input 
-                  id="password" 
-                  type="password" 
-                  value={password} 
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                />
-              </div>
-              
               <Button 
                 type="submit" 
                 className="w-full" 
@@ -128,7 +115,7 @@ const AuthPage: React.FC = () => {
               >
                 {isSubmitting 
                   ? 'Processing...' 
-                  : isSignUp ? 'Create Account' : 'Sign In'}
+                  : isSignUp ? 'Send Sign Up Link' : 'Send Login Link'}
               </Button>
               
               <div className="text-center mt-4">

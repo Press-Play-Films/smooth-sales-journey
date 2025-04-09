@@ -9,8 +9,8 @@ interface AuthContextType {
   session: Session | null;
   profile: any | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signIn: (email: string) => Promise<void>;
+  signUp: (email: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -81,15 +81,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password
+        options: {
+          emailRedirectTo: window.location.origin,
+        }
       });
       
       if (error) throw error;
+      
+      toast.success('Check your email for the login link!');
     } catch (error: any) {
       toast.error(error.message || 'Error signing in');
       throw error;
@@ -98,13 +102,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, fullName: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signInWithOtp({
         email,
-        password,
         options: {
+          emailRedirectTo: window.location.origin,
           data: {
             full_name: fullName,
           }
@@ -113,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) throw error;
       
-      toast.success('Sign up successful! Please check your email for verification.');
+      toast.success('Check your email for the sign in link!');
     } catch (error: any) {
       toast.error(error.message || 'Error signing up');
       throw error;
