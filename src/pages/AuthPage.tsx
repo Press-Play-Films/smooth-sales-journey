@@ -10,6 +10,7 @@ import { toast } from "sonner";
 
 const AuthPage: React.FC = () => {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +33,11 @@ const AuthPage: React.FC = () => {
       return;
     }
     
+    if (!password) {
+      toast.error('Please enter your password');
+      return;
+    }
+    
     if (isSignUp && !fullName) {
       toast.error('Please enter your full name');
       return;
@@ -41,15 +47,12 @@ const AuthPage: React.FC = () => {
       setIsSubmitting(true);
       
       if (isSignUp) {
-        await signUp(email, fullName);
-        toast.success('Sign up link sent! Please check your email.');
+        await signUp(email, password, fullName);
       } else {
-        await signIn(email);
-        toast.success('Login link sent! Please check your email.');
+        await signIn(email, password);
       }
     } catch (error: any) {
       console.error('Authentication error:', error);
-      toast.error(error.message || 'Authentication failed');
     } finally {
       setIsSubmitting(false);
     }
@@ -79,7 +82,7 @@ const AuthPage: React.FC = () => {
             <CardDescription>
               {isSignUp 
                 ? 'Enter your information to create an account' 
-                : 'Enter your email to receive a sign in link'}
+                : 'Enter your email and password to sign in'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -108,6 +111,17 @@ const AuthPage: React.FC = () => {
                 />
               </div>
               
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input 
+                  id="password" 
+                  type="password" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                />
+              </div>
+              
               <Button 
                 type="submit" 
                 className="w-full" 
@@ -115,7 +129,7 @@ const AuthPage: React.FC = () => {
               >
                 {isSubmitting 
                   ? 'Processing...' 
-                  : isSignUp ? 'Send Sign Up Link' : 'Send Login Link'}
+                  : isSignUp ? 'Sign Up' : 'Sign In'}
               </Button>
               
               <div className="text-center mt-4">

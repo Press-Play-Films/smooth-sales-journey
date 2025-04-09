@@ -9,8 +9,8 @@ interface AuthContextType {
   session: Session | null;
   profile: any | null;
   isLoading: boolean;
-  signIn: (email: string) => Promise<void>;
-  signUp: (email: string, fullName: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -81,19 +81,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signIn = async (email: string) => {
+  const signIn = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
-        options: {
-          emailRedirectTo: window.location.origin,
-        }
+        password
       });
       
       if (error) throw error;
       
-      toast.success('Check your email for the login link!');
+      toast.success('Signed in successfully');
     } catch (error: any) {
       toast.error(error.message || 'Error signing in');
       throw error;
@@ -102,13 +100,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const signUp = async (email: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signUp({
         email,
+        password,
         options: {
-          emailRedirectTo: window.location.origin,
           data: {
             full_name: fullName,
           }
@@ -117,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) throw error;
       
-      toast.success('Check your email for the sign in link!');
+      toast.success('Account created successfully');
     } catch (error: any) {
       toast.error(error.message || 'Error signing up');
       throw error;
