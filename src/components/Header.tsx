@@ -30,12 +30,12 @@ const Header: React.FC = () => {
     <header className="bg-white border-b border-gray-200 py-2 px-4 md:px-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <Link to="/" className="text-2xl font-bold text-brio-navy">BRIO</Link>
+          <Link to="/" className="text-2xl font-bold text-brio-navy">CRM Tool</Link>
           {!isMobile && (
             <span className="text-gray-500 text-sm">|</span>
           )}
           {!isMobile && (
-            <span className="text-gray-500 text-sm">Sales Management</span>
+            <span className="text-gray-500 text-sm">Client Management</span>
           )}
         </div>
         

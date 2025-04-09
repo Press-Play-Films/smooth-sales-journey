@@ -1,8 +1,8 @@
 
 {
-  "name": "Brio Sales Management",
-  "short_name": "Brio Sales",
-  "description": "Comprehensive sales management platform for Brio Vacations",
+  "name": "CRM Tool",
+  "short_name": "CRM Tool",
+  "description": "Comprehensive client relationship management platform",
   "start_url": "/?source=pwa",
   "display": "browser",
   "background_color": "#ffffff",

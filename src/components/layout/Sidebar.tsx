@@ -21,7 +21,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
       <div className="flex items-center justify-center p-4">
         <img 
           src="/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png" 
-          alt="Brio Vacations" 
+          alt="CRM Tool" 
           className="h-16 object-contain"
         />
       </div>
@@ -119,7 +119,7 @@ const Sidebar: React.FC<SidebarProps> = ({ userRole }) => {
           onClick={() => {
             toast({
               title: "Help & Resources",
-              description: "Contact support@briovacations.com for assistance.",
+              description: "Contact support@crmtool.com for assistance.",
             });
           }}
           className="flex items-center space-x-2 p-3 rounded-lg w-full hover:bg-white/10 transition-all"
