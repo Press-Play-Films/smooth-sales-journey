@@ -18,6 +18,9 @@ const Header: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut, profile } = useAuth();
   
+  // Always treat user as authenticated for demo purposes
+  const mockAuthenticatedUser = true;
+  
   const handleNewPresentation = () => {
     // Handle new presentation action
     console.log("New presentation action triggered");
@@ -38,7 +41,7 @@ const Header: React.FC = () => {
         
         {isMobile ? (
           <div className="flex items-center space-x-4">
-            {user ? (
+            {mockAuthenticatedUser ? (
               <>
                 <NotificationButton />
                 <Button
@@ -50,15 +53,7 @@ const Header: React.FC = () => {
                   <Menu className="h-6 w-6" />
                 </Button>
               </>
-            ) : (
-              <Button 
-                onClick={() => navigate('/auth')}
-                className="bg-brio-navy hover:bg-brio-navy/90 text-white"
-                size="sm"
-              >
-                Sign In
-              </Button>
-            )}
+            ) : null}
           </div>
         ) : (
           <div className="hidden md:flex items-center space-x-6">

@@ -13,18 +13,8 @@ import NotFound from '@/pages/NotFound';
 import AuthPage from '@/pages/AuthPage';
 import { useAuth } from '@/contexts/AuthContext';
 
-const RequireAuth = () => {
-  const { user, isLoading } = useAuth();
-  const location = useLocation();
-
-  if (isLoading) {
-    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
-  }
-
-  if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
-  }
-
+// This component is now just a passthrough without authentication checks
+const BypassAuth = () => {
   return <Outlet />;
 };
 
@@ -34,8 +24,8 @@ const AppRoutes = () => {
       {/* Public routes */}
       <Route path="/auth" element={<AuthPage />} />
       
-      {/* Protected routes */}
-      <Route element={<RequireAuth />}>
+      {/* All routes are now public - bypassing auth check */}
+      <Route element={<BypassAuth />}>
         <Route path="/" element={<Index />} />
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/presentations" element={<PresentationsPage />} />
