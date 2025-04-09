@@ -4,7 +4,7 @@
   "short_name": "CRM Tool",
   "description": "Comprehensive client relationship management platform",
   "start_url": "/?source=pwa",
-  "display": "browser",
+  "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e3a8a",
   "icons": [
