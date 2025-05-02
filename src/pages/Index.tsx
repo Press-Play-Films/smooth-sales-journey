@@ -14,42 +14,14 @@ const Index: React.FC = () => {
   // Show welcome toast for demo purposes
   React.useEffect(() => {
     const timer = setTimeout(() => {
-      toast.success("Welcome to the Brio Sales Management demo!", {
-        description: "This demonstration is optimized for all browsers and email clients.",
+      toast.success("Welcome to the CRM Tool!", {
+        description: "This is a test message to verify the preview is working.",
         duration: 5000,
       });
-    }, 1500);
+    }, 1000); // Reduced timeout for faster verification
     
     return () => clearTimeout(timer);
   }, []);
-  
-  // Simulate notifications for demo purposes
-  React.useEffect(() => {
-    if (demoMode) {
-      const notifications = [
-        { title: "New client registered", message: "The Andersons have scheduled a presentation" },
-        { title: "Team meeting reminder", message: "Sales team meeting at 3:00 PM" },
-        { title: "Performance milestone", message: "Congratulations! 90% client engagement today" }
-      ];
-      
-      let notificationIndex = 0;
-      const interval = setInterval(() => {
-        const notification = notifications[notificationIndex % notifications.length];
-        toast.info(notification.title, {
-          description: notification.message,
-          duration: 4000,
-        });
-        notificationIndex++;
-        
-        // Stop after cycling through all notifications once
-        if (notificationIndex >= notifications.length) {
-          clearInterval(interval);
-        }
-      }, 25000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [demoMode]);
 
   const dismissWelcome = () => {
     setWelcomeDismissed(true);
@@ -57,6 +29,27 @@ const Index: React.FC = () => {
 
   return (
     <Layout>
+      {/* Test card to verify preview is visible */}
+      <Card className="mb-6 border-red-500 bg-red-100">
+        <CardContent className="pt-6 pb-4">
+          <div className="flex items-center justify-center">
+            <h1 className="text-3xl font-bold text-red-600">PREVIEW TEST</h1>
+          </div>
+          <p className="text-center mt-4 text-red-600 font-bold">
+            If you can see this message, the preview is working correctly.
+          </p>
+          <div className="mt-4 flex justify-center">
+            <Button 
+              variant="destructive"
+              size="lg"
+              onClick={() => toast.info("Button clicked!")}
+            >
+              Click Me To Test Interactivity
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {!welcomeDismissed && (
         <Card className="mb-6 border-blue-100 bg-blue-50">
           <CardContent className="pt-6 pb-4">
