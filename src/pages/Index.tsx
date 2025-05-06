@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import BrowserPreview from '@/components/browser/BrowserPreview';
+import PreviewTest from '@/components/PreviewTest';
 
 const Index: React.FC = () => {
   const [welcomeDismissed, setWelcomeDismissed] = React.useState(false);
@@ -13,14 +14,12 @@ const Index: React.FC = () => {
   
   // Show welcome toast for demo purposes
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      toast.success("Welcome to the CRM Tool!", {
-        description: "This is a test message to verify the preview is working.",
-        duration: 5000,
-      });
-    }, 1000); // Reduced timeout for faster verification
+    // Immediate toast for testing
+    toast.success("CRM Tool Preview Test", {
+      description: "This message confirms the preview is working",
+    });
     
-    return () => clearTimeout(timer);
+    return () => {};
   }, []);
 
   const dismissWelcome = () => {
@@ -29,26 +28,8 @@ const Index: React.FC = () => {
 
   return (
     <Layout>
-      {/* Test card to verify preview is visible */}
-      <Card className="mb-6 border-red-500 bg-red-100">
-        <CardContent className="pt-6 pb-4">
-          <div className="flex items-center justify-center">
-            <h1 className="text-3xl font-bold text-red-600">PREVIEW TEST</h1>
-          </div>
-          <p className="text-center mt-4 text-red-600 font-bold">
-            If you can see this message, the preview is working correctly.
-          </p>
-          <div className="mt-4 flex justify-center">
-            <Button 
-              variant="destructive"
-              size="lg"
-              onClick={() => toast.info("Button clicked!")}
-            >
-              Click Me To Test Interactivity
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Enhanced visibility test component */}
+      <PreviewTest />
 
       {!welcomeDismissed && (
         <Card className="mb-6 border-blue-100 bg-blue-50">
