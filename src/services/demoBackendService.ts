@@ -60,22 +60,63 @@ const demoData = {
       title: 'Premium Vacation Package',
       presenter: 'Alex Johnson',
       startTime: new Date(Date.now() - 30 * 60 * 1000),
-      status: 'active' as const,
+      status: 'active',
       roomNumber: 'Room A',
       waveTime: '10:00 AM',
-      clients: 8
+      clients: [
+        {
+          id: '1',
+          names: 'John & Sarah Mitchell',
+          status: 'engaged' as const,
+          department: 'sales',
+          roomNumber: '6391',
+          assignedAgent: 'Alex Johnson',
+          presentationTime: '10:00 AM',
+          location: 'Miami, FL',
+          city: 'Miami',
+          state: 'Florida',
+          image: '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png'
+        },
+        {
+          id: '2',
+          names: 'Michael Rodriguez',
+          status: 'distracted' as const,
+          department: 'sales',
+          roomNumber: '6391',
+          assignedAgent: 'Alex Johnson',
+          presentationTime: '10:00 AM',
+          location: 'Dallas, TX',
+          city: 'Dallas',
+          state: 'Texas',
+          image: '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png'
+        }
+      ]
     },
     {
       id: 'pres-002',
       title: 'Family Resort Experience',
       presenter: 'Maria Garcia',
       startTime: new Date(Date.now() + 60 * 60 * 1000),
-      status: 'scheduled' as const,
+      status: 'scheduled',
       roomNumber: 'Room B',
       waveTime: '2:00 PM',
-      clients: 12
+      clients: [
+        {
+          id: '3',
+          names: 'Emma & David Chen',
+          status: 'away' as const,
+          department: 'finance',
+          roomNumber: '6392',
+          assignedAgent: 'Maria Garcia',
+          presentationTime: '2:00 PM',
+          location: 'Los Angeles, CA',
+          city: 'Los Angeles',
+          state: 'California',
+          image: '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png'
+        }
+      ]
     }
-  ] as (ActivePresentation | any)[],
+  ] as ActivePresentation[],
 
   sales: [
     {
@@ -159,7 +200,7 @@ export const demoBackendApi = {
     const newPresentation = {
       ...presentation,
       id: `pres-${Date.now()}`,
-      clients: 0
+      clients: []
     } as ActivePresentation;
     
     demoData.presentations.push(newPresentation);
