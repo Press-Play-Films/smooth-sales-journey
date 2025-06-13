@@ -9,17 +9,32 @@ import RouteChangeTracker from './components/routing/RouteChangeTracker';
 import AppRoutes from './components/routing/AppRoutes';
 import SimpleErrorDebugger from './components/SimpleErrorDebugger';
 import { AuthProvider } from "./contexts/AuthContext";
+import { webAppConfig, initializeWebApp } from './config/webAppConfig';
+import { demoWebSocket } from './services/demoBackendService';
 
 const App = () => {
   useEffect(() => {
-    debug('App component mounted', null, LogLevel.INFO);
+    debug('Web Application starting', { 
+      timestamp: new Date().toISOString(),
+      demoMode: webAppConfig.demoMode 
+    }, LogLevel.INFO);
+    
+    // Initialize web app specific settings
+    initializeWebApp();
+    
+    // Connect demo WebSocket for real-time features
+    if (webAppConfig.demoMode && webAppConfig.features.realTimeUpdates) {
+      demoWebSocket.connect();
+    }
+    
     return () => {
-      debug('App component unmounted', null, LogLevel.INFO);
+      debug('Web Application unmounting', null, LogLevel.INFO);
+      demoWebSocket.disconnect();
     };
   }, []);
 
-  // Always show the debugger for simplicity
-  const showDebugger = true;
+  // Show debugger in demo mode
+  const showDebugger = webAppConfig.demoMode;
 
   return (
     <QueryProvider>
