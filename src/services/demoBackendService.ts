@@ -17,31 +17,40 @@ const demoData = {
       id: '1',
       names: 'John & Sarah Mitchell',
       status: 'engaged' as const,
-      lastSeen: new Date(Date.now() - 5 * 60 * 1000),
-      presentationId: 'pres-001',
-      engagementScore: 85,
-      notes: 'Very interested in premium package',
-      profileImage: '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png'
+      department: 'sales',
+      roomNumber: '6391',
+      assignedAgent: 'Alex Johnson',
+      presentationTime: '10:00 AM',
+      location: 'Miami, FL',
+      city: 'Miami',
+      state: 'Florida',
+      image: '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png'
     },
     {
       id: '2',
       names: 'Michael Rodriguez',
       status: 'distracted' as const,
-      lastSeen: new Date(Date.now() - 2 * 60 * 1000),
-      presentationId: 'pres-001',
-      engagementScore: 45,
-      notes: 'Checking phone frequently',
-      profileImage: '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png'
+      department: 'sales',
+      roomNumber: '6391',
+      assignedAgent: 'Alex Johnson',
+      presentationTime: '10:00 AM',
+      location: 'Dallas, TX',
+      city: 'Dallas',
+      state: 'Texas',
+      image: '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png'
     },
     {
       id: '3',
       names: 'Emma & David Chen',
       status: 'away' as const,
-      lastSeen: new Date(Date.now() - 15 * 60 * 1000),
-      presentationId: 'pres-002',
-      engagementScore: 0,
-      notes: 'Left for break',
-      profileImage: '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png'
+      department: 'finance',
+      roomNumber: '6392',
+      assignedAgent: 'Maria Garcia',
+      presentationTime: '2:00 PM',
+      location: 'Los Angeles, CA',
+      city: 'Los Angeles',
+      state: 'California',
+      image: '/lovable-uploads/6ad16794-edeb-45cd-bc70-cbf5842c34aa.png'
     }
   ] as Client[],
   
@@ -54,7 +63,7 @@ const demoData = {
       status: 'active' as const,
       roomNumber: 'Room A',
       waveTime: '10:00 AM',
-      clients: []
+      clients: 8
     },
     {
       id: 'pres-002',
@@ -133,7 +142,6 @@ export const demoBackendApi = {
     if (!client) throw new Error('Client not found');
     
     client.status = status;
-    client.lastSeen = new Date();
     return { ...client };
   },
 
@@ -151,7 +159,7 @@ export const demoBackendApi = {
     const newPresentation = {
       ...presentation,
       id: `pres-${Date.now()}`,
-      clients: []
+      clients: 0
     } as ActivePresentation;
     
     demoData.presentations.push(newPresentation);
@@ -218,7 +226,6 @@ export class DemoWebSocketService {
       
       if (randomClient.status !== newStatus) {
         randomClient.status = newStatus;
-        randomClient.lastSeen = new Date();
         
         this.notifyListeners({
           type: 'CLIENT_STATUS_UPDATE',

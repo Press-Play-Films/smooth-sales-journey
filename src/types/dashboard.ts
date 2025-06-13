@@ -1,4 +1,3 @@
-
 export interface Client {
   id: string;
   names: string;
@@ -108,6 +107,20 @@ export interface Sale {
   timestamp: Date;
   waveTime: string;
   roomNumber: string;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  department: string;
+  status: 'active' | 'inactive' | 'online' | 'offline';
+  avatar: string;
+  performance: {
+    salesThisMonth: number;
+    conversionRate: number;
+    avgDealSize: number;
+  };
 }
 
 export interface TeamMemberAssignment {
